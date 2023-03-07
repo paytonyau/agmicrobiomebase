@@ -1,9 +1,7 @@
 
 # UK CROP MICROBIOME CRYOBANK
 
-### Plate 1 
-
-This drafted process for plate 1 () required the following packages pre-installed in your Linux envernment
+This is the process for the 16S data generated from THE UK CROP MICROBIOME CRYOBANK(https://agmicrobiomebase.org), and the following packages are required to be pre-installed in your Linux environment for the sequencing analysis.
 - [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
 - [QIIME2 - the cummunity developed suite](https://qiime2.org/)
 - [FIGARO](https://github.com/Zymo-Research/figaro)
@@ -15,12 +13,13 @@ This drafted process for plate 1 () required the following packages pre-installe
 
 ##### Install Anaconda / Miniconda
 
-Anaconda or Miniconda provide the environment and package manager, which is requred to install QIIME2. Follow the instructions for downloading and installing Miniconda.
+Anaconda or Miniconda provides the environment and package manager required to install QIIME2. Please follow the instructions for downloading and installing Miniconda.
+
 <https://docs.qiime2.org/2022.8/install/native/#install-qiime-2-within-a-conda-environment>
 
 ##### Install sequence quality check packages
 
-create a new envernment and install the quality check packages
+create a new envernment and install the quality check packages, these are including fastqc, multiqc and trimmomatic.
 ```conda create --name qc```
 
 ```conda install -c bioconda fastqc multiqc```
@@ -32,14 +31,11 @@ Noted that java may need to be pre-installed before the run.
 
 ##### Install FIGARO
 
-FIGARO is a program that performs estimation when deciding to use the truncation parameters of the QIIME2 DADA2 plug-in. A pre-print its use is available.
+FIGARO is a program that performs estimations when deciding to use the truncation parameters of the QIIME2 DADA2 plug-in. A pre-print of its usage is available.
 
 ```
 git clone https://github.com/Zymo-Research/figaro.git
 cd figaro
-```
-```
-python /mnt/shared/scratch/pyau/figaro/figaro/figaro.py -a 460 -f 21 -r 17 -m 12
 ```
 
 ##### Install QIIME2
@@ -61,8 +57,8 @@ This process is to visulalie the sequence quality and the adaptors left in eash 
 ``` multiqc . ```
 
 #### STEP 2
-##### Trim the reads for FIGARO
-Trim the reads to the length of 290bp and discard the reads shorder then 290bp to run the program. [^1] Cutadapt or Trimmomatic can be applied for the process. Here, we used Trimmomatic and the trimmed files are only for FIGARO.
+##### Sequencing reads trimming for FIGARO
+Trim the sequence reads to a length of 250bp and discard reads shorter than 250bp to ensure consistency on each of the as required by the program. [^1] Cutadapt or Trimmomatic can be applied for the process. Here, we used Trimmomatic and please noted that the trimmed sequencing data are only for FIGARO.
 [^1]: https://github.com/Zymo-Research/figaro/issues/37
 
 ```
@@ -74,9 +70,11 @@ MINLEN:290 CROP: 290
 ```
 
 ##### Identify the optimal setting denosing in DADA2 by using FIGARO
-```python figaro.py -i ~/test_figaro/ -o ~/test_figaro/ -f 17 -r 21 -a 460 -F zymo```
+```python figaro.py -i ~/test_figaro/ -o ~/test_figaro/ -f 17 -r 21 -a 460 -m 12```
 
-Noted that the default DADA2 merging in QIIME2 is 12bp (not 20bp).[^2]
+Here ```-f``` indecates the length of the forward primer - 17 bp, and ```-r``` indecates the length of the reverse primer - 21bp. ```-a``` indecates the length of the merged sequence.
+```-m``` indecates the requirement of the merging base pair. Noted that the default DADA2 merging in QIIME2 is 12bp (not 20bp).[^2]
+
 [^2]:https://forum.qiime2.org/t/extremely-low-merged-score-after-using-dada2/16085/3
 ##### generate a manifest.txt for QIIME2 artifact (medification to fit for the QIIME2 required format)
 
@@ -92,7 +90,7 @@ You can activate this conda environment with this command (you may need to swap 
 
 ##### Import FASTQs as QIIME 2 artifact
 
-To standardise QIIME 2 analyses and to keep track of provenance (i.e. a list of what commands were previously run to produce a file) a special format is used for all QIIME2 input and output files called an "artifact" (with the extension QZA). The first step is to import the raw reads as a QZA file.
+To standardise QIIME 2 analyses and to keep track of provenance (i.e. a list of what commands were previously run to produce a file) a special format is used for all QIIME2 input and output files called an "artifact" (with the extension QZA). The first step is to import the paried-end raw reads as a QZA file. Noted that you need to prepare the manifast.csv file following the QIIME2 requirement.
 
 ```
 qiime tools import
@@ -103,7 +101,7 @@ qiime tools import
 ```
 
 ##### Summarize FASTQs
-
+We can also obtain the sequencing data quality information by executing the command below.
 ```
 qiime demux summarize \
 --i-data demux.qza \
