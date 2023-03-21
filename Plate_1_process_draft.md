@@ -1,7 +1,8 @@
 
 # UK CROP MICROBIOME CRYOBANK
 
-This is the process for the 16S data generated from THE UK CROP MICROBIOME CRYOBANK(https://agmicrobiomebase.org), and the following packages are required to be pre-installed in your Linux environment for the sequencing analysis.
+If you want to conduct sequencing analysis on the 16S amplicon data obtained from THE UK CROP MICROBIOME CRYOBANK (https://agmicrobiomebase.org), you'll need to have a Linux environment set up and certain packages pre-installed. These packages are essential for the sequencing data process and include various tools for quality control, sequence alignment, taxonomic classification, and diversity analysis. Before starting the analysis, make sure you have all the required packages installed on your system to ensure a smooth and successful analysis.
+
 - [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
 - [QIIME2 - the cummunity developed suite](https://qiime2.org/)
 - [FIGARO](https://github.com/Zymo-Research/figaro)
@@ -13,13 +14,14 @@ This is the process for the 16S data generated from THE UK CROP MICROBIOME CRYOB
 
 ##### Install Anaconda / Miniconda
 
-Anaconda or Miniconda provides the environment and package manager required to install QIIME2. Please follow the instructions for downloading and installing Miniconda.
+To install QIIME2, you can use Anaconda or Miniconda, which provide a self-contained environment and package manager. Download and install Miniconda and create a new environment for QIIME2. This allows you to manage your QIIME2 installation and dependencies easily.
 
-<https://docs.qiime2.org/2022.8/install/native/#install-qiime-2-within-a-conda-environment>
+<https://docs.qiime2.org/2022.2/install/native/#install-qiime-2-within-a-conda-environment>
 
 ##### Install sequence quality check packages
 
-create a new envernment and install the quality check packages, these are including fastqc, multiqc and trimmomatic.
+Create a new environment and install quality check packages such as FastQC, MultiQC, and Trimmomatic to ensure high-quality sequencing data. This avoids conflicts with other software and helps to streamline the quality control process.
+
 ```conda create --name qc```
 
 ```conda install -c bioconda fastqc multiqc```
@@ -42,8 +44,8 @@ cd figaro
 
 Run the workflow in a specific conda environment, which makes sure the correct version of the Python required packages are being used for QIIME2.
 ```
-wget https://data.qiime2.org/distro/core/qiime2-2022.8-py38-linux-conda.yml
-conda env create -n qiime2-2022.8 --file qiime2-2022.8-py38-linux-conda.yml
+wget https://data.qiime2.org/distro/core/qiime2-2022.2-py38-linux-conda.yml
+conda env create -n qiime2-2022.8 --file qiime2-2022.2-py38-linux-conda.yml
 ```
 
 #### STEP 1
@@ -145,11 +147,11 @@ qiime dada2 denoise-paired \
   --p-trim-left-r 0 \
   --p-trunc-len-f 247  \
   --p-trunc-len-r 225 \
-  --p-max-ee-f 5 \
-  --p-max-ee-r 4 \
-  --o-representative-sequences rep-seqs-trimmed_0_0_264_246_5_4.qza \
-  --o-table table-trimmed_0_0_247_225_5_4.qza \
-  --o-denoising-stats stats-trimmed_0_0_247_225_5_4.qza
+  --p-max-ee-f 2 \
+  --p-max-ee-r 2 \
+  --o-representative-sequences rep-seqs-trimmed_247_225_2_2.qza \
+  --o-table table-trimmed_247_225_2_2.qza \
+  --o-denoising-stats stats-trimmed_247_225_2_2.qza
 ```
 
 ##### Assign taxonomy to ASVs by running taxonomic classification
@@ -162,8 +164,8 @@ You can run the taxonomic classification with this command, which is one of the 
 qiime feature-classifier classify-sklearn \
   --p-n-jobs 1 \
   --i-classifier /mnt/shared/scratch/pyau/qiime2-ref/silva-138-99-nb-classifier.qza \
-  --i-reads rep-seqs-trimmed_0_0_247_225_5_4.qza \
-  --o-classification taxonomy-trimmed_0_0_247_225_5_4.qza
+  --i-reads rep-seqs-trimmed_247_225_2_2.qza \
+  --o-classification taxonomy-trimmed_247_225_2_2.qza
 ```
 
 ##### Filter out contaminant and unclassified ASVs
@@ -172,11 +174,11 @@ Now that we have assigned taxonomy to our ASVs we can use that information to re
 
 ```
 qiime taxa filter-seqs \
-  --i-sequences rep-seqs-trimmed_0_0_247_225_5_4.qza \
-  --i-taxonomy taxonomy-trimmed_0_0_247_225_5_4.qza \
+  --i-sequences rep-seqs-trimmed_247_225_2_2.qza \
+  --i-taxonomy taxonomy-trimmed_247_225_2_2.qza \
   --p-include p__ \
   --p-exclude mitochondria,chloroplast \
-  --o-filtered-sequences rep-seqs-trimmed_0_0_247_225_5_4-with-phyla-no-mitochondria-no-chloroplast.qza
+  --o-filtered-sequences rep-seqs-trimmed_247_225_5_4-with-phyla-no-mitochondria-no-chloroplast.qza
   ```
 
 
@@ -187,10 +189,11 @@ qiime taxa filter-seqs \
 There are many other possible QIIME 2 analyses that we recommend you look into. You may also find these other resources useful:
 
 ALDEx2 for testing for differential relative abundances in R
+
 corncob for testing for differential relative abundances in R
+
 Building Random Forest Models in R
+
 PICRUSt2 for metagenome prediction based on amplicon sequences
+
 STAMP for straight-forward visualization (see workflow here)
-
-
-
