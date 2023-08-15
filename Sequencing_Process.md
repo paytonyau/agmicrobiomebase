@@ -43,7 +43,7 @@ cd figaro
 ##### Install QIIME2
 
 Run the workflow in a specific conda environment, which makes sure the correct version of the Python required packages are being used for QIIME2.
-<https://docs.qiime2.org/2023.5/install/native/#install-qiime-2-within-a-conda-environment>
+<https://docs.qiime2.org/2022.4/install/native/#install-qiime-2-within-a-conda-environment>
 
 #### STEP 1
 ##### Screen all the fastq files by using FastQC and integrated into one single report by using multiQC
@@ -80,17 +80,53 @@ Noted that the default DADA2 merging in QIIME2 is 12bp (not 20bp).[^2]
 
 ```python figaro.py -i (path) -o (path) -f 17 -r 21 -a 447 -m 12```
 
-Best outcome from each of the run
-|T* length | T* position (F, R)| maxEE* (F, R)|Read Retention (%)|Score|
-| ----------- | ----------- |----------- |----------- |----------- |
-| 460 bp | ,  | ,  |  |  |  
-| 459 bp | ,  | ,  |  |  |  
-| 458 bp | ,  | ,  |  |  |  
-| 457 bp | ,  | ,  |  |  |  
-| 456 bp | ,  | ,  |  |  |  
-| 447 bp | ,  | ,  |  |  | 
-| 445 bp | ,  | ,  |  |  |
 
+Below is a bash loop script for the use of Figaro on the length of the parameter for every 3 bp from 380 bp to 460 bp
+```
+#!/bin/bash
+
+output_folder="."  # Path to the output folder
+results_file="figaro_results.txt"  # Results file name
+
+for ((param = 380; param <= 460; param += 3)); do
+    output_dir="${output_folder}/${param}bp"  # Output directory with parameter value
+
+    # Create the output directory if it doesn't exist
+    mkdir -p "$output_dir"
+
+    log_file="${output_dir}/figaro.log"  # Log file path
+
+    # Run figaro.py and save the screen output to the log file
+    python /home/payton/figaro/figaro/figaro.py -f 20 -r 20 -a "$param" -m 12 -o "$output_dir" > "$log_file" 2>&1
+
+    # Extract the third line from the log file and remove unwanted characters
+    third_line=$(sed -n '3p' "$log_file" | tr -d '{}",[]:')
+
+    # Append the parameter and modified line on the same line in the results file
+    echo -n "param: $param " >> "$results_file"
+    echo "$third_line" | tr '\n' ' ' >> "$results_file"
+    echo >> "$results_file"
+done
+
+```
+Below is the outcomes from using FIGAOR run on each of the plate and each of the row are the best outcome on each run
+|T* length | T* position (F, R)| maxEE* (F, R)|Read Retention (%)|Score| Plate |
+| ----------- | ----------- |----------- |----------- |----------- |----------- |
+| 449 bp | 249, 250 | 2, 2 | 82.05 | 80.045 | 1 |
+| 449 bp | 249, 250 | 2, 2 | 84.9  | 76.903 | 2 |
+| 449 bp | 249, 250 | 2, 2 | 85.3  | 83.298 | 3 |
+| 448 bp | 249, 249 | 2, 2 | 82.28 | 80.275 | 1 | 
+| 448 bp | 249, 249 | 3, 3 | 85.23 | 77.234 | 2 |
+| 448 bp | 249, 249 | 2, 2 | 85.46 | 83.464 | 3 |
+| 447 bp | 248, 249 | 2, 2 | 82.42 | 80.421 | 1 | 
+| 447 bp | 248, 249 | 3, 3 | 85.39 | 77.390 | 2 | 
+| 447 bp | 248, 249 | 2, 2 | 85.58 | 83.576 | 3 | 
+| 446 bp | 247, 249 | 2, 2 | 82.57 | 80.567 | 1 |
+| 446 bp | 247, 249 | 3, 3 | 85.59 | 77.587 | 2 | 
+| 446 bp | ,  | ,  |  | |  3 | 
+| 445 bp | 246, 249 | 2, 2 | 82.7  | 80.705 | 1 |
+| 445 bp | 246, 249 | 3, 3 | 85.74 | 77.740 | 2 | 
+| 445 bp | ,  | ,  |  | |  3 | 
 *T, Trim; **EE, expected error
 
 
@@ -105,7 +141,7 @@ The required format: (sample-id absolute file-path direction)
 You can activate this conda environment with this command (you may need to swap in source for conda if you get an error):
 
 ```
-conda activate qiime2-2023.5
+conda activate qiime2-2022.4
 ```
 
 ##### Import FASTQs as QIIME 2 artifact
