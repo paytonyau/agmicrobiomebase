@@ -1,50 +1,42 @@
 ---
 title: "The UK Crop Microbiome Cryobank"
 author: "Payton Yau"
-date: "2023-03-30"
-output: html_document
+date: "2023-08-10"
+output:
+  html_document: default
+  pdf_document: default
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 # The UK Crop Microbiome Cryobank
 
-The UK Crop Microbiome Cryobank (UK-CMCB) project integrates genomic (DNA) data with a cryobank collection of samples for the soil microbiomes of the UKs major crop plant systems. Microbiomes are all the microbes present in any one ecosystem. For this project the microbiomes are from the rhizosphere (the soil surrounding the crop plant roots) and from bulk soil (soil outside the rhizosphere). A beneficial microbiome results in a healthy plant and can lead to improved crop yield and improved crop quality.
+The UK Crop Microbiome Cryobank (UK-CMCB) project integrates genomic (DNA) data with a cryobank collection of samples for the soil microbiomes of the UK major crop plant systems. Microbiomes are all the microbes present in any one ecosystem. For this project the microbiomes are from the rhizosphere (the soil surrounding the crop plant roots) and from bulk soil (soil outside the rhizosphere). A beneficial microbiome results in a healthy plant and can lead to improved crop yield and improved crop quality.
 
 The UK-CMCB will provide a facility for researchers to source data and samples, including living microbial material, as well as genomic and metagenomic sequences from different soil microbiome environments. Specifically the project will produce a microbiome resource comprising
 
 An integrated cryopreserved collection of samples (rhizophere and bulk soil, bacterial and fungal isolates and DNA) from crop plant systems (initially barley, oats, oil seed rape, sugar beet and wheat) An open access AgMicrobiomeBase of microbiome data and associated meta-data linked to current public resources such as MGnify.
 
-#### Load required packages
-
-In many programming languages, including R, functionality is extended through the use of external packages. Packages contain a collection of functions, data sets, and documentation that can be loaded into R to provide additional capabilities.
-
-In the R language, packages can be installed from CRAN (The Comprehensive R Archive Network), Bioconductor, GitHub, or other sources. Once a package is installed, it must be loaded into the R session using the **`library()`** function before its functions can be used.
-
-```{r cars}
-# Convert qiime2 results to phyloseq format
-if (!requireNamespace("devtools", quietly = TRUE)){install.packages("devtools")}
-devtools::install_github("jbisanz/qiime2R") # current version is 0.99.20
-library("qiime2R")
-
-if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-BiocManager::install("phyloseq")
-library("phyloseq")
-
-library("ggplot2")
-library("tidyverse")
-```
+In various programming languages, including R, features are enhanced through external packages. These packages encompass a range of functions, datasets, and documentation that can be imported into R to extend its capabilities. External R packages are available from diverse sources such as CRAN (The Comprehensive R Archive Network), Bioconductor, GitHub, and more. The process of acquiring packages varies. After installation, a package must be loaded into the R session using the **library()** function before its functions can be utilised.
 
 #### Qiime2 to Phyloseq
 
-Qiime2 is a powerful tool for microbial community analysis which we used for sequencing analysis; Phyloseq is a package in R that provides a flexible and comprehensive framework for the analysis of high-throughput sequencing data. To convert Qiime2 data to Phyloseq, users can export the Qiime2 data to a Biom format and then import it into R using the "import_biom" function in the "phyloseq" package.\
-\
-Once the data is imported, users can manipulate, analyze, and visualize the data using the various functions available in Phyloseq. This conversion allows users to take advantage of the many analysis tools available in R, such as ggplot2 for data visualization, dplyr for data manipulation, and vegan for ecological community analysis.
+Qiime2 is a powerful tool for microbial community analysis which we used for sequencing analysis; Phyloseq is a package in R that provides a flexible and comprehensive framework for the analysis of high-throughput sequencing data. To convert Qiime2 data to Phyloseq, users can use an external package called Qiime2R for the conversion. Qiime2R facilitates the transformation of Qiime2 data structures into phyloseq data structures within the R programming environment.
 
-```{r pressure, echo=FALSE}
+Once the data is imported, users can manipulate, analyse, and visualise the data using the various functions available in Phyloseq. This conversion allows users to take advantage of the many analysis tools available in R, such as ggplot2 for data visualisation, dplyr for data manipulation, and vegan for ecological community analysis.
+
+```{r packages, warning=FALSE, message=FALSE}
+# Download qiime2R from Github
+# if (!requireNamespace("devtools", quietly = TRUE)){install.packages("devtools")}
+# devtools::install_github("jbisanz/qiime2R")
+library("qiime2R")
+
+# Download phyloseq from CRAN
+# if (!require("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# BiocManager::install("phyloseq")
+library("phyloseq")
+```
+
+```{r qiime2R, warning=FALSE, message=FALSE}
 # Convert qiime2 results to phyloseq format
 physeq <- qza_to_phyloseq(
   features = "table_231_228_2_2-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
@@ -52,20 +44,21 @@ physeq <- qza_to_phyloseq(
   metadata = "meta-table_1-4.txt"
   #, tree = "rooted-tree.qza"
 )
+
 physeq ## confirm the object
 ```
 
-##### Remove unwanted (failed and controls) samples before the normalisation
+#### Remove unwanted (failed and controls) samples before the normalisation
 
-Removing unwanted samples before normalization is a common step in microbiome data analysis pipelines. In many cases, some samples may fail during sequencing or quality control, while others may be controls or blanks that are not of interest. These samples can introduce noise and bias in downstream analyses if not removed.
+Removing unwanted samples before normalisation is a common step in microbiome data analysis pipelines. In many cases, some samples may fail during sequencing or quality control, while others may be controls or blanks that are not of interest. These samples can introduce noise and bias in downstream analyses if not removed.
 
 In this script, the unwanted samples are removed using the **`subset_samples`** function from the **`phyloseq`** package. This function subsets a **`phyloseq`** object by samples that meet a certain condition, in this case, those that have a certain type (e.g., not failed or control samples).
 
-By removing the unwanted samples before normalization, the remaining samples can be normalized based on their true biological variation, allowing for more accurate comparisons between samples.
+By removing the unwanted samples before normalization, the remaining samples can be normalised based on their true biological variation, allowing for more accurate comparisons between samples.
 
-```{r Step 3}
-
-sample_names(physeq) rank_names(physeq) # "Kingdom" "Phylum" "Class" "Order" "Family" "Genus" "Species"
+```{r Remove, warning=FALSE, message=FALSE}
+# sample_names(physeq) 
+# rank_names(physeq) # "Kingdom" "Phylum" "Class" "Order" "Family" "Genus" "Species"
 
 ## list of unwanted samples (including failed samples)
 sample.remove <- c("SU.SC.SH.4", "SU.CY.YO.5", "BE.SC.SH.5", "BE.SL.AN.3", # failed samples - 1
@@ -75,162 +68,205 @@ sample.remove <- c("SU.SC.SH.4", "SU.CY.YO.5", "BE.SC.SH.5", "BE.SL.AN.3", # fai
                    "p.ve.1", "p.ve.2","p.ve.3", "p.ve.4", # positive controls 
                    "n.ve.1","n.ve.2","n.ve.3","n.ve.4",# negative controls 1 
                    "n.ve.ext.1", "n.ve.ext.2", "n.ve.ITS.1" # negative controls 2 
-                   )
+)
 
 ## Subset the data
-physeq.a <- subset_samples(physeq,!(id %in% sample.remove))
+physeq.ori <- subset_samples(physeq,!(id %in% sample.remove))
+
+## remove object
+rm(sample.remove)
 ```
 
 #### normalisation using ConQUR
 
-Constrained Quantile Normalization (ConQUR) is a normalization technique commonly used in the analysis of high-throughput sequencing data, particularly in microbiome studies. It is a type of quantile normalization that preserves the relative abundances of taxa between samples while simultaneously removing systematic technical variations that can arise due to differences in sequencing depth, PCR amplification bias, or other factors. ConQUR uses kernel density estimation to model the distribution of taxon abundances across all samples, and then constrains the normalization process to maintain the relative position of each taxon within that distribution. This allows for robust normalization even when the number of samples is small or when there are extreme outliers in the data.
+Constrained Quantile Normalisation (ConQUR) <https://www.nature.com/articles/s41467-022-33071-9> is a normalization technique commonly used in the analysis of high-throughput sequencing data, particularly in microbiome studies. It is a type of **quantile normalisation** approach that preserves the relative abundances of taxa between samples while simultaneously removing systematic technical variations that can arise due to differences in sequencing depth, PCR amplification bias, or other factors. ConQUR uses kernel density estimation to model the distribution of taxon abundances across all samples, and then constrains the normalisation process to maintain the relative position of each taxon within that distribution.
 
-**(For reference only, need to confirm the information from** <https://www.nature.com/articles/s41467-022-33071-9>**)**
-
-```{r Step 4}
-# install.packages("doParallel")
-# devtools::install_github("wdl2459/ConQuR", build_vignettes = TRUE, force=TRUE)
-devtools::install_github("wdl2459/ConQuR")
+```{r ConQuR_install, warning=FALSE, message=FALSE}
+# devtools::install_github("wdl2459/ConQuR")
 library(ConQuR)
+
 library(doParallel)
 ```
 
-```{r Step 5}
-# Convert OTU table to a data frame and transpose
-B <- as.data.frame(physeq.a@otu_table) # taxa
+```{r ConQuR_run, warning=FALSE, message=FALSE}
+# Convert ASV table to a data frame and transpose
+B <- as.data.frame(physeq.ori@otu_table) # taxa
 B <- t(B)
 B <- as.data.frame(B) 
 
 # Extract batch ID from sample data
-batchid = physeq.a@sam_data$Plate # batchid
+batchid = physeq.ori@sam_data$Plate # batchid
 
 # Extract covariates
-D = physeq.a@sam_data[, c('Type', 'Soil', 'Location')] #covar
+D = physeq.ori@sam_data[, c('Type', 'Soil', 'Location')] #covar
 summary(D)
 
 # Correct for batch effects using ConQuR package
 options(warn=-1) # required to call
-taxa_corrected1 = ConQuR(tax_tab = B, batchid = batchid, covariates = D, batch_ref="1")
+taxa_correct1 = ConQuR(tax_tab = B, batchid = batchid, covariates = D, batch_ref="1") #  warning messages may appear & it can be ignored
 
-# Transpose the corrected data and convert to data frame
-taxa_corrected2 <- t(taxa_corrected1)
-taxa_corrected2 <- as.data.frame(taxa_corrected2)
+# Transpose the corrected matrix and convert it to a data frame
+taxa_correct2 <- t(taxa_correct1)
+taxa_correct2 <- as.data.frame(taxa_correct2)
 
-# Create new OTU table, taxonomy table, and sample data
-ASV = otu_table(taxa_corrected2, taxa_are_rows = TRUE)
-TAX = tax_table(physeq.a)
-sampledata = sample_data(physeq.a)
+# Create new ASV table, taxonomy table, and sample data
+ASV = otu_table(taxa_correct2, taxa_are_rows = TRUE)
+TAXA = tax_table(physeq.ori)
+sampledata = sample_data(physeq.ori)
 
 # repack the objects into a level 4 phyloseq structural data
-physeq.b = phyloseq(ASV, TAX, sampledata)
+physeq.norm = phyloseq(ASV, TAXA, sampledata)
+
+# remove
+rm(B, D, batchid, taxa_correct1, taxa_correct2, ASV, TAXA, sampledata, to_skip)
 ```
 
-# Bata diversity
+#### Subgroupping
+```{r tidyverse, warning=FALSE, message=FALSE}
+# install.packages("tidyverse")
+library("tidyverse")
+```
 
-Beta diversity is a measure of the differences or similarities between two or more microbial communities or samples. It quantifies the degree of variation in microbial composition among different samples. There are several methods to measure beta diversity, including distance-based metrics like Bray-Curtis dissimilarity or UniFrac distance, which take into account the phylogenetic relationships between the microbial taxa. Beta diversity analysis can help identify patterns in the distribution of microbial communities and reveal relationships between different factors such as environment, host, and other ecological variables.
+```{r Subgroupping, warning=FALSE, message=FALSE}
+## (1) Sub-samples for Wheat and Bulk Soil groups for the comparisons
+physeq.W.B <- physeq.norm %>% subset_samples(Type %in% c("Wheat", "Bulksoil"))
 
-```{r Step 6}
-## Sub-samples for specific group comparisons
-physeq.temp_sub <- physeq.b %>% subset_samples(Type %in% c("Oats", "Bulksoil")) # 
-moth_sub_pcoa <- ordinate(physeq = physeq.temp_sub, method = "NMDS", distance = "bray") # method options: NMDS / PCoA
+## (2) Subset the samples in the phyloseq object that belong to "Wheat" 
+## or other crops "Barley", "Beans", "Bulksoil", "Oats", "OilseedRape", "Sugarbeet"
+physeq.wheat <- subset_samples(physeq.norm, Type=="Wheat")
 
+## (3A) Merge the replicate samples for each Group
+physeq.wheat.group = merge_samples(physeq.wheat, "Group") # Sum between replicate samples
+
+# (3B) repair factors in the sample metadata
+sample_data(physeq.wheat.group)$Group <- levels(sample_data(physeq.norm)$Group)[get_variable(physeq.wheat.group, "Group")]
+sample_data(physeq.wheat.group)$Soil <- levels(sample_data(physeq.norm)$Soil)[get_variable(physeq.wheat.group, "Soil")]
+
+## (4) Further subgroup for WH.CL.BO vs WH.CL.YO
+physeq.wheat.vs <- physeq.wheat %>% subset_samples(Group %in% c("WH.CL.BO", "WH.CL.YO"))
+```
+
+#### Bata diversity
+
+Beta diversity is a measure of the differences or similarities between two or more microbial communities or samples. It quantifies the degree of variation in microbial composition among different samples. Beta diversity analysis can help identify patterns in the distribution of microbial communities and reveal relationships between different factors such as environment, host, and other ecological variables.
+
+Non-Metric Multidimensional Scaling (NMDS) and Principal Coordinates Analysis (PCoA) are both ordination techniques used in analyzing beta diversity, which captures the variation in species composition between different samples or sites. However, they have some differences in terms of methodology and interpretation:
+
+**NMDS (Non-Metric Multidimensional Scaling)** NMDS is a method that aims to represent the pairwise dissimilarities between samples in a lower-dimensional space while preserving the rank order of these dissimilarities. It is considered a non-metric method because it doesn't assume a linear relationship between the original dissimilarities and the distances in the ordination space. NMDS emphasizes preserving the relative ranking of dissimilarities, making it more suitable for cases where the distances between samples are not well-preserved in a lower-dimensional space. NMDS produces an ordination plot where the positions of samples are arranged based on their pairwise dissimilarities. The distances between points on the plot are not directly interpretable but reflect the similarities or dissimilarities between samples.
+
+**PCoA (Principal Coordinates Analysis)** PCoA is also used to visualize and analyse beta diversity by representing samples in a lower-dimensional space. It is a type of metric multidimensional scaling. PCoA is based on a metric approach, which means it attempts to preserve the actual distances between samples as closely as possible in the lower-dimensional space. PCoA produces an ordination plot where the distances between points reflect the actual dissimilarities between samples. Unlike NMDS, PCoA may not perform as well with non-linear or rank-based dissimilarity measures.
+
+```{r ggplot2, warning=FALSE, message=FALSE}
+# install.packages("ggplot2")
+library("ggplot2")
+```
+
+```{r Bata, warning=FALSE, message=FALSE}
+# method options: NMDS / PCoA
+pcoa <- ordinate(physeq = physeq.W.B, method = "NMDS", distance = "bray")
+
+# Plot ordination
 plot_ordination(
-  physeq = physeq.temp_sub,
-  ordination = moth_sub_pcoa,
-  # title = "NMDS",
+  physeq = physeq.W.B,
+  ordination = pcoa,
   color = "Type",
   shape = "Soil.Location"
 ) +
-  # scale_x_discrete(name ="NMDS1 ()") + 
-  # scale_y_discrete(name ="NMDS2 ()") + 
   theme_classic() + 
   geom_point(aes(color = Type), alpha = 1, size = 3) +
-  theme(text = element_text(size=18, colour = "black"), 
-        axis.ticks = element_line(colour = "black", size = 1.1),
-        axis.line = element_line(colour = 'black', size = 1.1),
-        axis.text.x = element_text(colour = "black", angle=0, 
-                                   hjust=0.5, size = 13, face="bold"),
-        axis.text.y = element_text(colour = "black", angle=0, 
-                                   hjust=0.5, size = 13, face="bold"),
-        axis.title.y = element_text(color="black", size=20,face="bold"), 
-        axis.title.x = element_text(color="black", size=20,face="bold")) +
-  # stat_ellipse(geom = "polygon", type="norm", alpha=0.25, aes(fill = Group)) + # polygon, path, point
-  scale_color_brewer(palette="Dark2") + 
-  scale_fill_brewer(palette="Dark2") + 
-  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # https://r-graphics.org/recipe-scatter-shapes
+  theme(
+    text = element_text(size = 18, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
+    axis.title.x = element_text(color = "black", size = 20, face = "bold")
+  ) +
+  scale_color_brewer(palette = "Dark2") + 
+  scale_fill_brewer(palette = "Dark2") + 
+  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
+  
+# Clean up by removing objects that are no longer needed
+rm(pcoa, physeq.W.B)
+
 ```
 
-# Alpha diversity
+#### Alpha diversity
 
-Alpha diversity refers to the diversity of species within a single ecosystem or habitat. It is measured by analyzing the number and distribution of species within a specific area or sample. Alpha diversity indices take into account the richness (number of species) and evenness (relative abundance of species) of a community. It provides insights into the complexity and stability of ecosystems. A high level of alpha diversity indicates a more complex ecosystem with a greater number of species, which is often associated with greater ecological resilience and stability. In contrast, a low level of alpha diversity can be an indicator of ecosystem disturbance, degradation, or vulnerability.
+Alpha diversity refers to the diversity of species within a single ecosystem or habitat. It is measured by analysing the number and distribution of species within a specific area or sample. Alpha diversity indices take into account the richness (number of species) and evenness (relative abundance of species) of a community. It provides insights into the complexity and stability of ecosystems. A high level of alpha diversity indicates a more complex ecosystem with a greater number of species, which is often associated with greater ecological resilience and stability. In contrast, a low level of alpha diversity can be an indicator of ecosystem disturbance, degradation, or vulnerability.
 
-```{r Step 7}
-# available measurements [c("Observed", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher")]
-alpha.object = cbind(x = sample_data(physeq.temp_sub), y = estimate_richness(physeq.temp_sub, measures = 'Shannon'))
+Please noted that different types of alpha diversity metrics capture various aspects of biodiversity within a specific community. Here's a brief explanation of each:
 
-# Statistical comparison
-# stat.test <- alpha.object %>%
-#   # group_by(Neutrophils, GROUP1) %>%
-#   t_test(Shannon ~ x.Type) %>%
-#   adjust_pvalue(method = "bonferroni") %>%
-#   add_significance()
+**Observed**: This metric simply counts the number of unique species (or operational taxonomic units) present in a sample. It provides a basic measure of species richness.
 
-# pdf("Alpha diversity - Shannon (Location) norm_1_1.pdf", 4.5, 5.5)
-ggplot(data = alpha.object, aes(x = x.Location, y = Shannon, color = x.Location, fill = x.Location)) + 
+**Chao1**: Chao1 estimates the total number of species by considering the number of rare or singleton species. It takes into account the number of singletons (species observed only once) and doubletons (species observed only twice).
+
+**ACE (Abundance-based Coverage Estimator)**: Similar to Chao1, ACE also estimates species richness by accounting for rare species, but it also considers their abundance in the community.
+
+**Shannon Diversity Index**: This index takes into account both species richness and evenness in the community. It considers the number of species present as well as their relative abundances.
+
+**Simpson Diversity Index**: Simpson's index gives more weight to dominant species in the community. It reflects the probability that two randomly selected individuals belong to different species.
+
+**Inverse Simpson Diversity Index (InvSimpson)**: This index is the reciprocal of the Simpson index and is useful for emphasizing the dominance of a few species.
+
+**Fisher's Alpha**: Fisher's alpha is a measure of species richness that takes into account the distribution of individuals among species. It's particularly useful for comparing species diversity between different communities.
+
+Here, we pick Shannon as an example for the work
+
+```{r Alpha, warning=FALSE, message=FALSE}
+# available measurements: "Observed" "Chao1" "ACE" "Shannon" "Simpson" "InvSimpson" "Fisher"
+# Calculate alpha diversity (Shannon) and store it in alpha.object
+alpha.object <- cbind(
+  x = sample_data(physeq.wheat),
+  y = estimate_richness(physeq.wheat, measures = 'Shannon')
+)
+
+# Create a plot for alpha diversity
+ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group, fill = x.Group)) + 
   theme_classic() + 
-  labs(# title = "IBD Patients", 
-    x = element_blank(), 
-    y = "Alpha Diversity (Shannon)") + 
-  geom_point(size = 1.75) + 
-  geom_boxplot(alpha = 0.5) + 
-  #  stat_pvalue_manual(stat.test, 
-  #                   y.position = c(9, 9.5, 10.5, 8.5, 12, 9),
-  #                     label = "p.adj.signif",
-  #                     face="bold", 
-  #                     size = 6, 
-  #                     linetype = 1,
-  #                     tip.length = 0.02,
-  #                     inherit.aes = FALSE) + 
-  scale_y_continuous(limits=c(0, 12), breaks = c(0, 2.5, 5, 7.5, 10)) +
-  theme(text = element_text(size=18, colour = "black"), 
-        axis.ticks = element_line(colour = "black", size = 1.1),
-        axis.line = element_line(colour = 'black', size = 1.1),
-        axis.text.x = element_text(colour = "black",
-                                   angle=270, 
-                                   size = 13, face="bold"),
-        axis.text.y = element_text(angle=0, hjust=0, colour = "black",
-                                   size = 13, face="bold"),
-        axis.title.y = element_text(color="black", size=15,face="bold"),
-        legend.position = "none") +
-  scale_color_brewer(palette="Dark2")+
-  scale_fill_brewer(palette="Dark2")
-# dev.off()
+  labs(
+    x = element_blank(),                     # No x-axis label
+    y = "Alpha Diversity (Shannon)"          # y-axis label
+  ) + 
+  geom_point(size = 1.75) +                  # Add points
+  geom_boxplot(alpha = 0.5) +                # Add boxplot with transparency
+  theme(
+    text = element_text(size = 18, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 270, size = 13, face = "bold"),
+    axis.text.y = element_text(angle = 0, hjust = 0, colour = "black", size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 15, face = "bold"),
+    legend.position = "none"                 # Hide legend
+  ) 
 
+# Clean up by removing the alpha.object
+rm(alpha.object)
 ```
 
-#### Calculate read counts by each crop
+#### Calculate the number of taxa on each level and each group
 
-The purpose of this process is to visualize the distribution of the numbewr of sequence reads across different groups and to identify any patterns in the distribution of reads within individual samples.
+The purpose of this process is to visualise the distribution of the number of matched abundance across different groups and to identify any patterns in the distribution of the processed abundance within individual group.
 
-```{r Step 8}
-########in Crop types ######
-# Merge the information by 
-physeq.temp_sub <- merge_samples(physeq.a, "Group", fun = sum)
-###########################
-# create an empty list to store genus-level abundance data for each taxonomic level
+```{r ASV_group, warning=FALSE, message=FALSE}
+# Create an empty list to store genus-level abundance data for each taxonomic level
 gentab_levels <- list()
 
-# set observation threshold
+# Set observation threshold
 observationThreshold <- 1
 
-# loop through taxonomic levels
-for (level in c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")) {
+# Define the taxonomic levels
+genus_levels <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+
+# loop through all the taxonomic levels
+for (level in genus_levels) {
   
   # create a factor variable for each level
-  genfac <- factor(tax_table(physeq.temp_sub)[, level])
+  genfac <- factor(tax_table(physeq.wheat.group)[, level])
   
   # calculate the abundance of each genus within each sample
-  gentab <- apply(otu_table(physeq.temp_sub), MARGIN = 1, function(x) {
+  gentab <- apply(otu_table(physeq.wheat.group), MARGIN = 1, function(x) {
     tapply(x, INDEX = genfac, FUN = sum, na.rm = TRUE, simplify = TRUE)
   })
   
@@ -245,303 +281,275 @@ for (level in c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Speci
   gentab_levels[[level]] <- BB
 }
 
-# combine all level counts data frames into one data frame
-require(tidyverse);
-B <- reduce(gentab_levels, full_join, by = "name")
+# Combine all level counts data frames into one data frame
+B2 <- gentab_levels %>% reduce(full_join, by = "name")
 
-# write the data frame to a file
-write.csv(B, file = "level_read_counts_by_group.csv", row.names = FALSE)
+# Set row names and column names
+rownames(B2) <- B2$name
+B2$name <- NULL
+colnames(B2)[1:7] <- genus_levels
 
+# Print the resulting data frame
+print(B2)
+
+# Clean up by removing unnecessary objects
+rm(gentab_levels, BB)
 ```
 
-#### Calculate read counts by each individual sample (pending to confirm the loop)
+#### Calculate the sum of ASV (Wheat)
+```{r ASV_individual, warning=FALSE, message=FALSE}
+# Calculate the sum of ASVs across samples and create a data frame
+ASV <- sample_sums(physeq.wheat)
+ASV <- as.data.frame(ASV)
+ASV$Wheat <- rownames(ASV)
 
-```{r Step 9}
-# pending to confirm the loop
-# Define the taxonomic levels
-tax_levels <- c("Species", "Genus", "Family", "Order", "Class", "Phylum", "Kingdom")
+# Remove the suffix from the ASV names
+new_names <- sub("-\\d+$", "", ASV$Wheat)
 
-# Initialize BB data.frame
-BB <- data.frame()
+# Update the row names of the data frame
+ASV$Wheat <- new_names
 
-# Loop through the taxonomic levels
-for (level in tax_levels) {
-  
-  # Create a factor corresponding to the current taxonomic level
-  genfac <- factor(tax_table(physeq)[, level])
-  
-  # Tabulate the counts for each taxonomic level in each sample
-  gentab <- apply(otu_table(physeq), MARGIN = 2, function(x) {
-    tapply(x, INDEX = genfac, FUN = sum, na.rm = TRUE, simplify = TRUE)
-  })
-  
-  # Calculate the counts above the observation threshold
-  observationThreshold <- 1
-  counts <- apply(gentab > observationThreshold, 2, sum)
-  
-  # Add the counts to the BB data.frame
-  BB[[level]] <- counts
-  
-}
-
-# Write the BB data.frame to a file
-write.csv(BB, "7-levels_samples_stat.csv", row.names = FALSE)
-
+# Create a scatter plot with jittered points and overlaid boxplots
+ggplot(ASV, aes(x = Wheat, y = ASV,  colour = Wheat)) +
+  geom_point(alpha = 1, position = "jitter", size = 4) + 
+  geom_boxplot(alpha = 0, colour = "black", size = 0.8) + 
+  theme_classic() + 
+  theme(text = element_text(size=15, colour = "black"), 
+        axis.ticks = element_line(colour = "black", size = 1.25),
+        axis.line = element_line(colour = 'black', size = 1.25),
+        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black", size = 13),
+        axis.title.y = element_text(color="black", size=15, face="bold"),
+        legend.position = "none")
 ```
 
-### calculate the sum of ASV by each individual samples (pending to confirm the loop)
+#### Plotting for the abundance of one specific bacteria
 
-```{r Step 100}
-
-```
-
-# Plot
-
-# Plot ASV for each group from 7 types of crops
-
-```{r Step 10}
-# read the file
-z = read.csv("7-levels_samples_stat_2_for_plotting.csv", header = T)
-
-crops = c("CO", "SU", "BA", "WH", "OR", "BE", "OA")
-
-for(group in crops) {
-  pdf(paste0(group,"_ASV.pdf"), 6.5, 4)
-  ggplot(subset(z, Group %in% paste0(group,"-CL-BO", group,"-CL-YO", group,"-CY-BU", 
-                                     group,"-CY-YO", group,"-SC-HE", group,"-SC-SH", 
-                                     group,"-SL-AN", group,"-SL-BE", group,"-SL-SH")),
-         aes(x = Group, y = ASV,  colour = interaction(Group, Type))) +
-    geom_point(alpha = 1, position = "jitter", size = 4) + 
-    geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
-    theme_classic() +   
-    theme(text = element_text(size=15, colour = "black"), 
-          axis.ticks = element_line(colour = "black", size = 1.25),
-          axis.line = element_line(colour = 'black', size = 1.25),
-          axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-          axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
-          axis.title.y = element_text(color="black", size=15,face="bold"), legend.position = "none")
-  dev.off()
-}
-```
-
-### Calculate the top 100 taxa at all levels
-
-### Print out the lists - all
-
-```{r Top100 - load packages}
-library("microbiomeMarker")
-library("speedyseq")
-library("phyloseq")
-library("tidyverse")
-library("reshape2")
-```
-
-```{r Top100}
-
-# Set up the two variables
-crops <- c("Barley", "Beans", "Bulksoil", "Oats", "OilseedRape", "Sugarbeet", "Wheat")
-tax_levels <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
-
-# Loop through all combinations of the two variables
-for (i in 1:length(crops)) {
-  for (j in 1:length(tax_levels)) {
-    # Subset the phyloseq object for the current combination
-    AyBCode <- subset_samples(physeq.b, Type == crops[i])
-    AyBCode <- merge_samples(AyBCode, "Group")
-    B <- aggregate_taxa(AyBCode, tax_levels[j], verbose = TRUE)
-    
-    # removes any rows from B where the taxonomic level indicated by tax_levels[j] is "uncultured" or "Unknown", and assigns the result to B2
-    B2 <- subset_taxa(B, get(tax_levels[j]) != "uncultured")
-    B2 <- subset_taxa(B2, get(tax_levels[j]) != "Unknown")
-    
-    # converts B2 to a tibble, renames the columns, selects the columns of interest (Sample, Abundance, and the current taxonomic level), 
-    # groups by Sample, takes the top 100 values of Abundance for each Sample, and then ungroups the result and assigns it to D
-    D <- as_tibble(B2) |>
-      rename(Sample=.sample, ASV=.otu, Abundance=.abundance) |> 
-      select(Sample, Abundance, tax_levels[j]) |>
-      group_by(Sample) |> 
-      slice_max(Abundance, n = 100) |> 
-      ungroup()
-    
-    # write the result to a CSV file
-    filename <- paste0(crops[i], "_", tax_levels[j], "_Top100.csv")
-    D$Abundance <- NULL
-    names(D)[2] <- "ASV"
-    E <- dcast(D, ASV ~ Sample)
-    write.csv(E, filename)
-  }
-}  
-```
-
-### comparison
-
-```{r Top100  - part 2}
-
-# Create and Define a function that converts a vector of numbers to binary
-binary_fun <- function(x) {
-  # Replace any NA values with 0
-  x[is.na(x)] <- 0
-  # Convert any values greater than 0 to 1, and any others to 0
-  ifelse(x > 0, 1, 0)
-}
-
-
-# Set up the variables
-crops <- c("Barley", "Beans", "Oats", "OilseedRape", "Sugarbeet", "Wheat", "Bulksoil")
-
-# Create an empty list to store the binary data frames
-binary_list <- list()
-
-# Loop through all types and read in the corresponding files generated from step 1
-for (i in 1:length(crops)) {
-  file_name <- paste0(crops[i], "_Family_Top100.csv") # change to Family for another level
-  temp_df <- read.csv(file_name, header = TRUE, row.names = 2)
-  # Apply the binary function to the columns 2 to 10
-  temp_df <- apply(temp_df[2:10], 2, binary_fun)
-  # Add the resulting data frame to the binary list
-  binary_list[[i]] <- temp_df
-}
-
-############ step 2 #########
-# Extract row names and column names for each column where the value is 1
-row_names_list <- lapply(binary_list, function(x) {
-  lapply(1:ncol(x), function(i) {
-    list(column_name = colnames(x)[i], row_names = rownames(x)[which(x[,i] == 1)])
-  })
-})
-
-# Determine the maximum length of the row name lists for each column
-max_length <- max(sapply(row_names_list, function(x) max(sapply(x, function(y) length(y[[2]])))))
-
-# Pad the shorter row name lists with NA values 
-# The sample anmes are in at first of the list
-row_names_list <- lapply(row_names_list, function(x) {
-  lapply(x, function(y) {
-    c(y[[1]], y[[2]], rep(NA, max_length - length(y[[2]])))
-  })
-})
-
-############### step 3 ################
-# Extract the column names and data from each sublist in row_names_list
-matrix_list <- list()
-for (i in 1:9) {
-  col_names <- sapply(row_names_list, function(x) x[[i]][1])
-  data <- t(do.call(rbind, lapply(row_names_list, function(x) x[[i]]) ))[-1,]
-  colnames(data) <- col_names
-  
-  # Add the matrix to the list
-  matrix_list[[i]] <- data
-  # matrix_list <- matrix_list[sapply(matrix_list, function(x) !all(is.na(x)))]
-}
-
-
-################# output the comparison using UpSetR and export it to pdf files
-library(dplyr)
-library(UpSetR)
-library(reshape2)
-
-i = 9L
-# Perform UpSetR analysis and export to PDF for each matrix in matrix_list
-for(i in 1:length(matrix_list)){
-
-  Z <- melt(matrix_list[[i]])
-  Y <- dcast(Z, value ~ Var2)
-  Y <- Y[complete.cases(Y$value), ]
-  group_list <- colnames(matrix_list[[i]])
-  
-  # Export to PDF
-  pdf(paste0("UpSetR_", i, "_Family", ".pdf"), 7, 4.9)
-  upset(Y, sets = group_list, sets.bar.color = "#56B4E9",
-        order.by = "freq", empty.intersections = "on")
-  dev.off()
-}
-
-```
-
-Plotting the top 30 information
-
-```{r Top100  - part 2}
-physeq_Barley <- subset_samples(physeq.a, Type=="Wheat") # require to change to other crops
-physeq_Barley_2 = merge_samples(physeq_Barley, "Group") # Sum between replicate samples
-
-# repair factors
-sample_data(physeq_Barley_2)$Group <- levels(sample_data(physeq_Barley)$Group)[get_variable(physeq_Barley_2, "Group")]
-sample_data(physeq_Barley_2)$Soil <- levels(sample_data(physeq_Barley)$Soil)[get_variable(physeq_Barley_2, "Soil")]
-
-# transform to proportions ## relatively abundance
-restroomRgsmp = transform_sample_counts(physeq_Barley_2, function(x) 100 * x/sum(x))
-
-top19otus = names(sort(taxa_sums(restroomRgsmp), TRUE)[1:71])
-taxtab19 = cbind(tax_table(restroomRgsmp), Family30 = NA)
-taxtab19[top19otus, "Family30"] <- as(tax_table(restroomRgsmp)[top19otus, "Family"], "character")
-tax_table(restroomRgsmp) <- tax_table(taxtab19)
-
-restroomRgsm19 = prune_taxa(top19otus, restroomRgsmp)
-
-# plotting
-title = "Wheat top 30"
-plot_bar(restroomRgsm19, "Group", fill = "Family30", title = title) + coord_flip() + 
-  ylab("Percentage of Sequences") + ylim(0, 40)
-
-```
-
-#### Bar chart plotting for one specific bacteria
-
-```{r Top100  - part 3}
-#### for individual groups
-
-# Subset the samples in the phyloseq object that belong to "Wheat" or other crops "Barley", "Beans", "Bulksoil", "Oats", "OilseedRape", "Sugarbeet"
-ps_with_only_genus <- subset_samples(physeq.b, Type=="Wheat") 
-# Merge the replicate samples for each Group
-physeq_Barley_2 = merge_samples(ps_with_only_genus, "Group") # Sum between replicate samples
-
-# repair factors in the sample metadata
-sample_data(physeq_Barley_2)$Group <- levels(sample_data(physeq.a)$Group)[get_variable(physeq_Barley_2, "Group")]
-sample_data(physeq_Barley_2)$Soil <- levels(sample_data(physeq.a)$Soil)[get_variable(physeq_Barley_2, "Soil")]
-
-# Subset the taxa table to only include Azospirillum at the Genus level
-physeq_Barley_2 <- subset_taxa(physeq_Barley_2, Genus == "Azospirillum")
-
-# Create a data frame of the taxonomic information
-taxdf = data.frame(tax_table(physeq_Barley_2))
-
-# Plot a bar graph of the relative abundances of each taxon
-plot_bar(physeq_Barley_2)
-```
-
-```{r Top100  - part 4}
-#### for individual samples
-# Subset the samples to analyze individually
-ps_with_only_genus <- subset_samples(physeq.b, Type=="Wheat")
-physeq_Barley_2 <- subset_taxa(ps_with_only_genus, Genus == "Azospirillum")
-
-taxdf = data.frame(tax_table(physeq_Barley_2))
+```{r Top100_4, warning=FALSE, message=FALSE}
+# Subset the taxa to Genus from physeq.wheat 
+physeq.wheat.genus <- subset_taxa(physeq.wheat, Genus == "Azospirillum")
 
 # Calculate the total abundance of Azospirillum for each sample
-meta = physeq_Barley_2@sam_data
-otudf = as.data.frame(t(as.data.frame(physeq_Barley_2@otu_table)))
+meta = physeq.wheat.genus@sam_data
+otudf = as.data.frame(t(as.data.frame(physeq.wheat.genus@otu_table)))
 meta$Azospirillum = rowSums(otudf)
 
 # Plot a graph of the abundance of Azospirillum for each sample grouped by Group:
-# pdf("Wheat_Azospirillum.pdf",6.5 ,4)
-ggplot(subset(meta, Group %in% c("WH-CL-BO",
-                                 "WH-CL-YO",
-                                 "WH-CY-BU",
-                                 "WH-CY-YO",
-                                 "WH-SC-HE",
-                                 "WH-SC-SH",
-                                 "WH-SL-AN",
-                                 "WH-SL-BE",
-                                 "WH-SL-SH"
-)),
-aes(x = Group, y = Azospirillum,  colour = interaction(Group))) +
+ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
+                                 "WH.CY.BU","WH.CY.YO",
+                                 "WH.SC.HE","WH.SC.SH",
+                                 "WH.SL.AN","WH.SL.BE",
+                                 "WH.SL.SH")),
+       aes(x = Group, y = Azospirillum,  colour = interaction(Group))) +
   geom_point(alpha = 1, position = "jitter", size = 4) + 
   geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
-  theme_classic() +   theme(text = element_text(size=15, colour = "black"), 
-                            axis.ticks = element_line(colour = "black", size = 1.25),
-                            axis.line = element_line(colour = 'black', size = 1.25),
-                            axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-                            axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
-                            axis.title.y = element_text(color="black", size=15,face="bold"), legend.position = "none")
-# dev.off()
+  theme_classic() +   
+  theme(text = element_text(size=15, colour = "black"), 
+        axis.ticks = element_line(colour = "black", size = 1.25),
+        axis.line = element_line(colour = 'black', size = 1.25),
+        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.title.y = element_text(color="black", size=15,face="bold"), legend.position = "none")
+
+# Clean up by removing unnecessary objects
+rm(physeq.wheat.genus, meta, otudf)
+```
+
+### Plotting the top 30 taxa at family level
+
+```{r Top100_5, warning=FALSE, message=FALSE}
+## Transform normalised ASVs to proportions 
+proportions = transform_sample_counts(physeq.wheat.group, function(x) 100 * x/sum(x))
+
+##  
+Top30ASVs = names(sort(taxa_sums(proportions), TRUE)[1:71])
+Taxtab30 = cbind(tax_table(proportions), Family30 = NA)
+Taxtab30[Top30ASVs, "Family30"] <- as(tax_table(proportions)[Top30ASVs, "Family"], "character")
+tax_table(proportions) <- tax_table(Taxtab30)
+
+Rgsm30 = prune_taxa(Top30ASVs, proportions)
+
+# plotting
+title = "Wheat - Top 30"
+plot_bar(Rgsm30, "Group", fill = "Family", title = title) + 
+  coord_flip() + 
+  ylab("Percentage of Sequences") + ylim(0, 30) +  theme_classic() +   
+  theme(text = element_text(size=15, colour = "black"), 
+        axis.ticks = element_line(colour = "black", size = 1.25),
+        axis.line = element_line(colour = 'black', size = 1.25),
+        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.title.y = element_text(color="black", size=15,face="bold"), 
+        legend.position = "right", 
+        legend.text = element_text(size = 9.5), 
+        legend.key.height= unit(0.45, 'cm'),
+        legend.key.width= unit(0.45, 'cm')
+        )
+
+# Clean up by removing unnecessary objects
+# rm(proportions, Top30ASVs, Taxtab30, Rgsm30, title)
+```
+
+#### Pairwise comparison using PERMANOVA
+Pairwise PERMANOVA is a statistical method used to compare multiple groups or treatments in ecological and microbial community studies. It assesses dissimilarity between samples and provides a p-value to determine the significance of observed differences. This approach is valuable for targeted group comparisons, allowing researchers to investigate the effects of specific factors on microbial communities and uncover significant variations in community composition. By considering within- and between-group variation, pairwise PERMANOVA provides robust statistical analysis and insights into microbial community dynamics and functioning.
+
+```{r PERMANOVA Install, warning=FALSE, message=FALSE}
+# devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")
+library("pairwiseAdonis")
+```
+
+```{r PERMANOVA, warning=FALSE, message=FALSE}
+metdat = as.data.frame(as.matrix(physeq.wheat@sam_data))
+dat = as.data.frame(t(as.data.frame(physeq.wheat@otu_table)))
+pairwise.adonis(dat, metdat$Group, sim.function = "vegdist",
+                sim.method = "bray", p.adjust.m = "bonferroni",
+                reduce = NULL, perm = 10000)
+
+# Clean up by removing unnecessary objects
+rm(metdat, dat)
+```
+
+
+### Upset plot using UpsetR
+When it comes to representing sets visually, the go-to option is usually a Venn diagram. These diagrams work well when dealing with up to five sets, providing a clear visualisation. However, as the dataset expands, such as when dealing with five sets, deriving the desired insights from the diagram becomes more complex. As a result, considering an UpSet graph for data visualisation becomes an appealing choice. UpSet graphs offer a more streamlined way to display intersections and complements, particularly when dealing with larger datasets or multiple sets. This option ensures a more intuitive and informative representation of the data.
+
+```{r UpsetR_Install, warning=FALSE, message=FALSE}
+# BiocManager::install("microbiome")
+library("microbiome")
+
+# devtools::install_github("mikemc/speedyseq")
+library("speedyseq")
+
+library("UpSetR")
+library("plyr")
+library("dplyr")
+library("reshape2")
+```
+
+```{r UpsetR, warning=FALSE, message=FALSE}
+# Aggregate taxa at the genus level
+B <- aggregate_taxa(physeq.wheat.group, "Genus", verbose = TRUE)
+
+# Remove undesired genera
+# B2 <- subset_taxa(B, !get("Genus") %in% c("uncultured", "Unknown"))
+
+# Remove unwanted taxon names
+taxa_to_remove <- c("uncultured", "Unknown")
+B2 <- subset_taxa(B, !get("Genus") %in% taxa_to_remove)
+
+# Convert to tibble, rename columns, select relevant columns, group by Sample, and keep top 100 abundant ASVs
+# Convert data to a tibble and perform necessary operations
+D <- as_tibble(B2) %>%
+  mutate(Sample = .sample, ASV = .otu, Abundance = .abundance) %>%
+  select(Sample, Abundance, Genus) %>%
+  group_by(Sample) %>%
+  filter(rank(desc(Abundance)) <= 100) %>% # Filter the top 100
+  ungroup()
+
+
+# Remove the Abundance column
+D$Abundance <- NULL
+
+# Rename the second column to "ASV"
+names(D)[2] <- "ASV"
+
+# Convert data from long to wide format
+E <- dcast(D, ASV ~ Sample)
+
+# Define a binary function
+binary_fun <- function(x) {
+  x[is.na(x)] <- 0
+  ifelse(x > 0, 1, 0)
+}
+
+# Apply the binary function to columns 2 to 10
+temp_df <- apply(E[2:10], 2, binary_fun)
+temp_df <- as.data.frame(temp_df)
+
+# Create an UpSet plot
+upset_plot <- upset(temp_df, sets = colnames(temp_df), sets.bar.color = "#56B4E9",
+                    order.by = "freq", empty.intersections = "on")
+
+# Print the UpSet plot
+print(upset_plot)
+
+# Clean up by removing unnecessary objects
+# rm(B, B2, D, E, binary_fun, temp_df, upset_plot, physeq.wheat.group)
+```
+
+```{r phyloseq_plot_bar, warning=FALSE, message=FALSE}
+# https://github.com/joey711/phyloseq/issues/901
+# Filter taxa with mean abundance > 0.1
+physeq2 = filter_taxa(physeq.wheat.vs, function(x) mean(x) > 0.1, TRUE)
+
+# Transform sample counts to relative abundances
+physeq3 = transform_sample_counts(physeq2, function(x) x / sum(x))
+
+# Aggregate taxa at the Phylum level
+glom <- tax_glom(physeq3, taxrank = 'Phylum')
+
+# Convert the aggregated phyloseq object to a dataframe
+data <- psmelt(glom)
+# Convert Phylum column to character
+data$Phylum <- as.character(data$Phylum)
+
+# Rename phyla with abundance < 1% to "< 1% abund."
+data$Phylum[data$Abundance < 0.01] <- "< 1% abund."
+
+# Calculate medians of abundance for each Phylum
+medians <- ddply(data, ~Phylum, function(x) c(median = median(x$Abundance)))
+
+# Extract phyla with median abundance <= 0.01
+remainder <- medians[medians$median <= 0.01, ]$Phylum
+
+# Rename selected phyla to "Phyla < 1% abund."
+data[data$Phylum %in% remainder, ]$Phylum <- "Phyla < 1% abund."
+
+# Rename phyla with abundance < 1% to "Phyla < 1% abund."
+data$Phylum[data$Abundance < 0.01] <- "Phyla < 1% abund."
+
+# Plot the data with condensed phyla categories
+p <- ggplot(data = data, aes(x = Sample, y = Abundance, fill = Phylum))
+p + geom_bar(aes(), stat = "identity", position = "stack") +
+  scale_fill_manual(values = c("darkblue", "darkgoldenrod1", "darkseagreen", "darkorchid", "darkolivegreen1", "lightskyblue", "darkgreen", "deeppink", "khaki2", "firebrick", "brown1", "darkorange1", "cyan1", "royalblue4", "darksalmon", "darkblue", "royalblue4", "dodgerblue3", "steelblue1", "lightskyblue", "darkseagreen", "darkgoldenrod1", "darkseagreen", "darkorchid", "darkolivegreen1", "brown1", "darkorange1", "cyan1", "darkgrey")) +   theme_classic() +   
+  theme(text = element_text(size=15, colour = "black"), 
+        axis.ticks = element_line(colour = "black", size = 1.25),
+        axis.line = element_line(colour = 'black', size = 1.25),
+        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.title.y = element_text(color="black", size=15,face="bold"), legend.position = "right") # + guides(fill = guide_legend(nrow = 4))
+
+rm(p, data, remainder, medians,glom, physeq3, physeq2)
+```
+
+#### Linear discriminant analysis effect size (LEFSe)
+Linear discriminant analysis effect size (LEFSe) is a powerful computational tool commonly used in microbiome analysis to identify microbial biomarkers that are differentially abundant between different experimental groups. Microbiome analysis involves studying the composition and diversity of microbial communities present in various environments, such as the human gut, soil, water, and more. LEFSe is specifically designed to address the challenge of identifying microbial taxa that drive differences between different experimental conditions or groups.
+
+LEFSe combines linear discriminant analysis (LDA), which is a statistical technique used for classification and feature selection, with the concept of effect size. Effect size refers to the magnitude of a difference between two groups and provides insights into the biological relevance of the observed differences.
+
+P,S.ALDEx2 and ANCOM-II produce the most consistent results (https://www.nature.com/articles/s41467-022-28034-z )
+```{r LEFSe_install, warning=FALSE, message=FALSE}
+# BiocManager::install("microbiomeMarker")
+library("microbiomeMarker")
+```
+
+```{r LEFSe, warning=FALSE, message=FALSE}
+lef_out <- run_lefse(physeq.wheat.vs, group = "Group", 
+                     norm = "CPM", 
+                     # taxa_rank = "Genus",
+                     kw_cutoff = 0.01, lda_cutoff = 4)
+plot_ef_bar(lef_out)
+```
+
+#### Visualising the marker table as cladogram
+The default is 4 which is showing the kingdom, Phylum, Class on the cladogram.
+
+```{r cladogram, warning=FALSE, message=FALSE}
+# plot_cladogram(lef_out, color = c("red","blue"), 
+#                clade_label_level = 6)
+# rm(lef_out)
+```
+
+```{r sessionInfo, warning=FALSE, message=FALSE}
+sessionInfo()
 ```
