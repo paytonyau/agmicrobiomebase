@@ -1,4 +1,3 @@
-
 # UK CROP MICROBIOME CRYOBANK (Sequencing Analysis)
 
 If you want to conduct sequencing analysis on the 16S amplicon data obtained from THE UK CROP MICROBIOME CRYOBANK (https://agmicrobiomebase.org), you'll need to have a Linux environment set up and certain packages pre-installed. These packages are essential for the sequencing data process and include various tools for quality control, sequence alignment, taxonomic classification, and diversity analysis. Before starting the analysis, make sure you have all the required packages installed on your system to ensure a smooth and successful analysis.
@@ -15,8 +14,6 @@ If you want to conduct sequencing analysis on the 16S amplicon data obtained fro
 ##### Install Anaconda / Miniconda
 
 To install QIIME2, you can use Anaconda or Miniconda, which provide a self-contained environment and package manager. Download and install Miniconda and create a new environment for QIIME2. This allows you to manage your QIIME2 installation and dependencies easily.
-
-
 
 ##### Install sequence quality check packages
 
@@ -57,7 +54,6 @@ This process is to visulalie the sequence quality and the adaptors left in eash 
 
 #### STEP 2
 ##### Sequencing reads trimming for FIGARO
-
 Trim the sequence reads to a length of 250bp and discard reads shorter than 250bp to ensure consistency on each of the as required by the program.[^1] Cutadapt or Trimmomatic can be applied for the process. Here, we used Trimmomatic and please noted that the trimmed sequencing data are only for FIGARO.
 [^1]: https://github.com/Zymo-Research/figaro/issues/37
 
@@ -66,67 +62,70 @@ java -jar trimmomatic-0.39.jar PE \
 input_forward.fq.gz input_reverse.fq.gz \
 output_forward_paired.fq.gz output_forward_unpaired.fq.gz \
 output_reverse_paired.fq.gz output_reverse_unpaired.fq.gz \
-MINLEN:250 CROP: 250
+MINLEN:248 CROP: 248
 ```
 
 ##### Identify the optimal setting denosing in DADA2 by using FIGARO
 
-Following the trimming process, the Figaro program should be utilised. The program involved applying various read lengths to estimate the error rates for DADA2. By testing different read lengths, the aim was to optimize the accuracy of the DADA2 algorithm and improve its performance in accurately identifying and correcting sequencing errors in the dataset.
+Following the trimming process, the Figaro program should be utilised. The program involved applying various read lengths to estimate the error rates for DADA2. The aim was to optimize the accuracy of the DADA2 algorithm and improve its performance in accurately identifying and correcting sequencing errors in the dataset.
 
-Here `-f` indecates the length of the forward primer - 17 bp, and `-r` indecates the length of the reverse primer - 21bp. `-a` indecates the length of the merged sequence. -m indecates the requirement of the merging base pair. 
-Noted that the default DADA2 merging in QIIME2 is 12bp (not 20bp).[^2]
+As the average length of **16s V3-V4** region is **460 nt** and minus the length of the forward and reverse primers nt, it has a 209 nt gap from both sides.
+Forward: 460 - 251 = 209 nt
+Reverse: 460 - 251 = 209 nt
 
-[^2]:https://forum.qiime2.org/t/extremely-low-merged-score-after-using-dada2/16085/3
+Therefore, the overlapped nt for both side, which can be used for merging, would be 42 nt
+460 - (209 + 209) = 42 nt
 
-```python figaro.py -i (path) -o (path) -f 17 -r 21 -a 447 -m 12```
+In the scope of this study, the 16S V3-V4 region was targeted, employing a forward primer of 17 nucleotides and a reverse primer spanning 21 nucleotides.
+By primer removal,
+Forward: 251 - 17 = 234 nt
+Reverse: 251 - 21 = 230 nt
+
+On DADA2, the minimum merging length is 12, if we set the mering overlap nt as 12,
+
+42 nt - 12 nt = 30 nt
+
+Forward: 234 - 30 = 204 nt
+Reverse: 230 - 30 = 200 nt
+
+Therefore, total minimum length
+204 + 200 = 404 nt
+
+Several iterations were undertaken to determine the optimal length for the 16S V3-V4 region in our dataset. The analysis revealed that the region's length is 426 nucleotides at 50% and 428 nucleotides at 98% similarity levels. 
+
+The table below is based on the maximum length of 447 nt with the minimum of 12 nucleotides sequence overlap. 
+
+|Percentile (%)|Plate 1*|Plate 2*|Plate 3*|ALL*|
+| ----------- | ----------- |----------- |----------- |----------- |
+|2| 402|	402|	402|	402|
+|9| 402|	402|	402|	402|
+|25|	404|	409|	405|	405|
+|50|	426|	426|	426|	426|
+|75|	427|	427|	427|	427|
+|91|	428|	428|	428|	428|
+|98|	428|	428|	428|	428|
+*Length (nts)
+
+Taking into account these findings along with the favorable sequence quality across the dataset, a maximum length of 428 nucleotides was selected for achieving resolution. This length ensures a 32-nucleotide overlap, contributing to the attainment of the highest resolution in the analysis. 
+
+460 - 428 = 32 nt 
+
+In other word, there is 42 - 32 = 10 nt from both forward and reverse sequence can be discarded.
+
+Furthermore, adhering to the DADA2 recommendation for the v3-v4 16S region, it is advised to consider a minimum length of 20 nucleotides [^2]. Therefore, the FIGARO settings would be  
+[^2]:https://benjjneb.github.io/dada2/tutorial_1_8.html
+
+```python figaro.py -i (path) -o (path) -f 17 -r 21 -a 428 -m 20```
+
+Here `-f` indecates the length of the forward primer - 17 bp, and `-r` indecates the length of the reverse primer - 21bp. `-a` indecates the length of the merged sequence, this required to exclude the length of the primers on both sides with the consideration of the total merging length. -m indecates the requirement of the merging base pair. 
+Noted that the default DADA2 merging rate is 12bp (not 20bp).[^3] 
+[^3]:https://forum.qiime2.org/t/extremely-low-merged-score-after-using-dada2/16085/3 and https://benjjneb.github.io/dada2/ReleaseNotes_1_8.html
+
+Below is the outcomes from using FIGARO with the setting above
+|Rank | T* position (F, R)| maxEE* (F, R)|Read Retention (%)|Score| 
+| ----------- | ----------- |----------- |----------- |----------- |
 
 
-Below is a bash loop script for the use of Figaro on the length of the parameter for every 3 bp from 380 bp to 460 bp
-```
-#!/bin/bash
-
-output_folder="."  # Path to the output folder
-results_file="figaro_results.txt"  # Results file name
-
-for ((param = 380; param <= 460; param += 3)); do
-    output_dir="${output_folder}/${param}bp"  # Output directory with parameter value
-
-    # Create the output directory if it doesn't exist
-    mkdir -p "$output_dir"
-
-    log_file="${output_dir}/figaro.log"  # Log file path
-
-    # Run figaro.py and save the screen output to the log file
-    python /home/payton/figaro/figaro/figaro.py -f 20 -r 20 -a "$param" -m 12 -o "$output_dir" > "$log_file" 2>&1
-
-    # Extract the third line from the log file and remove unwanted characters
-    third_line=$(sed -n '3p' "$log_file" | tr -d '{}",[]:')
-
-    # Append the parameter and modified line on the same line in the results file
-    echo -n "param: $param " >> "$results_file"
-    echo "$third_line" | tr '\n' ' ' >> "$results_file"
-    echo >> "$results_file"
-done
-
-```
-Below is the outcomes from using FIGAOR run on each of the plate and each of the row are the best outcome on each run
-|T* length | T* position (F, R)| maxEE* (F, R)|Read Retention (%)|Score| Plate |
-| ----------- | ----------- |----------- |----------- |----------- |----------- |
-| 449 bp | 249, 250 | 2, 2 | 82.05 | 80.045 | 1 |
-| 449 bp | 249, 250 | 2, 2 | 84.9  | 76.903 | 2 |
-| 449 bp | 249, 250 | 2, 2 | 85.3  | 83.298 | 3 |
-| 448 bp | 249, 249 | 2, 2 | 82.28 | 80.275 | 1 | 
-| 448 bp | 249, 249 | 3, 3 | 85.23 | 77.234 | 2 |
-| 448 bp | 249, 249 | 2, 2 | 85.46 | 83.464 | 3 |
-| 447 bp | 248, 249 | 2, 2 | 82.42 | 80.421 | 1 | 
-| 447 bp | 248, 249 | 3, 3 | 85.39 | 77.390 | 2 | 
-| 447 bp | 248, 249 | 2, 2 | 85.58 | 83.576 | 3 | 
-| 446 bp | 247, 249 | 2, 2 | 82.57 | 80.567 | 1 |
-| 446 bp | 247, 249 | 3, 3 | 85.59 | 77.587 | 2 | 
-| 446 bp | ,  | ,  |  | |  3 | 
-| 445 bp | 246, 249 | 2, 2 | 82.7  | 80.705 | 1 |
-| 445 bp | 246, 249 | 3, 3 | 85.74 | 77.740 | 2 | 
-| 445 bp | ,  | ,  |  | |  3 | 
 *T, Trim; **EE, expected error
 
 
@@ -134,7 +133,33 @@ Below is the outcomes from using FIGAOR run on each of the plate and each of the
 
 ```ls -d "$PWD"/* > manifest.txt```
 
-The required format: (sample-id absolute file-path direction)
+The prescribed format entails the inclusion of "sample-id, absolute file-path, direction". The following script can be utilised to generate the necessary format, you could copy the script below and paste it into a `.sh` file.
+
+```
+#!/bin/bash
+# Input and output file paths
+input_file="manifest.txt"
+output_file="manifest.csv"
+
+# Create the CSV header
+echo "sample-id,absolute-filepath,direction" > "$output_file"
+
+# Read the input file line by line
+while IFS= read -r line; do
+    # Extract the sample name, direction, and remove "_S123"
+    sample=$(echo "$line" | sed 's#.*/##; s/\..*//; s/_L001_.*//; s/_\([0-9]\+\)$//; s/_S[0-9]\+$//')
+    direction=$(echo "$line" | grep -o "_R[12]_")
+
+    # Determine the direction and create the CSV lines
+    if [ "$direction" = "_R1_" ]; then
+        echo "$sample,$line,forward" >> "$output_file"
+    elif [ "$direction" = "_R2_" ]; then
+        echo "$sample,$line,reverse" >> "$output_file"
+    fi
+done < "$input_file"
+
+echo "CSV file created: $output_file"
+```
 
 #### STEP 3
 ### Activate the envernment
@@ -211,17 +236,20 @@ According to the projected results of the FAGRIO programme, the anticipated para
 ```
 qiime dada2 denoise-paired \
   --i-demultiplexed-seqs primer-trimmed-demux.qza \
-  --p-n-threads 8 \
+  --p-trunc-len-f 222 \
+  --p-trunc-len-r 220 \
   --p-trim-left-f 0 \
   --p-trim-left-r 0 \
-  --p-trunc-len-f 231  \
-  --p-trunc-len-r 228 \
   --p-max-ee-f 2 \
   --p-max-ee-r 2 \
-  --o-representative-sequences rep-seqs-trimmed_231_228_2_2.qza \
-  --o-table table-trimmed_231_228_2_2.qza \
-  --o-denoising-stats stats-trimmed_231_228_2_2.qza
+  --p-n-threads 8 \
+  --o-representative-sequences 422_222_220_rep-seqs.qza \
+  --o-table 422_222_220_table.qza \
+  --o-denoising-stats 422_222_220_stats.qza
 ```
+
+Please noted that taxonomic classifiers exhibit optimal performance when they are tailored to your sample and sequencing processes. This encompasses factors such as the primers employed for amplification and the precise length of sequence reads utilised[^4]. It should be highlighted that employing full-length taxonomic classifiers remains a feasible approach. 
+[^4]: https://docs.qiime2.org/2023.7/tutorials/feature-classifier/
 
 ##### Assign taxonomy to ASVs by running taxonomic classification
 
@@ -229,12 +257,17 @@ You can run the taxonomic classification with this command, which is one of the 
 
 ```
 qiime feature-classifier classify-sklearn \
-  --p-n-jobs 1 \
-  --i-classifier /mnt/shared/scratch/pyau/qiime2-ref/silva-138-99-nb-classifier.qza \
-  --i-reads rep-seqs-trimmed_231_228_2_2.qza \
-  --o-classification taxonomy-trimmed_231_228_2_2.qza
+  --i-classifier /mnt/shared/scratch/pyau/ref/silva-138-99-nb-classifier.qza \
+  --i-reads 422_222_220_rep-seqs.qza \
+  --p-n-jobs 8 \
+  --o-classification 422_222_220_taxonomy_silva138.qza
 ```
-
+##### visualise the taxonomy outcomes
+```
+qiime metadata tabulate \
+  --m-input-file 422_222_220_taxonomy_silva138.qza \
+  --o-visualization 422_222_220_taxonomy_silva138.qzv
+```
 
 ##### Filter out contaminant and unclassified ASVs
 
@@ -243,20 +276,28 @@ Note that if your data has not been classified against SILVA you will need to ch
 
   ```
 qiime taxa filter-table \
-  --i-table table-trimmed_231_228_2_2.qza \
-  --i-taxonomy taxonomy-trimmed_231_228_2_2.qza \
+  --i-table 422_222_220_table.qza \
+  --i-taxonomy 422_222_220_taxonomy_silva138.qza \
   --p-include p__ \
   --p-exclude mitochondria,chloroplast \
-  --o-filtered-table 447_239_220_table-with-phyla-no-mitochondria-no-chloroplast.qza
+  --o-filtered-table 422_222_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza
   ```
 
 ```
 qiime taxa filter-seqs \
-  --i-sequences rep-seqs-trimmed_231_228_2_2.qza \
-  --i-taxonomy taxonomy-trimmed_231_228_2_2.qza \
+  --i-sequences 422_222_220_rep-seqs.qza \
+  --i-taxonomy 422_222_220_taxonomy_silva138.qza \
   --p-include p__ \
   --p-exclude mitochondria,chloroplast \
-  --o-filtered-sequences rep-seqs-trimmed_231_228_2_2-with-phyla-no-mitochondria-no-chloroplast.qza
+  --o-filtered-sequences 422_222_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza
   ```
+
+### Unrooted phylogenetic tree construction
+An unrooted phylogenetic tree is used in evolutionary biology to display the relationships and evolutionary distances among entities like species or sequences. Unlike rooted trees, unrooted trees do not specify a common ancestor, focusing instead on showing branching patterns and relative relationships. They help infer genetic diversity and shared ancestry by analyzing molecular data and generating diagrams that highlight evolutionary connections. Unrooted trees are essential for understanding the evolutionary landscape and interconnections among biological entities.
+```
+qiime phylogeny align-to-tree-mafft-fasttree \  
+  --i-sequences rep-seqs-trimmed_231_228_2_2-with-phyla-no-mitochondria-no-chloroplast.qza \  
+  --output-dir phylogeny-align-to-tree-mafft-fasttree
+```
 
 The qiime2 framework structure established here can applied for various qiime2 plugins dedicated to diverse downstream analyses. In this context, we intend to employ the phyloseq package within the R programming environment for our downstream analysis.
