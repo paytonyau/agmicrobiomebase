@@ -1,0 +1,375 @@
+---
+title: ITS of Wheat
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+date: "2023-08-23"
+---
+
+## ITS of Wheat
+The relationship between fungi and wheat encompasses significant importance in agricultural ecosystems, transcending beyond the realm of infections. The coexistence of these two entities profoundly impacts agricultural productivity, with the specter of wheat root rot disease, wrought by soil-borne fungal pathogens, casting a formidable shadow over global crop yields, resulting in staggering annual economic losses. Beyond the purview of pathogenic interactions, the symbiotic and commensalistic associations of fungi with wheat rhizosphere foster a complex network of relationships that shape plant health and ecosystems. Investigating the multifaceted nexus between rhizosphere soil fungal diversity and wheat roots unveils a nuanced panorama, pivotal for comprehending the genesis and progression of wheat root rot disease. 
+
+### Qiime2 to Phyloseq
+
+Converting QIIME2 outcomes to the phyloseq object structure in R enables comprehensive analysis and visualisation of microbial community profiles. The phyloseq package provides functions for organising and manipulating data within the phyloseq object, allowing for diverse analyses such as diversity assessments, differential abundance testing, and taxonomic profile visualisation. By leveraging R's capabilities, researchers can perform advanced statistical analysis, integrate with other omics data, and gain deeper insights into microbiome datasets.
+
+```{r install, warning=FALSE, message=FALSE}
+# Download qiime2R from Github
+# if (!requireNamespace("devtools", quietly = TRUE)){install.packages("devtools")}
+# devtools::install_github("jbisanz/qiime2R")
+library("qiime2R")
+
+# Download phyloseq from CRAN
+# if (!require("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# BiocManager::install("phyloseq")
+library("phyloseq")
+```
+
+```{r qiime2R, warning=FALSE, message=FALSE}
+# Convert qiime2 to phyloseq format
+physeq.a <- qza_to_phyloseq(
+  features = "table-its-fungi-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
+  tree = "phylogeny-align-to-tree-mafft-fasttree/rooted_tree.qza",
+  taxonomy = "taxonomy-fungi.qza",
+  metadata = "meta-table.txt"
+)
+physeq.a ## confirm the object
+```
+
+## Assessing ASV Distribution (merged and filtered)
+We evaluated the number of Amplicon Sequence Variants (ASVs) after merging and filtering, as well as visualised the raw read counts per sample within each group. This analysis provided insights into the distribution of ASVs and the sequencing depth of each sample, allowing for a comprehensive assessment of data quality and quantity.
+
+```{r Install_ASV, warning=FALSE, message=FALSE}
+# install.packages("ggplot2")
+library("ggplot2")
+```
+
+```{r ASV, warning=FALSE, message=FALSE}
+
+ASV <- sample_sums(physeq.a)
+ASV <- as.data.frame(ASV)
+ASV$Group <- physeq.a@sam_data$Group
+
+ggplot(ASV, aes(x = Group, y = ASV,  colour = Group))+
+  geom_point(alpha = 1, position = "jitter", size = 4) + 
+  geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
+  theme_classic() + 
+  theme(text = element_text(size=15, colour = "black"), 
+        axis.ticks = element_line(colour = "black", size = 1.25),
+        axis.line = element_line(colour = 'black', size = 1.25),
+        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.title.y = element_text(color="black", size=15,face="bold"),
+        legend.position = "none")
+```
+
+### Beta diversity
+Beta diversity is a metric used in microbial community studies to assess species composition dissimilarity between samples, providing insights into microbial community dynamics and their ecological significance. By quantifying variation in community structure and employing visualisation techniques, beta diversity analysis allows comparisons across habitats or treatments, revealing key drivers of community variation and functional implications. It aids our understanding of microbial assemblages and their responses to environmental changes in ecology, environmental science, and human health research.
+
+```{r Beta diversity , message=FALSE, warning=FALSE}
+# method options: NMDS / PCoA
+NMDS <- ordinate(physeq = physeq.a, method = "NMDS", distance = "bray")
+
+# Plot ordination
+plot_ordination(
+  physeq = physeq.a,
+  ordination = NMDS,
+  color = "Group",
+  shape = "Group"
+) +
+  theme_classic() + 
+  geom_point(aes(color = Group), alpha = 1, size = 3) +
+  theme(
+    text = element_text(size = 18, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
+    axis.title.x = element_text(color = "black", size = 20, face = "bold")
+  ) + stat_ellipse(geom = "polygon", type="norm", alpha=0.25, aes(fill = Group)) +
+  scale_color_brewer(palette = "Set1") + 
+  scale_fill_brewer(palette = "Set1") + 
+  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
+  
+# Clean up by removing objects that are no longer needed
+rm(pcoa, physeq.W.B)
+```
+
+### Alpha diversity
+
+Alpha diversity is a fundamental concept in ecology and refers to the diversity or richness of species within a specific community or habitat. In the context of microbial ecology, alpha diversity represents the diversity of microorganisms within a given sample or microbiome. It provides insights into the variety and evenness of microbial species present in a particular environment. Common measures of alpha diversity include species richness, which counts the number of unique species, and evenness, which assesses the distribution of species abundances. Alpha diversity is crucial for understanding the stability, resilience, and functional potential of microbial communities. It can be influenced by various factors, including environmental conditions, host factors, and perturbations. By comparing alpha diversity across different samples or experimental groups, researchers can gain insights into the impact of factors such as disease, habitat changes, or interventions on microbial community structure.
+
+```{r Alpha diversity , message=FALSE, warning=FALSE}
+# available measurements [c("Observed", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher")]
+alpha.object <- cbind(
+  x = sample_data(physeq.a),
+  y = estimate_richness(physeq.a, measures = 'Shannon')
+)
+
+# Create a plot for alpha diversity
+ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group, fill = x.Group)) + 
+  theme_classic() + 
+  labs(
+    x = element_blank(),                     # No x-axis label
+    y = "Alpha Diversity (Shannon)"          # y-axis label
+  ) + 
+  geom_point(size = 1.75) +                  # Add points
+  geom_boxplot(alpha = 0.5) +                # Add boxplot with transparency
+  theme(
+    text = element_text(size = 18, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 270, size = 13, face = "bold"),
+    axis.text.y = element_text(angle = 0, hjust = 0, colour = "black", size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 15, face = "bold"),
+    legend.position = "none"                 # Hide legend
+  ) 
+
+# Clean up by removing the alpha.object
+rm(alpha.object)
+```
+
+### Pairwise comparison using PERMANOVA
+Pairwise PERMANOVA is a statistical method used to compare multiple groups or treatments in ecological and microbial community studies. It assesses dissimilarity between samples and provides a p-value to determine the significance of observed differences. This approach is valuable for targeted group comparisons, allowing researchers to investigate the effects of specific factors on microbial communities and uncover significant variations in community composition. By considering within- and between-group variation, pairwise PERMANOVA provides robust statistical analysis and insights into microbial community dynamics and functioning.
+
+```{r Install PERMANOVA, warning=FALSE, message=FALSE}
+# devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")
+library("pairwiseAdonis")
+```
+
+```{r PERMANOVA, warning=FALSE, message=FALSE}
+metdat = as.data.frame(as.matrix(physeq.a@sam_data))
+dat = as.data.frame(t(as.data.frame(physeq.a@otu_table)))
+pairwise.adonis(dat, metdat$Group, sim.function = "vegdist",
+                sim.method = "bray", p.adjust.m = "bonferroni",
+                reduce = NULL, perm = 100000)
+```
+
+### Bar plot composition
+
+```{r Install_PERMANOVA, warning=FALSE, message=FALSE}
+# install.packages("plyr")
+library("plyr")
+```
+
+```{r Bar, warning=FALSE, message=FALSE}
+# https://github.com/joey711/phyloseq/issues/901
+
+## (3A) Merge the replicate samples for each Group
+physeq.a.group = merge_samples(physeq.a, "Group") # Sum between replicate samples
+
+# (3B) repair factors in the sample metadata
+sample_data(physeq.a.group)$Group <- levels(sample_data(physeq.a)$Group)[get_variable(physeq.a.group, "Group")]
+sample_data(physeq.a.group)$Soil <- levels(sample_data(physeq.a)$Soil)[get_variable(physeq.a.group, "Soil")]
+
+# Filter taxa with mean abundance > 0.1
+physeq2 = filter_taxa(physeq.a.group, function(x) mean(x) > 0.1, TRUE)
+
+# Transform sample counts to relative abundances
+physeq3 = transform_sample_counts(physeq2, function(x) x / sum(x))
+
+# Aggregate taxa at the Phylum level
+glom <- tax_glom(physeq3, taxrank = 'Phylum')
+
+# Convert the aggregated phyloseq object to a dataframe
+data <- psmelt(glom)
+# Convert Phylum column to character
+data$Phylum <- as.character(data$Phylum)
+
+# Rename phyla with abundance < 1% to "< 1% abund."
+data$Phylum[data$Abundance < 0.01] <- "< 1% abund."
+
+# Calculate medians of abundance for each Phylum
+medians <- ddply(data, ~Phylum, function(x) c(median = median(x$Abundance)))
+
+# Extract phyla with median abundance <= 0.01
+remainder <- medians[medians$median <= 0.01, ]$Phylum
+
+# Rename selected phyla to "Phyla < 1% abund."
+data[data$Phylum %in% remainder, ]$Phylum <- "Phyla < 1% abund."
+
+# Rename phyla with abundance < 1% to "Phyla < 1% abund."
+data$Phylum[data$Abundance < 0.01] <- "Phyla < 1% abund."
+
+# Plot the data with condensed phyla categories
+p <- ggplot(data = data, aes(x = Sample, y = Abundance, fill = Phylum))
+p + geom_bar(aes(), stat = "identity", position = "stack") +
+  scale_fill_manual(values = c("darkblue", "darkgoldenrod1", "darkseagreen", "darkorchid", "darkolivegreen1", "lightskyblue", "darkgreen", "deeppink", "khaki2", "firebrick", "brown1", "darkorange1", "cyan1", "royalblue4", "darksalmon", "darkblue", "royalblue4", "dodgerblue3", "steelblue1", "lightskyblue", "darkseagreen", "darkgoldenrod1", "darkseagreen", "darkorchid", "darkolivegreen1", "brown1", "darkorange1", "cyan1", "darkgrey")) +   theme_classic() +   
+  theme(text = element_text(size=15, colour = "black"), 
+        axis.ticks = element_line(colour = "black", size = 1.25),
+        axis.line = element_line(colour = 'black', size = 1.25),
+        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.title.y = element_text(color="black", size=15,face="bold"), legend.position = "right") # + guides(fill = guide_legend(nrow = 4))
+```
+
+
+### Plotting the top 10 taxa at family level
+
+```{r top10, warning=FALSE, message=FALSE}
+
+## Transform normalised ASVs to proportions 
+proportions = transform_sample_counts(physeq.a.group, function(x) 100 * x/sum(x))
+
+##  
+Top30ASVs = names(sort(taxa_sums(proportions), TRUE)[1:13])
+Taxtab30 = cbind(tax_table(proportions), Family30 = NA)
+Taxtab30[Top30ASVs, "Family30"] <- as(tax_table(proportions)[Top30ASVs, "Family"], "character")
+tax_table(proportions) <- tax_table(Taxtab30)
+
+Rgsm30 = prune_taxa(Top30ASVs, proportions)
+
+# plotting
+title = "Top 10 - Family level"
+plot_bar(Rgsm30, "Group", fill = "Family", title = title) + 
+  coord_flip() + 
+  ylab("Percentage of Sequences") + ylim(0, 50) +  theme_classic() +   
+  theme(text = element_text(size=15, colour = "black"), 
+        axis.ticks = element_line(colour = "black", size = 1.25),
+        axis.line = element_line(colour = 'black', size = 1.25),
+        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.title.y = element_text(color="black", size=15,face="bold"), 
+        legend.position = "right", 
+        legend.text = element_text(size = 9.5), 
+        legend.key.height= unit(0.45, 'cm'),
+        legend.key.width= unit(0.45, 'cm')
+        )
+
+# Clean up by removing unnecessary objects
+# rm(proportions, Top30ASVs, Taxtab30, Rgsm30, title)
+```
+### Upset plot using UpsetR
+
+When it comes to representing sets visually, the go-to option is usually a Venn diagram. These diagrams work well when dealing with up to five sets, providing a clear visualisation. However, as the dataset expands, such as when dealing with five sets, deriving the desired insights from the diagram becomes more complex. As a result, considering an UpSet graph for data visualisation becomes an appealing choice. UpSet graphs offer a more streamlined way to display intersections and complements, particularly when dealing with larger datasets or multiple sets. This option ensures a more intuitive and informative representation of the data.
+
+```{r install UpSetR, warning=FALSE, message=FALSE}
+library("UpSetR")
+library("reshape2")
+library("plyr")
+library("dplyr")
+# BiocManager::install("microbiome")
+library("microbiome")
+```
+
+```{r UpSetR, warning=FALSE, message=FALSE}
+# Aggregate taxa at the genus level
+B <- aggregate_taxa(physeq.a.group, "Genus", verbose = TRUE)
+# Remove undesired genera
+# B2 <- subset_taxa(B, !get("Genus") %in% c("uncultured", "Unknown"))
+
+# Remove unwanted taxon names
+taxa_to_remove <- c("uncultured", "Unknown")
+B2 <- subset_taxa(B, !get("Genus") %in% taxa_to_remove)
+
+# Extract relevant data from the phyloseq object
+sample_data <- sample_data(B2)
+otu_table <- otu_table(B2)
+abundance <- as.vector(otu_table)
+
+# Create a tibble with the extracted data
+D <- tibble(
+  Sample = rep(sample_data$Group, each = nrow(otu_table)),
+  ASV = rep(rownames(otu_table), times = ncol(otu_table)),
+  Abundance = abundance
+) %>%
+  group_by(Sample) %>%
+  mutate(rank = rank(desc(Abundance))) %>%
+   filter(Abundance > 0) %>%
+  ungroup() %>%
+  select(Sample, Abundance, ASV)
+
+# Remove the Abundance column
+D$Abundance <- NULL
+
+# Rename the second column to "ASV"
+names(D)[2] <- "ASV"
+
+# Convert data from long to wide format
+E <- dcast(D, ASV ~ Sample)
+
+# Define a binary function
+binary_fun <- function(x) {
+  x[is.na(x)] <- 0
+  ifelse(x > 0, 1, 0)
+}
+
+# Apply the binary function to columns 2 to 10
+temp_df <- apply(E[2:10], 2, binary_fun)
+temp_df <- as.data.frame(temp_df)
+
+# Create an UpSet plot
+upset_plot <- upset(temp_df, sets = colnames(temp_df), sets.bar.color = "#56B4E9",
+                    order.by = "freq", empty.intersections = "on")
+
+# Print the UpSet plot
+print(upset_plot)
+```
+
+```{r fungi, warning=FALSE, message=FALSE}
+# Plotting for the abundance of one specific fungi
+# Subset the taxa to Genus from physeq.wheat 
+physeq.a.genus <- subset_taxa(physeq.a, Genus == "Cladosporium")
+
+# Calculate the total abundance of Cladosporium for each sample
+meta = physeq.a.genus@sam_data
+otudf = as.data.frame(t(as.data.frame(physeq.a.genus@otu_table)))
+meta$Cladosporium = rowSums(otudf)
+
+# Plot a graph of the abundance of Cladosporium for each sample grouped by Group:
+ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
+                                 "WH.CY.BU","WH.CY.YO",
+                                 "WH.SC.HE","WH.SC.SH",
+                                 "WH.SL.AN","WH.SL.BE",
+                                 "WH.SL.SH")),
+       aes(x = Group, y = Cladosporium,  colour = interaction(Group))) +
+  geom_point(alpha = 1, position = "jitter", size = 4) + 
+  geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
+  theme_classic() +   
+  theme(text = element_text(size=15, colour = "black"), 
+        axis.ticks = element_line(colour = "black", size = 1.25),
+        axis.line = element_line(colour = 'black', size = 1.25),
+        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.title.y = element_text(color="black", size=15,face="bold"), legend.position = "none")
+```
+
+###Phylogenetic tree
+Phylogenetic trees are branching diagrams that show the evolutionary relationships between different species or other entities. They are constructed by comparing the organisms' DNA, proteins, or other features. The more similar the features, the more closely related the organisms are thought to be. It can be used to answer a variety of questions about evolution, such as how different species are related to each other, when different species diverged from each other, and what are the common ancestors of different species.
+```{r install.tree, warning=FALSE, message=FALSE}
+# Load required libraries
+library(phyloseq)   # For handling phylogenetic sequencing data
+library(ggtree)     # For tree visualisation
+library(scales)     # For scaling transformations
+```
+
+There could be an error message and it could be ignored (https://github.com/YuLab-SMU/tidytree/issues/10)
+
+```{r tree, warning=FALSE, message=FALSE}
+# Load the GlobalPatterns dataset and prune taxa
+GP <- prune_taxa(taxa_sums(physeq.a) > 0, physeq.a)  # Remove taxa with zero sums
+GP.chl <- subset_taxa(GP, Genus == "Fusarium")   # Subset data based on Phylum value
+
+
+# Create a ggtree plot
+p <- ggtree(GP.chl, ladderize = FALSE) +
+  geom_text2(aes(subset = !isTip, label = label), hjust = -0.3, size = 3.5) +
+  geom_tiplab(aes(label = Species), as_ylab=TRUE) +
+  geom_point(aes(x = x + hjust, color = Group, 
+                 shape = Group, size = Abundance), na.rm = TRUE) +
+  scale_size_continuous(trans = log_trans(2)) +
+  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) + # Set custom
+  # theme_classic() +   
+  theme(text = element_text(size=15, colour = "black"), 
+        axis.ticks = element_line(colour = "black", size = 1.25),
+        axis.line = element_line(colour = 'black', size = 1.25),
+        # axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 2.5),
+        axis.title.y = element_text(color="black", size=2.5,face="bold"), legend.osition = "top")
+
+# Print the ggtree plot
+print(p)
+```
