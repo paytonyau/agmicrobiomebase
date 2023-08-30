@@ -9,10 +9,10 @@ library(qiime2R)
 
 # Convert qiime2 results to phyloseq format
 physeq <- qza_to_phyloseq(
-  features = "table_231_228_2_2-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
+  features = "16s/GreenGenes_13_8/428_228_220_table_gg-13-8-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
   # tree = "inst/artifacts/2020.2_moving-pictures/rooted-tree.qza",
-  taxonomy = "taxonomy_231_228_2_2.qza",
-  metadata = "meta-table_1-4.txt"
+  taxonomy = "16s/GreenGenes_13_8/428_228_220_taxonomy_gg-13-8.qza",
+  metadata = "16s/meta-table.txt"
 )
 physeq ## confirm the object
 

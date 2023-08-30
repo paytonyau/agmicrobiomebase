@@ -206,7 +206,32 @@ p + geom_bar(aes(), stat = "identity", position = "stack") +
         axis.title.y = element_text(color="black", size=15,face="bold"), legend.position = "right") # + guides(fill = guide_legend(nrow = 4))
 ```
 
+##### Number of taxa in groups
+```{Num, warning=FALSE, message=FALSE}
 
+AyBCode <- merge_samples(physeq.a, "Group", fun = sum)
+physeq = AyBCode
+
+
+gentab_levels <- list()
+observationThreshold <- 1
+
+for (level in c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")) {
+  genfac <- factor(tax_table(physeq)[, level])
+  gentab <- apply(otu_table(physeq), MARGIN = 1, function(x) {
+    tapply(x, INDEX = genfac, FUN = sum, na.rm = TRUE, simplify = TRUE)
+  })
+  
+  level_counts <- apply(gentab > observationThreshold, 2, sum)
+  BB <- as.data.frame(level_counts)
+  BB$name <- row.names(BB)
+  # Add the result to the gentab_levels list
+  gentab_levels[[level]] <- BB
+}
+
+require(tidyverse);
+B <- reduce(gentab_levels, full_join, by = "name");
+```
 ### Plotting the top 10 taxa at family level
 
 ```{r top10, warning=FALSE, message=FALSE}
