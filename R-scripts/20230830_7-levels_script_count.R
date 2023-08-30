@@ -1,48 +1,98 @@
-# https://github.com/joey711/phyloseq/issues/337#issuecomment-42254256
-
 # R version 4.2.0
 ### Convert qiime2 results to phyloseq format
-if (!requireNamespace("devtools", quietly = TRUE)){install.packages("devtools")}
-devtools::install_github("jbisanz/qiime2R") # current version is 0.99.20
 
-library(qiime2R)
 
-# Convert qiime2 results to phyloseq format
-physeq <- qza_to_phyloseq(
-  features = "16s/GreenGenes_13_8/428_228_220_table_gg-13-8-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
-  # tree = "inst/artifacts/2020.2_moving-pictures/rooted-tree.qza",
-  taxonomy = "16s/GreenGenes_13_8/428_228_220_taxonomy_gg-13-8.qza",
-  metadata = "16s/meta-table.txt"
-)
-physeq ## confirm the object
-
-## Subset the data
-sample.remove <- c("SU.SC.SH.4", "SU.CY.YO.5", 
-                   "BE.SC.SH.5", "BE.SL.AN.3",
-                   "OA.SL.SH.4","OA.SL.BE.2",
-                   "OR.SL.SH.1", "OR.SL.SH.2", 
-                   "WH.SC.SH.4",
-                   "BA.SL.BE.3.RE", "CO.CL.YO.5.RE", "OA.SL.AN.4.RE", 
-                   "CO.CY.YO.5.RE2", #
-                   "p.ve.1", "p.ve.2","p.ve.3", "p.ve.4", "p.ve.5",
-                   "n.ve.ext.1", "n.ve.ext.2", "n.ve.ITS.1",
-                   "n.ve.1","n.ve.2","n.ve.3","n.ve.4", "n.ve.5")
-physeq.a <- subset_samples(physeq,  !(id %in% sample.remove)) # Durie data
-
-# Visualise data
-# Script adapted from https://vaulot.github.io/tutorials/Phyloseq_tutorial.html
+##### Install required packages
+# if (!requireNamespace("devtools", quietly = TRUE)){install.packages("devtools")}
+# devtools::install_github("jbisanz/qiime2R") # current version is 0.99.20
+library("qiime2R")
 
 library("phyloseq")
-library("ggplot2")
-library("ggpubr")
+library("dplyr")
 
-sample_names(physeq)
-rank_names(physeq) # "Kingdom" "Phylum" "Class" "Order" "Family" "Genus" "Species"
+#################################################
+# Define the taxonomic levels
+genus_levels <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
 
-# Script adopted from https://vaulot.github.io/tutorials/Phyloseq_tutorial.html
+# Define the datasets and paths
+dataset_info <- list(
+  list(  # GreenGenes 1
+    features = "[Qiime2]GreenGenes_13_8/428_228_220_table_gg-13-8-with-phyla-no-mitochondria-no-chloroplast.qza",
+    taxonomy = "[Qiime2]GreenGenes_13_8/428_228_220_taxonomy_gg-13-8.qza",
+    output_path = "[Qiime2]GreenGenes_13_8/level_counts_by_group.csv"
+  ),
+  list(  # GreenGenes2
+    features = "[Qiime2]GreenGenes2_2022_10/428_228_220_table_gg_2022_10-with-phyla-no-mitochondria-no-chloroplast.qza",
+    taxonomy = "[Qiime2]GreenGenes2_2022_10/428_228_220_taxonomy_gg_2022_10.qza",
+    output_path = "[Qiime2]GreenGenes2_2022_10/level_counts_by_group.csv"
+  ),
+  list(  # Silva138
+    features = "[Qiime2]Silva_138/428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza",
+    taxonomy = "[Qiime2]Silva_138/428_228_220_taxonomy_silva138.qza",
+    output_path = "[Qiime2]Silva_138/level_counts_by_group.csv"
+  )
+)
+
+# Loop through each dataset
+for (dataset in dataset_info) {
+  # Convert qiime2 results to phyloseq format
+  physeq <- qza_to_phyloseq(
+    features = dataset$features,
+    taxonomy = dataset$taxonomy,
+    metadata = "meta-table.txt"
+  )
+  
+  physeq.sum <- subset_samples(physeq, Analysis == "Include")
+  physeq.sum <- merge_samples(physeq.sum, "Type", fun = sum)
+  
+  # Create an empty list to store genus-level abundance data for each taxonomic level
+  gentab_levels <- list()
+  
+  # Set observation threshold
+  observationThreshold <- 1
+  
+  # loop through all the taxonomic levels
+  for (level in genus_levels) {
+    
+    # create a factor variable for each level
+    genfac <- factor(tax_table(physeq.sum)[, level])
+    
+    # calculate the abundance of each genus within each sample
+    gentab <- apply(otu_table(physeq.sum), MARGIN = 1, function(x) {
+      tapply(x, INDEX = genfac, FUN = sum, na.rm = TRUE, simplify = TRUE)
+    })
+    
+    # calculate the number of samples in which each genus is observed above the threshold
+    level_counts <- apply(gentab > observationThreshold, 2, sum)
+    
+    # create a data frame of level counts with genus names as row names
+    BB <- as.data.frame(level_counts)
+    BB$name <- row.names(BB)
+    
+    # add the data frame to the gentab_levels list
+    gentab_levels[[level]] <- BB
+  }
+  
+  # Combine all level counts data frames into one data frame
+  B2 <- gentab_levels %>% reduce(full_join, by = "name")
+  
+  # Set row names and column names
+  row.names(B2) <- B2$name
+  B2$name <- NULL
+  colnames(B2)[1:7] <- genus_levels
+  
+  # Write the data frame to a file
+  write.csv(B2, file = dataset$output_path, row.names = TRUE)
+  
+  # Clean up by removing unnecessary objects
+  rm(gentab_levels, observationThreshold, BB, B2)
+}
+
+###########################################################
 
 
-##############################
+
+############################################## individal samples ######################
 # Create a factor corresponding to the Species
 genfac = factor(tax_table(physeq)[, "Species"])
 
@@ -83,6 +133,7 @@ observationThreshold = 1
 
 Family = apply(gentab > observationThreshold, 2, sum)
 BB$Family = Family
+
 ###################
 # Create a factor corresponding to the Order
 genfac = factor(tax_table(physeq)[, "Order"])
@@ -141,32 +192,7 @@ BB$Kingdom = Kingdom
 
 write.csv(BB, "7-levels_samples_stat.csv")
 
-########################## in Crop types #########
-AyBCode <- merge_samples(physeq.a, "Group", fun = sum)
-physeq = AyBCode
-##############################
 
-gentab_levels <- list()
-observationThreshold <- 1
-
-for (level in c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")) {
-  genfac <- factor(tax_table(physeq)[, level])
-  gentab <- apply(otu_table(physeq), MARGIN = 1, function(x) {
-    tapply(x, INDEX = genfac, FUN = sum, na.rm = TRUE, simplify = TRUE)
-  })
-  
-  level_counts <- apply(gentab > observationThreshold, 2, sum)
-  BB <- as.data.frame(level_counts)
-  BB$name <- row.names(BB)
-  # Add the result to the gentab_levels list
-  gentab_levels[[level]] <- BB
-}
-
-require(tidyverse);
-B <- reduce(gentab_levels, full_join, by = "name");
-
-# Write the data frame to a file
-write.csv(B, file = "level_counts_by_group.csv", row.names = FALSE)
 
 
 #####################
