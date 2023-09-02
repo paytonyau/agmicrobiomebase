@@ -3,23 +3,21 @@ title: "The UK Crop Microbiome Cryobank"
 author: "Payton Yau"
 date: "2023-08-10"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 # The UK Crop Microbiome Cryobank
 
-The UK Crop Microbiome Cryobank (UK-CMCB) project integrates genomic (DNA) data with a cryobank collection of samples for the soil microbiomes of the UK major crop plant systems. Microbiomes are all the microbes present in any one ecosystem. For this project the microbiomes are from the rhizosphere (the soil surrounding the crop plant roots) and from bulk soil (soil outside the rhizosphere). A beneficial microbiome results in a healthy plant and can lead to improved crop yield and improved crop quality.
+The UK Crop Microbiome Cryobank integrates genomic (DNA) data with a cryobank collection of samples for the soil microbiomes of the UK major crop plant systems. For this project, the microbiomes are from the rhizosphere (the soil surrounding the crop plant roots) and from bulk soil (soil outside the rhizosphere). The Cryobank  provides a facility for researchers to source data and samples, including cryo-preserved microbial material, as well as genomic and metagenomic sequences from different soil microbiome environments. 
 
-The UK-CMCB will provide a facility for researchers to source data and samples, including living microbial material, as well as genomic and metagenomic sequences from different soil microbiome environments. Specifically the project will produce a microbiome resource comprising
-
-An integrated cryopreserved collection of samples (rhizophere and bulk soil, bacterial and fungal isolates and DNA) from crop plant systems (initially barley, oats, oil seed rape, sugar beet and wheat) An open access AgMicrobiomeBase of microbiome data and associated meta-data linked to current public resources such as MGnify.
-
-In various programming languages, including R, features are enhanced through external packages. These packages encompass a range of functions, datasets, and documentation that can be imported into R to extend its capabilities. External R packages are available from diverse sources such as CRAN (The Comprehensive R Archive Network), Bioconductor, GitHub, and more. The process of acquiring packages varies. After installation, a package must be loaded into the R session using the **library()** function before its functions can be utilised.
+An integrated cryopreserved collection of samples (rhizophere and bulk soil, bacterial and fungal isolates and DNA) from crop plant systems (barley, oats, oil seed rape, sugar beet and wheat) An open access AgMicrobiomeBase of microbiome data and associated meta-data linked to current public resources such as MGnify.
 
 #### Qiime2 to Phyloseq
 
 Qiime2 is a powerful tool for microbial community analysis which we used for sequencing analysis; Phyloseq is a package in R that provides a flexible and comprehensive framework for the analysis of high-throughput sequencing data. To convert Qiime2 data to Phyloseq, users can use an external package called Qiime2R for the conversion. Qiime2R facilitates the transformation of Qiime2 data structures into phyloseq data structures within the R programming environment.
+
+In various programming languages, including R, features are enhanced through external packages. These packages encompass a range of functions, datasets, and documentation that can be imported into R to extend its capabilities. External R packages are available from diverse sources such as CRAN (The Comprehensive R Archive Network), Bioconductor, GitHub, and more. The process of acquiring packages varies. After installation, a package must be loaded into the R session using the **library()** function before its functions can be utilised.
 
 Once the data is imported, users can manipulate, analyse, and visualise the data using the various functions available in Phyloseq. This conversion allows users to take advantage of the many analysis tools available in R, such as ggplot2 for data visualisation, dplyr for data manipulation, and vegan for ecological community analysis.
 
@@ -29,7 +27,7 @@ Once the data is imported, users can manipulate, analyse, and visualise the data
 # devtools::install_github("jbisanz/qiime2R")
 library("qiime2R")
 
-# Download phyloseq from CRAN
+# Download phyloseq from Bioconductor
 # if (!require("BiocManager", quietly = TRUE))
 #   install.packages("BiocManager")
 # BiocManager::install("phyloseq")
@@ -39,9 +37,9 @@ library("phyloseq")
 ```{r qiime2R, warning=FALSE, message=FALSE}
 # Convert qiime2 results to phyloseq format
 physeq <- qza_to_phyloseq(
-  features = "table_231_228_2_2-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
-  taxonomy = "taxonomy_231_228_2_2.qza",
-  metadata = "meta-table_1-4.txt"
+  features = "~/GitHub/agmicrobiomebase/16s/[Qiime2]Silva_138/428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
+  taxonomy = "~/GitHub/agmicrobiomebase/16s/[Qiime2]Silva_138/428_228_220_taxonomy_silva138.qza",
+  metadata = "~/GitHub/agmicrobiomebase/16s/meta-table.txt"
   #, tree = "rooted-tree.qza"
 )
 
@@ -52,39 +50,29 @@ physeq ## confirm the object
 
 Removing unwanted samples before normalisation is a common step in microbiome data analysis pipelines. In many cases, some samples may fail during sequencing or quality control, while others may be controls or blanks that are not of interest. These samples can introduce noise and bias in downstream analyses if not removed.
 
-In this script, the unwanted samples are removed using the **`subset_samples`** function from the **`phyloseq`** package. This function subsets a **`phyloseq`** object by samples that meet a certain condition, in this case, those that have a certain type (e.g., not failed or control samples).
-
 By removing the unwanted samples before normalization, the remaining samples can be normalised based on their true biological variation, allowing for more accurate comparisons between samples.
 
 ```{r Remove, warning=FALSE, message=FALSE}
 # sample_names(physeq) 
 # rank_names(physeq) # "Kingdom" "Phylum" "Class" "Order" "Family" "Genus" "Species"
 
-## list of unwanted samples (including failed samples)
-sample.remove <- c("SU.SC.SH.4", "SU.CY.YO.5", "BE.SC.SH.5", "BE.SL.AN.3", # failed samples - 1
-                   "OA.SL.SH.4", "OA.SL.BE.2", "WH.SC.SH.4", # failed samples - 2
-                   "BA.SL.BE.3.RE", "CO.CL.YO.5.RE", "OA.SL.AN.4.RE", # sample controls
-                   "OR.SL.SH.1", "OR.SL.SH.2", # failed samples from plate 4
-                   "p.ve.1", "p.ve.2","p.ve.3", "p.ve.4", # positive controls 
-                   "n.ve.1","n.ve.2","n.ve.3","n.ve.4",# negative controls 1 
-                   "n.ve.ext.1", "n.ve.ext.2", "n.ve.ITS.1" # negative controls 2 
-)
-
-## Subset the data
-physeq.ori <- subset_samples(physeq,!(id %in% sample.remove))
+## unwanted samples removel (including failed samples)
+  physeq.ori <- subset_samples(physeq, Analysis == "Include")
 
 ## remove object
-rm(sample.remove)
+rm(physeq)
 ```
 
 #### normalisation using ConQUR
 
-Constrained Quantile Normalisation (ConQUR) <https://www.nature.com/articles/s41467-022-33071-9> is a normalization technique commonly used in the analysis of high-throughput sequencing data, particularly in microbiome studies. It is a type of **quantile normalisation** approach that preserves the relative abundances of taxa between samples while simultaneously removing systematic technical variations that can arise due to differences in sequencing depth, PCR amplification bias, or other factors. ConQUR uses kernel density estimation to model the distribution of taxon abundances across all samples, and then constrains the normalisation process to maintain the relative position of each taxon within that distribution.
+Constrained Quantile Normalisation (ConQUR) <https://www.nature.com/articles/s41467-022-33071-9> is a normalisation technique used in high-throughput sequencing data, particularly in microbiome studies. It is a type of **quantile normalisation** approach that preserves the relative abundances of taxa between samples while simultaneously removing systematic technical variations that can arise due to differences in sequencing depth, PCR amplification bias, or other factors. ConQUR uses kernel density estimation to model the distribution of taxon abundances across all samples, and then constrains the normalisation process to maintain the relative position of each taxon within that distribution.
 
 ```{r ConQuR_install, warning=FALSE, message=FALSE}
 # devtools::install_github("wdl2459/ConQuR")
 library(ConQuR)
 
+# Download phyloseq from CRAN
+#   install.packages("doParallel")
 library(doParallel)
 ```
 
@@ -422,7 +410,6 @@ library("speedyseq")
 
 library("UpSetR")
 library("plyr")
-library("dplyr")
 library("reshape2")
 ```
 

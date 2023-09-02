@@ -9,7 +9,7 @@ library("qiime2R")
 
 library("phyloseq")
 library("dplyr")
-
+library("tidyverse")
 #################################################
 # Define the taxonomic levels
 genus_levels <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
@@ -19,17 +19,17 @@ dataset_info <- list(
   list(  # GreenGenes 1
     features = "[Qiime2]GreenGenes_13_8/428_228_220_table_gg-13-8-with-phyla-no-mitochondria-no-chloroplast.qza",
     taxonomy = "[Qiime2]GreenGenes_13_8/428_228_220_taxonomy_gg-13-8.qza",
-    output_path = "[Qiime2]GreenGenes_13_8/level_counts_by_group.csv"
+    output_path = "[Qiime2]GreenGenes_13_8/level_counts_by_group_gg1.csv"
   ),
   list(  # GreenGenes2
     features = "[Qiime2]GreenGenes2_2022_10/428_228_220_table_gg_2022_10-with-phyla-no-mitochondria-no-chloroplast.qza",
     taxonomy = "[Qiime2]GreenGenes2_2022_10/428_228_220_taxonomy_gg_2022_10.qza",
-    output_path = "[Qiime2]GreenGenes2_2022_10/level_counts_by_group.csv"
+    output_path = "[Qiime2]GreenGenes2_2022_10/level_counts_by_group_gg2.csv"
   ),
   list(  # Silva138
     features = "[Qiime2]Silva_138/428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza",
     taxonomy = "[Qiime2]Silva_138/428_228_220_taxonomy_silva138.qza",
-    output_path = "[Qiime2]Silva_138/level_counts_by_group.csv"
+    output_path = "[Qiime2]Silva_138/level_counts_by_group_silva138.csv"
   )
 )
 

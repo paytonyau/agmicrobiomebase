@@ -25,15 +25,17 @@ library("qiime2R")
 #   install.packages("BiocManager")
 # BiocManager::install("phyloseq")
 library("phyloseq")
+
+library("tidyverse")
 ```
 
 ```{r qiime2R, warning=FALSE, message=FALSE}
 # Convert qiime2 to phyloseq format
 physeq.a <- qza_to_phyloseq(
-  features = "table-its-fungi-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
-  tree = "phylogeny-align-to-tree-mafft-fasttree/rooted_tree.qza",
-  taxonomy = "taxonomy-fungi.qza",
-  metadata = "meta-table.txt"
+  features = "ITS/table-its-fungi-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
+  tree = "ITS/phylogeny-align-to-tree-mafft-fasttree/rooted_tree.qza",
+  taxonomy = "ITS/taxonomy-fungi.qza",
+  metadata = "ITS/meta-table.txt"
 )
 physeq.a ## confirm the object
 ```
@@ -148,9 +150,9 @@ pairwise.adonis(dat, metdat$Group, sim.function = "vegdist",
                 reduce = NULL, perm = 100000)
 ```
 
-### Bar plot composition
-
-```{r Install_PERMANOVA, warning=FALSE, message=FALSE}
+### Bar plot - relative abundance
+Bar plots illustrating relative abundance in microbiome enable to visually represent the proportions of different microbial taxa within a given sample. Each bar corresponds to a specific taxonomic group, with its height indicating the relative abundance of that group in the microbiome. 
+```{r Install Bar, warning=FALSE, message=FALSE}
 # install.packages("plyr")
 library("plyr")
 ```
@@ -207,33 +209,56 @@ p + geom_bar(aes(), stat = "identity", position = "stack") +
 ```
 
 ##### Number of taxa in groups
-```{Num, warning=FALSE, message=FALSE}
+Examining the cumulative count of taxa within a particular taxonomic group for each distinct subgroup involves the summation of the total number of taxa within that group while eliminating any overlapping taxa based on their names within individual subgroups. This process aids in comprehending the dynamics of microbiome populations.
+```{R install_taxa, warning=FALSE, message=FALSE}
+library("dplyr")
+```
 
-AyBCode <- merge_samples(physeq.a, "Group", fun = sum)
-physeq = AyBCode
-
-
+```{R num_taxa, warning=FALSE, message=FALSE}
+physeq <- merge_samples(physeq.a, "Group", fun = sum)
 gentab_levels <- list()
 observationThreshold <- 1
 
-for (level in c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")) {
-  genfac <- factor(tax_table(physeq)[, level])
-  gentab <- apply(otu_table(physeq), MARGIN = 1, function(x) {
-    tapply(x, INDEX = genfac, FUN = sum, na.rm = TRUE, simplify = TRUE)
-  })
+# Define the taxonomic levels
+genus_levels <- c("Phylum", "Class", "Order", "Family", "Genus", "Species")
+
+# Something wrong with Kingdom Level, removed from the analysis 
+# loop through all the taxonomic levels
+  for (level in genus_levels) {
+    
+    # create a factor variable for each level
+    genfac <- factor(tax_table(physeq)[, level])
+    
+    # calculate the abundance of each genus within each sample
+    gentab <- apply(otu_table(physeq), MARGIN = 1, function(x) {
+      tapply(x, INDEX = genfac, FUN = sum, na.rm = TRUE, simplify = TRUE)
+    })
+    
+    # calculate the number of samples in which each genus is observed above the threshold
+    level_counts <- apply(gentab > observationThreshold, 2, sum)
+    
+    # create a data frame of level counts with genus names as row names
+    BB <- as.data.frame(level_counts)
+    BB$name <- row.names(BB)
+    
+    # add the data frame to the gentab_levels list
+    gentab_levels[[level]] <- BB
+  }
+
+# Combine all level counts data frames into one data frame
+B2 <- gentab_levels %>% reduce(full_join, by = "name")
   
-  level_counts <- apply(gentab > observationThreshold, 2, sum)
-  BB <- as.data.frame(level_counts)
-  BB$name <- row.names(BB)
-  # Add the result to the gentab_levels list
-  gentab_levels[[level]] <- BB
-}
+# Set row names and column names
+row.names(B2) <- B2$name
+B2$name <- NULL
+colnames(B2)[1:6] <- genus_levels
 
-require(tidyverse);
-B <- reduce(gentab_levels, full_join, by = "name");
+print(B2)
+# write.csv(B2, file = "ITS/level_counts_by_group.csv", row.names = TRUE)
 ```
-### Plotting the top 10 taxa at family level
 
+### Plotting the top 10 taxa at family level
+Generating a visual representation through the plotting of the top 10 taxa at the family level offers a concise overview of the predominant microbial groups within a dataset. This approach is instrumental in identifying and emphasizing significant contributors to the structure and function of microbial communities across diverse groups or conditions.
 ```{r top10, warning=FALSE, message=FALSE}
 
 ## Transform normalised ASVs to proportions 
@@ -265,7 +290,7 @@ plot_bar(Rgsm30, "Group", fill = "Family", title = title) +
         )
 
 # Clean up by removing unnecessary objects
-# rm(proportions, Top30ASVs, Taxtab30, Rgsm30, title)
+rm(proportions, Top30ASVs, Taxtab30, Rgsm30, title)
 ```
 ### Upset plot using UpsetR
 
@@ -337,20 +362,20 @@ print(upset_plot)
 ```{r fungi, warning=FALSE, message=FALSE}
 # Plotting for the abundance of one specific fungi
 # Subset the taxa to Genus from physeq.wheat 
-physeq.a.genus <- subset_taxa(physeq.a, Genus == "Cladosporium")
+physeq.a.genus <- subset_taxa(physeq.a, Genus == "Fusarium")
 
-# Calculate the total abundance of Cladosporium for each sample
+# Calculate the total abundance of Fusarium for each sample
 meta = physeq.a.genus@sam_data
 otudf = as.data.frame(t(as.data.frame(physeq.a.genus@otu_table)))
-meta$Cladosporium = rowSums(otudf)
+meta$Fusarium = rowSums(otudf)
 
-# Plot a graph of the abundance of Cladosporium for each sample grouped by Group:
+# Plot a graph of the abundance of Fusarium for each sample grouped by Group:
 ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
                                  "WH.CY.BU","WH.CY.YO",
                                  "WH.SC.HE","WH.SC.SH",
                                  "WH.SL.AN","WH.SL.BE",
                                  "WH.SL.SH")),
-       aes(x = Group, y = Cladosporium,  colour = interaction(Group))) +
+       aes(x = Group, y = Fusarium,  colour = interaction(Group))) +
   geom_point(alpha = 1, position = "jitter", size = 4) + 
   geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
   theme_classic() +   
@@ -393,7 +418,7 @@ p <- ggtree(GP.chl, ladderize = FALSE) +
         axis.line = element_line(colour = 'black', size = 1.25),
         # axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
         axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 2.5),
-        axis.title.y = element_text(color="black", size=2.5,face="bold"), legend.osition = "top")
+        axis.title.y = element_text(color="black", size=2.5,face="bold"), legend.position = "top")
 
 # Print the ggtree plot
 print(p)
