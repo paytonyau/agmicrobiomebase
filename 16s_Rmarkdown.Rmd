@@ -116,22 +116,22 @@ library("tidyverse")
 ```
 
 ```{r Subgroupping, warning=FALSE, message=FALSE}
-## (1) Sub-samples for Wheat and Bulk Soil groups for the comparisons
-physeq.W.B <- physeq.norm %>% subset_samples(Type %in% c("Wheat", "Bulksoil"))
+## (1) Sub-samples for Sugarbeet and Bulk Soil groups for the comparisons
+physeq.W.B <- physeq.norm %>% subset_samples(Type %in% c("Sugarbeet", "Bulksoil"))
 
-## (2) Subset the samples in the phyloseq object that belong to "Wheat" 
+## (2) Subset the samples in the phyloseq object that belong to "Sugarbeet" 
 ## or other crops "Barley", "Beans", "Bulksoil", "Oats", "OilseedRape", "Sugarbeet"
-physeq.wheat <- subset_samples(physeq.norm, Type=="Wheat")
+physeq.Sugarbeet <- subset_samples(physeq.norm, Type=="Sugarbeet")
 
 ## (3A) Merge the replicate samples for each Group
-physeq.wheat.group = merge_samples(physeq.wheat, "Group") # Sum between replicate samples
+physeq.Sugarbeet.group = merge_samples(physeq.Sugarbeet, "Group") # Sum between replicate samples
 
 # (3B) repair factors in the sample metadata
-sample_data(physeq.wheat.group)$Group <- levels(sample_data(physeq.norm)$Group)[get_variable(physeq.wheat.group, "Group")]
-sample_data(physeq.wheat.group)$Soil <- levels(sample_data(physeq.norm)$Soil)[get_variable(physeq.wheat.group, "Soil")]
+sample_data(physeq.Sugarbeet.group)$Group <- levels(sample_data(physeq.norm)$Group)[get_variable(physeq.Sugarbeet.group, "Group")]
+sample_data(physeq.Sugarbeet.group)$Soil <- levels(sample_data(physeq.norm)$Soil)[get_variable(physeq.Sugarbeet.group, "Soil")]
 
 ## (4) Further subgroup for WH.CL.BO vs WH.CL.YO
-physeq.wheat.vs <- physeq.wheat %>% subset_samples(Group %in% c("WH.CL.BO", "WH.CL.YO"))
+physeq.Sugarbeet.vs <- physeq.Sugarbeet %>% subset_samples(Group %in% c("SU.CL.BO", "SU.CL.YO"))
 ```
 
 #### Bata diversity
@@ -206,8 +206,8 @@ Here, we pick Shannon as an example for the work
 # available measurements: "Observed" "Chao1" "ACE" "Shannon" "Simpson" "InvSimpson" "Fisher"
 # Calculate alpha diversity (Shannon) and store it in alpha.object
 alpha.object <- cbind(
-  x = sample_data(physeq.wheat),
-  y = estimate_richness(physeq.wheat, measures = 'Shannon')
+  x = sample_data(physeq.Sugarbeet),
+  y = estimate_richness(physeq.Sugarbeet, measures = 'Shannon')
 )
 
 # Create a plot for alpha diversity
@@ -251,10 +251,10 @@ genus_levels <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Spe
 for (level in genus_levels) {
   
   # create a factor variable for each level
-  genfac <- factor(tax_table(physeq.wheat.group)[, level])
+  genfac <- factor(tax_table(physeq.Sugarbeet.group)[, level])
   
   # calculate the abundance of each genus within each sample
-  gentab <- apply(otu_table(physeq.wheat.group), MARGIN = 1, function(x) {
+  gentab <- apply(otu_table(physeq.Sugarbeet.group), MARGIN = 1, function(x) {
     tapply(x, INDEX = genfac, FUN = sum, na.rm = TRUE, simplify = TRUE)
   })
   
@@ -284,21 +284,21 @@ print(B2)
 rm(gentab_levels, BB)
 ```
 
-#### Calculate the sum of ASV (Wheat)
+#### Calculate the sum of ASV (Sugarbeet)
 ```{r ASV_individual, warning=FALSE, message=FALSE}
 # Calculate the sum of ASVs across samples and create a data frame
-ASV <- sample_sums(physeq.wheat)
+ASV <- sample_sums(physeq.Sugarbeet)
 ASV <- as.data.frame(ASV)
-ASV$Wheat <- rownames(ASV)
+ASV$Sugarbeet <- rownames(ASV)
 
 # Remove the suffix from the ASV names
-new_names <- sub("-\\d+$", "", ASV$Wheat)
+new_names <- sub("-\\d+$", "", ASV$Sugarbeet)
 
 # Update the row names of the data frame
-ASV$Wheat <- new_names
+ASV$Sugarbeet <- new_names
 
 # Create a scatter plot with jittered points and overlaid boxplots
-ggplot(ASV, aes(x = Wheat, y = ASV,  colour = Wheat)) +
+ggplot(ASV, aes(x = Sugarbeet, y = ASV,  colour = Sugarbeet)) +
   geom_point(alpha = 1, position = "jitter", size = 4) + 
   geom_boxplot(alpha = 0, colour = "black", size = 0.8) + 
   theme_classic() + 
@@ -314,12 +314,12 @@ ggplot(ASV, aes(x = Wheat, y = ASV,  colour = Wheat)) +
 #### Plotting for the abundance of one specific bacteria
 
 ```{r Top100_4, warning=FALSE, message=FALSE}
-# Subset the taxa to Genus from physeq.wheat 
-physeq.wheat.genus <- subset_taxa(physeq.wheat, Genus == "Azospirillum")
+# Subset the taxa to Genus from physeq.Sugarbeet 
+physeq.Sugarbeet.genus <- subset_taxa(physeq.Sugarbeet, Genus == "Azospirillum")
 
 # Calculate the total abundance of Azospirillum for each sample
-meta = physeq.wheat.genus@sam_data
-otudf = as.data.frame(t(as.data.frame(physeq.wheat.genus@otu_table)))
+meta = physeq.Sugarbeet.genus@sam_data
+otudf = as.data.frame(t(as.data.frame(physeq.Sugarbeet.genus@otu_table)))
 meta$Azospirillum = rowSums(otudf)
 
 # Plot a graph of the abundance of Azospirillum for each sample grouped by Group:
@@ -340,14 +340,14 @@ ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
         axis.title.y = element_text(color="black", size=15,face="bold"), legend.position = "none")
 
 # Clean up by removing unnecessary objects
-rm(physeq.wheat.genus, meta, otudf)
+rm(physeq.Sugarbeet.genus, meta, otudf)
 ```
 
 ### Plotting the top 30 taxa at family level
 
 ```{r Top100_5, warning=FALSE, message=FALSE}
 ## Transform normalised ASVs to proportions 
-proportions = transform_sample_counts(physeq.wheat.group, function(x) 100 * x/sum(x))
+proportions = transform_sample_counts(physeq.Sugarbeet.group, function(x) 100 * x/sum(x))
 
 ##  
 Top30ASVs = names(sort(taxa_sums(proportions), TRUE)[1:71])
@@ -358,7 +358,7 @@ tax_table(proportions) <- tax_table(Taxtab30)
 Rgsm30 = prune_taxa(Top30ASVs, proportions)
 
 # plotting
-title = "Wheat - Top 30"
+title = "Sugarbeet - Top 30"
 plot_bar(Rgsm30, "Group", fill = "Family", title = title) + 
   coord_flip() + 
   ylab("Percentage of Sequences") + ylim(0, 30) +  theme_classic() +   
@@ -387,8 +387,8 @@ library("pairwiseAdonis")
 ```
 
 ```{r PERMANOVA, warning=FALSE, message=FALSE}
-metdat = as.data.frame(as.matrix(physeq.wheat@sam_data))
-dat = as.data.frame(t(as.data.frame(physeq.wheat@otu_table)))
+metdat = as.data.frame(as.matrix(physeq.Sugarbeet@sam_data))
+dat = as.data.frame(t(as.data.frame(physeq.Sugarbeet@otu_table)))
 pairwise.adonis(dat, metdat$Group, sim.function = "vegdist",
                 sim.method = "bray", p.adjust.m = "bonferroni",
                 reduce = NULL, perm = 10000)
@@ -415,7 +415,7 @@ library("reshape2")
 
 ```{r UpsetR, warning=FALSE, message=FALSE}
 # Aggregate taxa at the genus level
-B <- aggregate_taxa(physeq.wheat.group, "Genus", verbose = TRUE)
+B <- aggregate_taxa(physeq.Sugarbeet.group, "Genus", verbose = TRUE)
 
 # Remove undesired genera
 # B2 <- subset_taxa(B, !get("Genus") %in% c("uncultured", "Unknown"))
@@ -461,13 +461,13 @@ upset_plot <- upset(temp_df, sets = colnames(temp_df), sets.bar.color = "#56B4E9
 print(upset_plot)
 
 # Clean up by removing unnecessary objects
-# rm(B, B2, D, E, binary_fun, temp_df, upset_plot, physeq.wheat.group)
+# rm(B, B2, D, E, binary_fun, temp_df, upset_plot, physeq.Sugarbeet.group)
 ```
 
 ```{r phyloseq_plot_bar, warning=FALSE, message=FALSE}
 # https://github.com/joey711/phyloseq/issues/901
 # Filter taxa with mean abundance > 0.1
-physeq2 = filter_taxa(physeq.wheat.vs, function(x) mean(x) > 0.1, TRUE)
+physeq2 = filter_taxa(physeq.Sugarbeet.vs, function(x) mean(x) > 0.1, TRUE)
 
 # Transform sample counts to relative abundances
 physeq3 = transform_sample_counts(physeq2, function(x) x / sum(x))
@@ -521,7 +521,7 @@ library("microbiomeMarker")
 ```
 
 ```{r LEFSe, warning=FALSE, message=FALSE}
-lef_out <- run_lefse(physeq.wheat.vs, group = "Group", 
+lef_out <- run_lefse(physeq.Sugarbeet.vs, group = "Group", 
                      norm = "CPM", 
                      # taxa_rank = "Genus",
                      kw_cutoff = 0.01, lda_cutoff = 4)

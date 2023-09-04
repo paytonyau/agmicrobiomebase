@@ -89,10 +89,55 @@ for (dataset in dataset_info) {
 }
 
 ###########################################################
+# Load the reshape2 library
+library(reshape2)
+library(ggplot2)
+
+GreenGenes.1 = read.csv("[Qiime2]GreenGenes_13_8/level_counts_by_group.csv")[5,]
+GreenGenes.2 = read.csv("[Qiime2]GreenGenes2_2022_10/level_counts_by_group_gg2.csv")[5,]
+sliva.138 = read.csv("[Qiime2]Silva_138//level_counts_by_group.csv")[5,]
+
+combined_df <- rbind(GreenGenes.1, GreenGenes.2, sliva.138)
+combined_df$X <- c("GreenGenes.1", "GreenGenes.2", "sliva.138")
+
+data_long <- melt(combined_df, id.vars = "X", variable.name = "Dataset", value.name = "Count")
+
+colnames(data_long) = c("Database","Taxonomic.Level","Count")
+
+# Convert Taxonomic.Level to a factor and specify the desired order of the levels
+data_long$Taxonomic.Level <- factor(data_long$Taxonomic.Level,
+                               levels = c("Kingdom", "Phylum", "Class", "Order", 
+                                          "Family", "Genus", "Species"))
 
 
+# Plot the data as a line graph using ggplot
+# Open a new PDF graphics device
+pdf(file = "line_graph.pdf", width=8,height=5)
+ggplot(data_long, aes(x = Taxonomic.Level, y = Count, color = Database, group = Database)) +
+  geom_line() +
+  geom_point(size = 4) +
+  scale_color_manual(values = c("sliva.138" = "red", 
+                                "GreenGenes.2" = "blue", 
+                                "GreenGenes.1" = "green")) +
+  labs(x = "Taxonomic Level", y = "Count") +
+  theme_classic() + 
+  theme(
+    text = element_text(size = 19, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 14, face = "bold"), 
+    axis.title.x = element_text(color = "black", size = 14, face = "bold")
+  ) +
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  scale_y_continuous(breaks=seq(0,1500,by=250))
 
-############################################## individal samples ######################
+
+# Close the PDF device and save the plot to a file
+dev.off()  
+
+############################################## individual samples ######################
 # Create a factor corresponding to the Species
 genfac = factor(tax_table(physeq)[, "Species"])
 
