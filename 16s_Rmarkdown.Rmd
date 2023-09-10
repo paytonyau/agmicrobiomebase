@@ -57,10 +57,88 @@ By removing the unwanted samples before normalization, the remaining samples can
 # rank_names(physeq) # "Kingdom" "Phylum" "Class" "Order" "Family" "Genus" "Species"
 
 ## unwanted samples removel (including failed samples)
-  physeq.ori <- subset_samples(physeq, Analysis == "Include")
+physeq.ori <- subset_samples(physeq, Analysis == "Include")
 
 ## remove object
 rm(physeq)
+```
+
+#### Bata diversity
+
+Beta diversity is a measure of the differences or similarities between two or more microbial communities or samples. It quantifies the degree of variation in microbial composition among different samples. Beta diversity analysis can help identify patterns in the distribution of microbial communities and reveal relationships between different factors such as environment, host, and other ecological variables.
+
+Non-Metric Multidimensional Scaling (NMDS) and Principal Coordinates Analysis (PCoA) are both ordination techniques used in analyzing beta diversity, which captures the variation in species composition between different samples or sites. However, they have some differences in terms of methodology and interpretation:
+
+**NMDS (Non-Metric Multidimensional Scaling)** NMDS is a method that aims to represent the pairwise dissimilarities between samples in a lower-dimensional space while preserving the rank order of these dissimilarities. It is considered a non-metric method because it doesn't assume a linear relationship between the original dissimilarities and the distances in the ordination space. NMDS emphasizes preserving the relative ranking of dissimilarities, making it more suitable for cases where the distances between samples are not well-preserved in a lower-dimensional space. NMDS produces an ordination plot where the positions of samples are arranged based on their pairwise dissimilarities. The distances between points on the plot are not directly interpretable but reflect the similarities or dissimilarities between samples.
+
+**PCoA (Principal Coordinates Analysis)** PCoA is also used to visualise and analyse beta diversity by representing samples in a lower-dimensional space. It is a type of metric multidimensional scaling. PCoA is based on a metric approach, which means it attempts to preserve the actual distances between samples as closely as possible in the lower-dimensional space. PCoA produces an ordination plot where the distances between points reflect the actual dissimilarities between samples. Unlike NMDS, PCoA may not perform as well with non-linear or rank-based dissimilarity measures.
+
+### bata diversity - before normalisation
+
+```{r ggplot2, warning=FALSE, message=FALSE}
+# install.packages("ggplot2")
+library("ggplot2")
+```
+
+```{r beta_before_1, warning=FALSE, message=FALSE}
+# Based on Type and Soil.Location
+# method options: NMDS / PCoA
+pcoa <- ordinate(physeq = physeq.ori, method = "NMDS", distance = "bray")
+
+# Plot ordination
+# pdf(file = "bata_ori.pdf", width = 9,height = 8)
+plot_ordination(
+  physeq = physeq.ori,
+  ordination = pcoa,
+  color = "Type",
+  shape = "Soil.Location"
+) +
+  theme_classic() + 
+  geom_point(aes(color = Type), alpha = 1, size = 3) +
+  theme(
+    text = element_text(size = 18, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
+    axis.title.x = element_text(color = "black", size = 20, face = "bold")
+  ) +
+  scale_color_brewer(palette = "Dark2") + 
+  scale_fill_brewer(palette = "Dark2") + 
+  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
+
+# Close the PDF device and save the plot to a file
+# dev.off()  
+```
+
+```{r beta_before_2, warning=FALSE, message=FALSE}
+##### based on Plate and Type
+# Plot ordination
+# pdf(file = "bata_ori_plate.pdf", width = 9,height = 8)
+plot_ordination(
+  physeq = physeq.ori,
+  ordination = pcoa,
+  color = "Plate",
+  shape = "Type"
+) +
+  theme_classic() + 
+  geom_point(aes(color = Plate), alpha = 1, size = 3) +
+  theme(
+    text = element_text(size = 18, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
+    axis.title.x = element_text(color = "black", size = 20, face = "bold")
+  ) + 
+  scale_color_brewer(palette = "Dark2") + 
+  scale_fill_brewer(palette = "Dark2") + 
+  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
+
+# Close the PDF device and save the plot to a file
+# dev.off()
 ```
 
 #### normalisation using ConQUR
@@ -117,7 +195,7 @@ library("tidyverse")
 
 ```{r Subgroupping, warning=FALSE, message=FALSE}
 ## (1) Sub-samples for Sugarbeet and Bulk Soil groups for the comparisons
-physeq.W.B <- physeq.norm %>% subset_samples(Type %in% c("Sugarbeet", "Bulksoil"))
+physeq.SU <- physeq.norm %>% subset_samples(Type %in% c("Sugarbeet", "Bulksoil"))
 
 ## (2) Subset the samples in the phyloseq object that belong to "Sugarbeet" 
 ## or other crops "Barley", "Beans", "Bulksoil", "Oats", "OilseedRape", "Sugarbeet"
@@ -127,35 +205,26 @@ physeq.Sugarbeet <- subset_samples(physeq.norm, Type=="Sugarbeet")
 physeq.Sugarbeet.group = merge_samples(physeq.Sugarbeet, "Group") # Sum between replicate samples
 
 # (3B) repair factors in the sample metadata
-sample_data(physeq.Sugarbeet.group)$Group <- levels(sample_data(physeq.norm)$Group)[get_variable(physeq.Sugarbeet.group, "Group")]
+# sample_data(physeq.Sugarbeet.group)$Group <- levels(sample_data(physeq.norm)$Group)[get_variable(physeq.Sugarbeet.group, "Group")]
+ # or another option
+sample_data(physeq.Sugarbeet.group)$Group <- rownames(sample_data(physeq.Sugarbeet.group))
+
 sample_data(physeq.Sugarbeet.group)$Soil <- levels(sample_data(physeq.norm)$Soil)[get_variable(physeq.Sugarbeet.group, "Soil")]
 
-## (4) Further subgroup for WH.CL.BO vs WH.CL.YO
+## (4) Further subgroup for SU.CL.BO vs SU.CL.YO
 physeq.Sugarbeet.vs <- physeq.Sugarbeet %>% subset_samples(Group %in% c("SU.CL.BO", "SU.CL.YO"))
 ```
 
-#### Bata diversity
-
-Beta diversity is a measure of the differences or similarities between two or more microbial communities or samples. It quantifies the degree of variation in microbial composition among different samples. Beta diversity analysis can help identify patterns in the distribution of microbial communities and reveal relationships between different factors such as environment, host, and other ecological variables.
-
-Non-Metric Multidimensional Scaling (NMDS) and Principal Coordinates Analysis (PCoA) are both ordination techniques used in analyzing beta diversity, which captures the variation in species composition between different samples or sites. However, they have some differences in terms of methodology and interpretation:
-
-**NMDS (Non-Metric Multidimensional Scaling)** NMDS is a method that aims to represent the pairwise dissimilarities between samples in a lower-dimensional space while preserving the rank order of these dissimilarities. It is considered a non-metric method because it doesn't assume a linear relationship between the original dissimilarities and the distances in the ordination space. NMDS emphasizes preserving the relative ranking of dissimilarities, making it more suitable for cases where the distances between samples are not well-preserved in a lower-dimensional space. NMDS produces an ordination plot where the positions of samples are arranged based on their pairwise dissimilarities. The distances between points on the plot are not directly interpretable but reflect the similarities or dissimilarities between samples.
-
-**PCoA (Principal Coordinates Analysis)** PCoA is also used to visualize and analyse beta diversity by representing samples in a lower-dimensional space. It is a type of metric multidimensional scaling. PCoA is based on a metric approach, which means it attempts to preserve the actual distances between samples as closely as possible in the lower-dimensional space. PCoA produces an ordination plot where the distances between points reflect the actual dissimilarities between samples. Unlike NMDS, PCoA may not perform as well with non-linear or rank-based dissimilarity measures.
-
-```{r ggplot2, warning=FALSE, message=FALSE}
-# install.packages("ggplot2")
-library("ggplot2")
-```
-
-```{r Bata, warning=FALSE, message=FALSE}
+## bata-diversity - after the normalisation
+```{r Bata_after_1, warning=FALSE, message=FALSE}
+### based on Type and Soil.Location
 # method options: NMDS / PCoA
-pcoa <- ordinate(physeq = physeq.W.B, method = "NMDS", distance = "bray")
+pcoa <- ordinate(physeq = physeq.SU, method = "NMDS", distance = "bray")
 
 # Plot ordination
+pdf(file = "bata_SU.pdf", width = 9,height = 8)
 plot_ordination(
-  physeq = physeq.W.B,
+  physeq = physeq.SU,
   ordination = pcoa,
   color = "Type",
   shape = "Soil.Location"
@@ -170,18 +239,51 @@ plot_ordination(
     axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
     axis.title.x = element_text(color = "black", size = 20, face = "bold")
-  ) +
+  ) + 
   scale_color_brewer(palette = "Dark2") + 
   scale_fill_brewer(palette = "Dark2") + 
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
+
+# Close the PDF device and save the plot to a file
+dev.off()
   
 # Clean up by removing objects that are no longer needed
-rm(pcoa, physeq.W.B)
+# rm(pcoa, physeq.SU)
+```
 
+```{r Bata_after_2, warning=FALSE, message=FALSE}
+#### Based on Plate and Type
+# method options: NMDS / PCoA
+pcoa <- ordinate(physeq = physeq.norm, method = "NMDS", distance = "bray")
+
+# Plot ordination
+pdf(file = "bata_norm_plate.pdf", width = 9,height = 8)
+plot_ordination(
+  physeq = physeq.norm,
+  ordination = pcoa,
+  color = "Plate",
+  shape = "Type"
+) +
+  theme_classic() + 
+  geom_point(aes(color = Plate), alpha = 1, size = 3) +
+  theme(
+    text = element_text(size = 18, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
+    axis.title.x = element_text(color = "black", size = 20, face = "bold")
+  ) + 
+  scale_color_brewer(palette = "Dark2") + 
+  scale_fill_brewer(palette = "Dark2") + 
+  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
+
+# Close the PDF device and save the plot to a file
+dev.off()
 ```
 
 #### Alpha diversity
-
 Alpha diversity refers to the diversity of species within a single ecosystem or habitat. It is measured by analysing the number and distribution of species within a specific area or sample. Alpha diversity indices take into account the richness (number of species) and evenness (relative abundance of species) of a community. It provides insights into the complexity and stability of ecosystems. A high level of alpha diversity indicates a more complex ecosystem with a greater number of species, which is often associated with greater ecological resilience and stability. In contrast, a low level of alpha diversity can be an indicator of ecosystem disturbance, degradation, or vulnerability.
 
 Please noted that different types of alpha diversity metrics capture various aspects of biodiversity within a specific community. Here's a brief explanation of each:
@@ -312,8 +414,7 @@ ggplot(ASV, aes(x = Sugarbeet, y = ASV,  colour = Sugarbeet)) +
 ```
 
 #### Plotting for the abundance of one specific bacteria
-
-```{r Top100_4, warning=FALSE, message=FALSE}
+```{r Bacteria, warning=FALSE, message=FALSE}
 # Subset the taxa to Genus from physeq.Sugarbeet 
 physeq.Sugarbeet.genus <- subset_taxa(physeq.Sugarbeet, Genus == "Azospirillum")
 
@@ -323,11 +424,11 @@ otudf = as.data.frame(t(as.data.frame(physeq.Sugarbeet.genus@otu_table)))
 meta$Azospirillum = rowSums(otudf)
 
 # Plot a graph of the abundance of Azospirillum for each sample grouped by Group:
-ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
-                                 "WH.CY.BU","WH.CY.YO",
-                                 "WH.SC.HE","WH.SC.SH",
-                                 "WH.SL.AN","WH.SL.BE",
-                                 "WH.SL.SH")),
+ggplot(subset(meta, Group %in% c("SU.CL.BO","SU.CL.YO",
+                                 "SU.CY.BU","SU.CY.YO",
+                                 "SU.SC.HE","SU.SC.SH",
+                                 "SU.SL.AN","SU.SL.BE",
+                                 "SU.SL.SH")),
        aes(x = Group, y = Azospirillum,  colour = interaction(Group))) +
   geom_point(alpha = 1, position = "jitter", size = 4) + 
   geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
@@ -344,13 +445,12 @@ rm(physeq.Sugarbeet.genus, meta, otudf)
 ```
 
 ### Plotting the top 30 taxa at family level
-
 ```{r Top100_5, warning=FALSE, message=FALSE}
 ## Transform normalised ASVs to proportions 
 proportions = transform_sample_counts(physeq.Sugarbeet.group, function(x) 100 * x/sum(x))
 
 ##  
-Top30ASVs = names(sort(taxa_sums(proportions), TRUE)[1:71])
+Top30ASVs = names(sort(taxa_sums(proportions), TRUE)[1:65])
 Taxtab30 = cbind(tax_table(proportions), Family30 = NA)
 Taxtab30[Top30ASVs, "Family30"] <- as(tax_table(proportions)[Top30ASVs, "Family"], "character")
 tax_table(proportions) <- tax_table(Taxtab30)
@@ -384,17 +484,50 @@ Pairwise PERMANOVA is a statistical method used to compare multiple groups or tr
 ```{r PERMANOVA Install, warning=FALSE, message=FALSE}
 # devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")
 library("pairwiseAdonis")
+
+library("GGally")
 ```
 
 ```{r PERMANOVA, warning=FALSE, message=FALSE}
 metdat = as.data.frame(as.matrix(physeq.Sugarbeet@sam_data))
 dat = as.data.frame(t(as.data.frame(physeq.Sugarbeet@otu_table)))
-pairwise.adonis(dat, metdat$Group, sim.function = "vegdist",
+perma = pairwise.adonis(dat, metdat$Group, sim.function = "vegdist",
                 sim.method = "bray", p.adjust.m = "bonferroni",
                 reduce = NULL, perm = 10000)
 
+print(perma)
+# Keep only the necessary columns
+df <- perma[, c("pairs", "p.adjusted")]
+
+# Split the "pairs" column into two separate columns
+df_split <- strsplit(df$pairs, " vs ")
+df$A <- sapply(df_split, "[[", 1)
+df$B <- sapply(df_split, "[[", 2)
+
+# Create a matrix
+cor_matrix <- matrix(NA, nrow = length(unique(df$A)), ncol = length(unique(df$B)))
+rownames(cor_matrix) <- unique(df$A)
+colnames(cor_matrix) <- unique(df$B)
+
+# Fill in the correlation matrix with p.adjusted sig values
+for (i in 1:nrow(cor_matrix)) {
+  for (j in 1:ncol(cor_matrix)) {
+    a <- rownames(cor_matrix)[i]
+    b <- colnames(cor_matrix)[j]
+    value <- df[df$A == a & df$B == b, "p.adjusted"]
+    if (length(value) > 0) {
+      cor_matrix[i, j] <- value
+    }
+  }
+}
+
+# Clean up by removing unnecessary objects generated from the loop
+# rm(a, b, i, j, value)
+
+print(cor_matrix)
+
 # Clean up by removing unnecessary objects
-rm(metdat, dat)
+# rm(metdat, dat, perma, df, cor_matrix)
 ```
 
 
@@ -430,7 +563,7 @@ D <- as_tibble(B2) %>%
   mutate(Sample = .sample, ASV = .otu, Abundance = .abundance) %>%
   select(Sample, Abundance, Genus) %>%
   group_by(Sample) %>%
-  filter(rank(desc(Abundance)) <= 100) %>% # Filter the top 100
+  filter(rank(desc(Abundance)) <= 100) %>% # Filter <= 100
   ungroup()
 
 
@@ -452,6 +585,7 @@ binary_fun <- function(x) {
 # Apply the binary function to columns 2 to 10
 temp_df <- apply(E[2:10], 2, binary_fun)
 temp_df <- as.data.frame(temp_df)
+rownames(temp_df) = E$ASV
 
 # Create an UpSet plot
 upset_plot <- upset(temp_df, sets = colnames(temp_df), sets.bar.color = "#56B4E9",

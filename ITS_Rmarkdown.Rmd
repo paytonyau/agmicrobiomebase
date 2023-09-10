@@ -65,6 +65,8 @@ ggplot(ASV, aes(x = Group, y = ASV,  colour = Group))+
         axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
         axis.title.y = element_text(color="black", size=15,face="bold"),
         legend.position = "none")
+
+rm(ASV)
 ```
 
 ### Beta diversity
@@ -74,6 +76,8 @@ Beta diversity is a metric used in microbial community studies to assess species
 # method options: NMDS / PCoA
 NMDS <- ordinate(physeq = physeq.a, method = "NMDS", distance = "bray")
 
+# pdf
+# pdf(file = "bata_ITS.pdf", width = 9,height = 8)
 # Plot ordination
 plot_ordination(
   physeq = physeq.a,
@@ -95,9 +99,11 @@ plot_ordination(
   scale_color_brewer(palette = "Set1") + 
   scale_fill_brewer(palette = "Set1") + 
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
-  
+# Close the PDF device and save the plot to a file
+# dev.off()
+
 # Clean up by removing objects that are no longer needed
-rm(pcoa, physeq.W.B)
+rm(NMDS)
 ```
 
 ### Alpha diversity
@@ -105,12 +111,15 @@ rm(pcoa, physeq.W.B)
 Alpha diversity is a fundamental concept in ecology and refers to the diversity or richness of species within a specific community or habitat. In the context of microbial ecology, alpha diversity represents the diversity of microorganisms within a given sample or microbiome. It provides insights into the variety and evenness of microbial species present in a particular environment. Common measures of alpha diversity include species richness, which counts the number of unique species, and evenness, which assesses the distribution of species abundances. Alpha diversity is crucial for understanding the stability, resilience, and functional potential of microbial communities. It can be influenced by various factors, including environmental conditions, host factors, and perturbations. By comparing alpha diversity across different samples or experimental groups, researchers can gain insights into the impact of factors such as disease, habitat changes, or interventions on microbial community structure.
 
 ```{r Alpha diversity , message=FALSE, warning=FALSE}
+
 # available measurements [c("Observed", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher")]
 alpha.object <- cbind(
   x = sample_data(physeq.a),
   y = estimate_richness(physeq.a, measures = 'Shannon')
 )
 
+# pdf
+pdf(file = "Alpha_ITS.pdf", width = 9,height = 5)
 # Create a plot for alpha diversity
 ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group, fill = x.Group)) + 
   theme_classic() + 
@@ -124,11 +133,13 @@ ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group, fill 
     text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
     axis.line = element_line(colour = 'black', size = 1.1),
-    axis.text.x = element_text(colour = "black", angle = 270, size = 13, face = "bold"),
+    axis.text.x = element_text(colour = "black", angle = 45, hjust = 1, size = 13, face = "bold"),
     axis.text.y = element_text(angle = 0, hjust = 0, colour = "black", size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 15, face = "bold"),
     legend.position = "none"                 # Hide legend
   ) 
+# Close the PDF device and save the plot to a file
+dev.off()
 
 # Clean up by removing the alpha.object
 rm(alpha.object)
@@ -145,9 +156,41 @@ library("pairwiseAdonis")
 ```{r PERMANOVA, warning=FALSE, message=FALSE}
 metdat = as.data.frame(as.matrix(physeq.a@sam_data))
 dat = as.data.frame(t(as.data.frame(physeq.a@otu_table)))
-pairwise.adonis(dat, metdat$Group, sim.function = "vegdist",
+perma = pairwise.adonis(dat, metdat$Group, sim.function = "vegdist",
                 sim.method = "bray", p.adjust.m = "bonferroni",
-                reduce = NULL, perm = 100000)
+                reduce = NULL, perm = 100000) 
+
+print(perma)
+# Keep only the necessary columns
+df <- perma[, c("pairs", "p.adjusted")]
+
+# Split the "pairs" column into two separate columns
+df_split <- strsplit(df$pairs, " vs ")
+df$A <- sapply(df_split, "[[", 1)
+df$B <- sapply(df_split, "[[", 2)
+
+# Create a matrix
+cor_matrix <- matrix(NA, nrow = length(unique(df$A)), ncol = length(unique(df$B)))
+rownames(cor_matrix) <- unique(df$A)
+colnames(cor_matrix) <- unique(df$B)
+
+# Fill in the correlation matrix with p.adjusted sig values
+for (i in 1:nrow(cor_matrix)) {
+  for (j in 1:ncol(cor_matrix)) {
+    a <- rownames(cor_matrix)[i]
+    b <- colnames(cor_matrix)[j]
+    value <- df[df$A == a & df$B == b, "p.adjusted"]
+    if (length(value) > 0) {
+      cor_matrix[i, j] <- value
+    }
+  }
+}
+
+# Clean up by removing unnecessary objects generated from the loop
+# rm(a, b, i, j, value)
+
+print(cor_matrix)
+
 ```
 
 ### Bar plot - relative abundance
@@ -212,6 +255,7 @@ p + geom_bar(aes(), stat = "identity", position = "stack") +
 Examining the cumulative count of taxa within a particular taxonomic group for each distinct subgroup involves the summation of the total number of taxa within that group while eliminating any overlapping taxa based on their names within individual subgroups. This process aids in comprehending the dynamics of microbiome populations.
 ```{R install_taxa, warning=FALSE, message=FALSE}
 library("dplyr")
+library(reshape2)
 ```
 
 ```{R num_taxa, warning=FALSE, message=FALSE}
@@ -255,6 +299,34 @@ colnames(B2)[1:6] <- genus_levels
 
 print(B2)
 # write.csv(B2, file = "ITS/level_counts_by_group.csv", row.names = TRUE)
+B2$name = row.names(B2)
+data_long <- melt(B2)
+data_long <- melt(B2, id.vars = "name", variable.name = "Level", value.name = "Taxa")
+
+
+# Plot the data as a line graph using ggplot
+# Open a new PDF graphics device
+pdf(file = "line_graph_ITS.pdf", width=8,height=5)
+ggplot(data_long, aes(x = Level, y = Taxa, color = name, group = name)) +
+  geom_line() +
+  geom_point(size = 4) +
+  labs(x = "Taxonomic Level", y = "Count") +
+  theme_classic() + 
+  theme(
+    text = element_text(size = 19, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 14, face = "bold"), 
+    axis.title.x = element_text(color = "black", size = 14, face = "bold")
+  ) +
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  scale_y_continuous(breaks=seq(0,1500,by=250))
+
+
+# Close the PDF device and save the plot to a file
+dev.off()  
 ```
 
 ### Plotting the top 10 taxa at family level
