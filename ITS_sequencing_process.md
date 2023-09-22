@@ -4,7 +4,7 @@
 
 ### Install QIIME2
 
-To run the workflow in a specific conda environment, ensuring the correct version of required Python packages for QIIME2, refer to the following documentation: [Install QIIME 2 within a Conda environment](https://docs.qiime2.org/2022.4/install/native/#install-qiime-2-within-a-conda-environment)
+To run the workflow in a specific conda environment, ensuring the correct version of required Python packages for QIIME2, refer to the following documentation: [Install QIIME 2 within a Conda environment](https://docs.qiime2.org/2023.5/install/native/#install-qiime-2-within-a-conda-environment)
 
 ### Step 1: Sequence Quality Control
 
@@ -29,15 +29,15 @@ output_reverse_paired.fq.gz output_reverse_unpaired.fq.gz \
 MINLEN:248 CROP: 248
 ```
 
-We use 300nt long as for the  average merged length as ITS1 region has a rughly ranging from 220-520nt[^1](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5309391)
+We use 300nt long as for the average merged length as ITS1 region has a roughly ranging from 220-520nt[^1](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5309391)
+
 `python figaro.py -i (path) -o (path) -f 20 -r 20 -a 300 -m 12`
+
 Please replace `(path)` with actual paths, and ensure that you have the required software and resources available for each step of the pipeline.
 ### Generate a manifest.txt for QIIME2 artifact
 
-  
 
 Generate a manifest.txt file containing the absolute file paths of the sequencing data, and then convert it to QIIME2-compatible format (manifest.csv).
-
 
 ##### Generate a manifest.txt for QIIME2 artifact (medification required to fit for the QIIME2 format)
 
@@ -72,8 +72,6 @@ echo "CSV file created: $output_file"
 ```
 ### Step 3: Import FASTQs as QIIME2 Artifact
 
-  
-
 Activate the QIIME2 environment:
 
 `conda activate qiime2-2023.5`
@@ -93,6 +91,37 @@ qiime demux summarize \
 --o-visualization demux.qzv
 ```
 
+##### Trim primers using Cutadapt QIIME2 plugin
+Screen out reads that do not begin with primer sequence and remove primer sequence from reads using the cutadapt QIIME2 plugin. The below primers correspond to the ITS1 region. DADA2's chimaera removal step requires primers to have been removed, as otherwise, the ambiguous nucleotides in most primer sets cause large numbers of false-positive chimaeras to be identified.
+
+The primes used in this dataset for ITS1 region
+###### TS1-Fl2 Primer-F	
+5’ 
+TCGTCGGCAGCGTC
+==AGATGTGTATAAGAGACAG== (Adaptor sequence)
+*GAACCWGCGGARGGATCA*  (Primer sequence)
+3’
+
+###### ITS2 Primer-R	
+5’ 
+GTCTCGTGGGCTCGG
+==AGATGTGTATAAGAGACAG== (Adaptor sequence)
+*GCTGCGTTCTTCATCGATGC* (Primer sequence)
+  3’ 
+
+```
+qiime cutadapt trim-paired \
+  --i-demultiplexed-sequences demux.qza \
+  --p-cores 4 \
+  --p-adapter-f AGATGTGTATAAGAGACAG \
+  --p-adapter-r AGATGTGTATAAGAGACAG \
+  --p-front-f GAACCWGCGGARGGATCA \
+  --p-front-r GCTGCGTTCTTCATCGATGC \
+  --p-discard-untrimmed \
+  --o-trimmed-sequences primer-trimmed-demux.qza \
+  --verbose \
+  &> primer_trimming.log
+
 ### Step 4: DADA2 Denoising and Taxonomic Classification
 Denoise and perform taxonomic classification using DADA2 and the UNITE reference classifier.
 ##### DADA2 Denoising:
@@ -111,21 +140,14 @@ qiime dada2 denoise-paired \
 --o-denoising-stats stats-its.qza
 
 ```
-Prepration of the Taxonomic Classification for Qiime2:
-
-```
-(find the commend)
-```
-
 Taxonomic Classification:  
+
 ```
 qiime feature-classifier classify-sklearn \
 --i-classifier /mnt/shared/scratch/pyau/qiime2-ref/unite-9-dynamic-s-all-29.11.2022-Q2-2023.5.qza \
 --i-reads rep-seqs-its.qza \
 --o-classification taxonomy-its.qza
 ```
-
-  
 
 ### Step 5: Taxonomy-Based Filtering
 Filter tables and sequences based on taxonomy to exclude unwanted taxa (e.g., mitochondria and chloroplast).
@@ -140,11 +162,9 @@ qiime taxa filter-table \
 --o-filtered-table table-its-with-phyla-no-mitochondria-no-chloroplast.qza
 ```
 
-  
 
 Filter Sequences:
 
-  
 
 ```
 qiime taxa filter-seqs \

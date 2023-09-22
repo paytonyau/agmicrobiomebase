@@ -162,7 +162,7 @@ echo "CSV file created: $output_file"
 ```
 
 #### STEP 3
-### Activate the envernment
+### Activate the environment 
 You can activate this conda environment with this command (you may need to swap in source for conda if you get an error):
 
 ```
@@ -170,7 +170,7 @@ conda activate qiime2-2022.4
 ```
 
 ##### Import FASTQs as QIIME 2 artifact
-To standardise QIIME 2 analyses and to keep track of provenance (i.e. a list of what commands were previously run to produce a file) a special format is used for all QIIME2 input and output files called an "artifact" (with the extension QZA). The first step is to import the paried-end raw reads as a QZA file. Noted that you need to prepare the manifast.csv file following the QIIME2 requirement.
+To standardise QIIME 2 analyses and to keep track of provenance (i.e. a list of what commands were previously run to produce a file) a special format is used for all QIIME2 input and output files called an "artefact" (with the extension QZA). The first step is to import the paired-end raw reads as a QZA file. Noted that you need to prepare the manifast.csv file following the QIIME2 requirement.
 
 ```
 qiime tools import
@@ -189,8 +189,8 @@ qiime demux summarize \
 --o-visualization demux.qzv
 ```
 
-##### Trim primers with using Cutadapt QIIME2 plugin
-Screen out reads that do not begin with primer sequence and remove primer sequence from reads using the cutadapt QIIME2 plugin. The below primers correspond to the 16s V3-V4 region. DADA2's chimera removal step requires primers to have been removed, as otherwise the ambiguous nucleotides in most primer sets cause large numbers of false-positive chimeras to be identified.
+##### Trim primers using Cutadapt QIIME2 plugin
+Screen out reads that do not begin with primer sequence and remove primer sequence from reads using the cutadapt QIIME2 plugin. The below primers correspond to the 16s V3-V4 region. DADA2's chimaera removal step requires primers to have been removed, as otherwise, the ambiguous nucleotides in most primer sets cause large numbers of false-positive chimaeras to be identified.
 
 The primes used in this dataset for 16s V3-V4 region
 ###### V3-V4 Primer-F	
@@ -292,6 +292,12 @@ qiime taxa filter-seqs \
   --o-filtered-sequences 422_222_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza
   ```
 
+##### visualise the rep seq
+```
+qiime metadata tabulate \
+  --m-input-file 422_222_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza \
+  --o-visualization 422_222_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qzv
+```
 ### Unrooted phylogenetic tree construction
 An unrooted phylogenetic tree is used in evolutionary biology to display the relationships and evolutionary distances among entities like species or sequences. Unlike rooted trees, unrooted trees do not specify a common ancestor, focusing instead on showing branching patterns and relative relationships. They help infer genetic diversity and shared ancestry by analyzing molecular data and generating diagrams that highlight evolutionary connections. Unrooted trees are essential for understanding the evolutionary landscape and interconnections among biological entities.
 ```

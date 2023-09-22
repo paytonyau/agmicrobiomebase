@@ -1,0 +1,144 @@
+## Required Packages
+
+##### Install required packages
+# if (!requireNamespace("devtools", quietly = TRUE)){install.packages("devtools")}
+# devtools::install_github("jbisanz/qiime2R") # current version is 0.99.20
+library("qiime2R")
+library("phyloseq")
+library("dplyr")
+library("tidyverse")
+
+
+# Data and Path Definitions
+
+# Define the taxonomic levels
+genus_levels <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+
+# Define the datasets and paths
+dataset_info <- list(
+  list(  # GreenGenes 1
+    features = "[Qiime2]GreenGenes_13_8/428_228_220_table_gg-13-8-with-phyla-no-mitochondria-no-chloroplast.qza",
+    taxonomy = "[Qiime2]GreenGenes_13_8/428_228_220_taxonomy_gg-13-8.qza",
+    output_path = "[Qiime2]GreenGenes_13_8/level_counts_by_group_gg1.csv"
+  ),
+  list(  # GreenGenes2
+    features = "[Qiime2]GreenGenes2_2022_10/428_228_220_table_gg_2022_10-with-phyla-no-mitochondria-no-chloroplast.qza",
+    taxonomy = "[Qiime2]GreenGenes2_2022_10/428_228_220_taxonomy_gg_2022_10.qza",
+    output_path = "[Qiime2]GreenGenes2_2022_10/level_counts_by_group_gg2.csv"
+  ),
+  list(  # Silva138
+    features = "[Qiime2]Silva_138/428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza",
+    taxonomy = "[Qiime2]Silva_138/428_228_220_taxonomy_silva138.qza",
+    output_path = "[Qiime2]Silva_138/level_counts_by_group_silva138.csv"
+  )
+)
+
+
+## Data Processing and Analysis
+
+# Loop through each dataset
+for (dataset in dataset_info) {
+  # Convert qiime2 results to phyloseq format
+  physeq <- qza_to_phyloseq(
+    features = dataset$features,
+    taxonomy = dataset$taxonomy,
+    metadata = "meta-table.txt"
+  )
+  
+  physeq.sum <- subset_samples(physeq, Analysis == "Include")
+  physeq.sum <- merge_samples(physeq.sum, "Type", fun = sum)
+  
+  # Create an empty list to store genus-level abundance data for each taxonomic level
+  gentab_levels <- list()
+  
+  # Set observation threshold
+  observationThreshold <- 1
+  
+  # loop through all the taxonomic levels
+  for (level in genus_levels) {
+    
+    # create a factor variable for each level
+    genfac <- factor(tax_table(physeq.sum)[, level])
+    
+    # calculate the abundance of each genus within each sample
+    gentab <- apply(otu_table(physeq.sum), MARGIN = 1, function(x) {
+      tapply(x, INDEX = genfac, FUN = sum, na.rm = TRUE, simplify = TRUE)
+    })
+    
+    # calculate the number of samples in which each genus is observed above the threshold
+    level_counts <- apply(gentab > observationThreshold, 2, sum)
+    
+    # create a data frame of level counts with genus names as row names
+    BB <- as.data.frame(level_counts)
+    BB$name <- row.names(BB)
+    
+    # add the data frame to the gentab_levels list
+    gentab_levels[[level]] <- BB
+  }
+  
+  # Combine all level counts data frames into one data frame
+  B2 <- gentab_levels %>% reduce(full_join, by = "name")
+  
+  # Set row names and column names
+  row.names(B2) <- B2$name
+  B2$name <- NULL
+  colnames(B2)[1:7] <- genus_levels
+  
+  # Write the data frame to a file
+  write.csv(B2, file = dataset$output_path, row.names = TRUE)
+  
+  # Clean up by removing unnecessary objects
+  rm(gentab_levels, observationThreshold, BB, B2)
+}
+
+
+
+## Data Visualization
+# Load the reshape2 and ggplot2 libraries
+library(reshape2)
+library(ggplot2)
+
+GreenGenes.v1 = read.csv("[Qiime2]GreenGenes_13_8/level_counts_by_group.csv")[5,]
+GreenGenes.v2 = read.csv("[Qiime2]GreenGenes2_2022_10/level_counts_by_group_gg2.csv")[5,]
+Sliva.v138 = read.csv("[Qiime2]Silva_138//level_counts_by_group.csv")[5,]
+
+combined_df <- rbind(GreenGenes.v1, GreenGenes.v2, Sliva.v138)
+combined_df$X <- c("GreenGenes.v1", "GreenGenes.v2", "Sliva.v138")
+
+data_long <- melt(combined_df, id.vars = "X", variable.name = "Dataset", value.name = "Count")
+
+colnames(data_long) = c("Ref.Database","Taxonomic.Level","Count")
+
+# Convert Taxonomic.Level to a factor and specify the desired order of the levels
+data_long$Taxonomic.Level <- factor(data_long$Taxonomic.Level,
+                                    levels = c("Kingdom", "Phylum", "Class", "Order", 
+                                               "Family", "Genus", "Species"))
+
+
+# Plot the data as a line graph using ggplot
+# Open a new PDF graphics device
+pdf(file = "line_graph.pdf", width=8,height=5)
+
+ggplot(data_long, aes(x = Taxonomic.Level, y = Count, color = Ref.Database, group = Ref.Database)) +
+  geom_line(size = 2) +
+  geom_point(size = 4) +
+  scale_color_manual(values = c("Sliva.v138" = "cornflowerblue", 
+                                "GreenGenes.v2" = "greenyellow", 
+                                "GreenGenes.v1" = "forestgreen")) +
+  labs(x = "Taxonomic Level", y = "Count") +
+  theme_classic() + 
+  theme(
+    text = element_text(size = 19, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 14, face = "bold"), 
+    axis.title.x = element_text(color = "black", size = 14, face = "bold")
+  ) +
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  scale_y_continuous(breaks=seq(0,1500,by=250))
+
+
+# Close the PDF device and save the plot to a file
+dev.off()  

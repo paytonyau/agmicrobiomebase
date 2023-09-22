@@ -8,7 +8,7 @@ date: "2023-08-23"
 ---
 
 ## ITS of Wheat
-The relationship between fungi and wheat encompasses significant importance in agricultural ecosystems, transcending beyond the realm of infections. The coexistence of these two entities profoundly impacts agricultural productivity, with the specter of wheat root rot disease, wrought by soil-borne fungal pathogens, casting a formidable shadow over global crop yields, resulting in staggering annual economic losses. Beyond the purview of pathogenic interactions, the symbiotic and commensalistic associations of fungi with wheat rhizosphere foster a complex network of relationships that shape plant health and ecosystems. Investigating the multifaceted nexus between rhizosphere soil fungal diversity and wheat roots unveils a nuanced panorama, pivotal for comprehending the genesis and progression of wheat root rot disease. 
+The relationship between fungi and wheat encompasses significant importance in agricultural ecosystems, transcending beyond the realm of infections. The coexistence of these two entities profoundly impacts agricultural productivity, with the specter of wheat root rot disease, wrought by soil-borne fungal pathogens, casting a formidable shadow over global crop yields, resulting in staggering annual economic losses. In this case study, we investigated the nexus between rhizosphere soil fungal diversity and wheat roots in "normal" condition to find out the abundance of soil-borne fungal pathogens. 
 
 ### Qiime2 to Phyloseq
 
@@ -16,7 +16,8 @@ Converting QIIME2 outcomes to the phyloseq object structure in R enables compreh
 
 ```{r install, warning=FALSE, message=FALSE}
 # Download qiime2R from Github
-# if (!requireNamespace("devtools", quietly = TRUE)){install.packages("devtools")}
+# if (!requireNamespace("devtools", quietly = TRUE))
+#   install.packages("devtools")
 # devtools::install_github("jbisanz/qiime2R")
 library("qiime2R")
 
@@ -27,6 +28,9 @@ library("qiime2R")
 library("phyloseq")
 
 library("tidyverse")
+
+
+library("ggpubr")
 ```
 
 ```{r qiime2R, warning=FALSE, message=FALSE}
@@ -41,11 +45,13 @@ physeq.a ## confirm the object
 ```
 
 ## Assessing ASV Distribution (merged and filtered)
-We evaluated the number of Amplicon Sequence Variants (ASVs) after merging and filtering, as well as visualised the raw read counts per sample within each group. This analysis provided insights into the distribution of ASVs and the sequencing depth of each sample, allowing for a comprehensive assessment of data quality and quantity.
+We evaluated the number of Amplicon Sequence Variants (ASVs) after merging and filtering, as well as visualised the raw read counts per sample within each group. This provided insights into the distribution of ASVs and the sequencing depth of each sample, allowing for a comprehensive assessment of data quality and quantity.
 
 ```{r Install_ASV, warning=FALSE, message=FALSE}
 # install.packages("ggplot2")
 library("ggplot2")
+# install.packages("RColorBrewer")
+library("RColorBrewer")
 ```
 
 ```{r ASV, warning=FALSE, message=FALSE}
@@ -55,6 +61,7 @@ ASV <- as.data.frame(ASV)
 ASV$Group <- physeq.a@sam_data$Group
 
 ggplot(ASV, aes(x = Group, y = ASV,  colour = Group))+
+  scale_color_brewer(palette = "Paired") +
   geom_point(alpha = 1, position = "jitter", size = 4) + 
   geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
   theme_classic() + 
@@ -96,8 +103,8 @@ plot_ordination(
     axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
     axis.title.x = element_text(color = "black", size = 20, face = "bold")
   ) + stat_ellipse(geom = "polygon", type="norm", alpha=0.25, aes(fill = Group)) +
-  scale_color_brewer(palette = "Set1") + 
-  scale_fill_brewer(palette = "Set1") + 
+  scale_color_brewer(palette = "Paired") + 
+  scale_fill_brewer(palette = "Paired") + 
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
 # Close the PDF device and save the plot to a file
 # dev.off()
@@ -118,17 +125,18 @@ alpha.object <- cbind(
   y = estimate_richness(physeq.a, measures = 'Shannon')
 )
 
-# pdf
-pdf(file = "Alpha_ITS.pdf", width = 9,height = 5)
+#### pdf
+# pdf(file = "Alpha_ITS.pdf", width = 9,height = 5)
 # Create a plot for alpha diversity
-ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group, fill = x.Group)) + 
+ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group)) + 
+    scale_color_brewer(palette = "Paired") +
   theme_classic() + 
   labs(
     x = element_blank(),                     # No x-axis label
     y = "Alpha Diversity (Shannon)"          # y-axis label
   ) + 
-  geom_point(size = 1.75) +                  # Add points
-  geom_boxplot(alpha = 0.5) +                # Add boxplot with transparency
+  geom_point(alpha = 1, position = "jitter", size = 4) + 
+  geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
   theme(
     text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
@@ -139,7 +147,7 @@ ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group, fill 
     legend.position = "none"                 # Hide legend
   ) 
 # Close the PDF device and save the plot to a file
-dev.off()
+# dev.off()
 
 # Clean up by removing the alpha.object
 rm(alpha.object)
@@ -154,13 +162,15 @@ library("pairwiseAdonis")
 ```
 
 ```{r PERMANOVA, warning=FALSE, message=FALSE}
+# p.adjust.methods
+# c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none")
+
 metdat = as.data.frame(as.matrix(physeq.a@sam_data))
 dat = as.data.frame(t(as.data.frame(physeq.a@otu_table)))
 perma = pairwise.adonis(dat, metdat$Group, sim.function = "vegdist",
-                sim.method = "bray", p.adjust.m = "bonferroni",
+                sim.method = "bray", p.adjust.m = "BH",
                 reduce = NULL, perm = 100000) 
 
-print(perma)
 # Keep only the necessary columns
 df <- perma[, c("pairs", "p.adjusted")]
 
@@ -195,6 +205,7 @@ print(cor_matrix)
 
 ### Bar plot - relative abundance
 Bar plots illustrating relative abundance in microbiome enable to visually represent the proportions of different microbial taxa within a given sample. Each bar corresponds to a specific taxonomic group, with its height indicating the relative abundance of that group in the microbiome. 
+
 ```{r Install Bar, warning=FALSE, message=FALSE}
 # install.packages("plyr")
 library("plyr")
@@ -242,7 +253,8 @@ data$Phylum[data$Abundance < 0.01] <- "Phyla < 1% abund."
 # Plot the data with condensed phyla categories
 p <- ggplot(data = data, aes(x = Sample, y = Abundance, fill = Phylum))
 p + geom_bar(aes(), stat = "identity", position = "stack") +
-  scale_fill_manual(values = c("darkblue", "darkgoldenrod1", "darkseagreen", "darkorchid", "darkolivegreen1", "lightskyblue", "darkgreen", "deeppink", "khaki2", "firebrick", "brown1", "darkorange1", "cyan1", "royalblue4", "darksalmon", "darkblue", "royalblue4", "dodgerblue3", "steelblue1", "lightskyblue", "darkseagreen", "darkgoldenrod1", "darkseagreen", "darkorchid", "darkolivegreen1", "brown1", "darkorange1", "cyan1", "darkgrey")) +   theme_classic() +   
+    scale_color_brewer(palette = "Paired") +
+  theme_classic() +   
   theme(text = element_text(size=15, colour = "black"), 
         axis.ticks = element_line(colour = "black", size = 1.25),
         axis.line = element_line(colour = 'black', size = 1.25),
@@ -253,9 +265,10 @@ p + geom_bar(aes(), stat = "identity", position = "stack") +
 
 ##### Number of taxa in groups
 Examining the cumulative count of taxa within a particular taxonomic group for each distinct subgroup involves the summation of the total number of taxa within that group while eliminating any overlapping taxa based on their names within individual subgroups. This process aids in comprehending the dynamics of microbiome populations.
+
 ```{R install_taxa, warning=FALSE, message=FALSE}
 library("dplyr")
-library(reshape2)
+library("reshape2")
 ```
 
 ```{R num_taxa, warning=FALSE, message=FALSE}
@@ -306,7 +319,7 @@ data_long <- melt(B2, id.vars = "name", variable.name = "Level", value.name = "T
 
 # Plot the data as a line graph using ggplot
 # Open a new PDF graphics device
-pdf(file = "line_graph_ITS.pdf", width=8,height=5)
+# pdf(file = "line_graph_ITS.pdf", width=8,height=5)
 ggplot(data_long, aes(x = Level, y = Taxa, color = name, group = name)) +
   geom_line() +
   geom_point(size = 4) +
@@ -315,18 +328,18 @@ ggplot(data_long, aes(x = Level, y = Taxa, color = name, group = name)) +
   theme(
     text = element_text(size = 19, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
-    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.5),
     axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
     axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 14, face = "bold"), 
     axis.title.x = element_text(color = "black", size = 14, face = "bold")
   ) +
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
-  scale_y_continuous(breaks=seq(0,1500,by=250))
+  scale_y_continuous(breaks=seq(0,300,by=50))
 
 
 # Close the PDF device and save the plot to a file
-dev.off()  
+# dev.off()  
 ```
 
 ### Plotting the top 10 taxa at family level
@@ -337,18 +350,20 @@ Generating a visual representation through the plotting of the top 10 taxa at th
 proportions = transform_sample_counts(physeq.a.group, function(x) 100 * x/sum(x))
 
 ##  
-Top30ASVs = names(sort(taxa_sums(proportions), TRUE)[1:13])
-Taxtab30 = cbind(tax_table(proportions), Family30 = NA)
-Taxtab30[Top30ASVs, "Family30"] <- as(tax_table(proportions)[Top30ASVs, "Family"], "character")
-tax_table(proportions) <- tax_table(Taxtab30)
+Top10ASVs = names(sort(taxa_sums(proportions), TRUE)[1:13])
+Taxtab10 = cbind(tax_table(proportions), Family30 = NA)
+Taxtab10[Top10ASVs, "Family30"] <- as(tax_table(proportions)[Top10ASVs, "Family"], "character")
+tax_table(proportions) <- tax_table(Taxtab10)
 
-Rgsm30 = prune_taxa(Top30ASVs, proportions)
+Rgsm10 = prune_taxa(Top10ASVs, proportions)
 
 # plotting
 title = "Top 10 - Family level"
-plot_bar(Rgsm30, "Group", fill = "Family", title = title) + 
+plot_bar(Rgsm10, "Group", fill = "Family", title = title) + 
   coord_flip() + 
-  ylab("Percentage of Sequences") + ylim(0, 50) +  theme_classic() +   
+  ylab("Percentage of Sequences") + ylim(0, 50) +  
+  scale_color_brewer(palette = "Paired") +
+  theme_classic() +   
   theme(text = element_text(size=15, colour = "black"), 
         axis.ticks = element_line(colour = "black", size = 1.25),
         axis.line = element_line(colour = 'black', size = 1.25),
@@ -362,10 +377,10 @@ plot_bar(Rgsm30, "Group", fill = "Family", title = title) +
         )
 
 # Clean up by removing unnecessary objects
-rm(proportions, Top30ASVs, Taxtab30, Rgsm30, title)
+rm(proportions, Top10ASVs, Taxtab10, Rgsm10, title)
 ```
-### Upset plot using UpsetR
 
+### Upset plot using UpsetR
 When it comes to representing sets visually, the go-to option is usually a Venn diagram. These diagrams work well when dealing with up to five sets, providing a clear visualisation. However, as the dataset expands, such as when dealing with five sets, deriving the desired insights from the diagram becomes more complex. As a result, considering an UpSet graph for data visualisation becomes an appealing choice. UpSet graphs offer a more streamlined way to display intersections and complements, particularly when dealing with larger datasets or multiple sets. This option ensures a more intuitive and informative representation of the data.
 
 ```{r install UpSetR, warning=FALSE, message=FALSE}
@@ -373,7 +388,7 @@ library("UpSetR")
 library("reshape2")
 library("plyr")
 library("dplyr")
-# BiocManager::install("microbiome")
+BiocManager::install("microbiome")
 library("microbiome")
 ```
 
@@ -419,56 +434,41 @@ binary_fun <- function(x) {
   ifelse(x > 0, 1, 0)
 }
 
+col = brewer.pal(n = 9, name = "Paired")
+
 # Apply the binary function to columns 2 to 10
 temp_df <- apply(E[2:10], 2, binary_fun)
 temp_df <- as.data.frame(temp_df)
 
 # Create an UpSet plot
-upset_plot <- upset(temp_df, sets = colnames(temp_df), sets.bar.color = "#56B4E9",
-                    order.by = "freq", empty.intersections = "on")
+upset_plot <- upset(temp_df, 
+                    sets = colnames(temp_df), 
+                    sets.bar.color = (col),
+                    order.by = "freq", 
+                    empty.intersections = "on",
+                    mainbar.y.label = "Counts by Pattern of Conditions", 
+                    sets.x.label = "Counts by Condition",
+                    matrix.color="blue", 
+                    point.size=2
+                    )
 
 # Print the UpSet plot
 print(upset_plot)
 ```
 
-```{r fungi, warning=FALSE, message=FALSE}
-# Plotting for the abundance of one specific fungi
-# Subset the taxa to Genus from physeq.wheat 
-physeq.a.genus <- subset_taxa(physeq.a, Genus == "Fusarium")
+### Phylogenetic tree
 
-# Calculate the total abundance of Fusarium for each sample
-meta = physeq.a.genus@sam_data
-otudf = as.data.frame(t(as.data.frame(physeq.a.genus@otu_table)))
-meta$Fusarium = rowSums(otudf)
-
-# Plot a graph of the abundance of Fusarium for each sample grouped by Group:
-ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
-                                 "WH.CY.BU","WH.CY.YO",
-                                 "WH.SC.HE","WH.SC.SH",
-                                 "WH.SL.AN","WH.SL.BE",
-                                 "WH.SL.SH")),
-       aes(x = Group, y = Fusarium,  colour = interaction(Group))) +
-  geom_point(alpha = 1, position = "jitter", size = 4) + 
-  geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
-  theme_classic() +   
-  theme(text = element_text(size=15, colour = "black"), 
-        axis.ticks = element_line(colour = "black", size = 1.25),
-        axis.line = element_line(colour = 'black', size = 1.25),
-        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
-        axis.title.y = element_text(color="black", size=15,face="bold"), legend.position = "none")
-```
-
-###Phylogenetic tree
 Phylogenetic trees are branching diagrams that show the evolutionary relationships between different species or other entities. They are constructed by comparing the organisms' DNA, proteins, or other features. The more similar the features, the more closely related the organisms are thought to be. It can be used to answer a variety of questions about evolution, such as how different species are related to each other, when different species diverged from each other, and what are the common ancestors of different species.
+
+Here we focus on Fusarium. Fusarium is a large genus of filamentous fungi, part of a group often referred to as hyphomycetes, widely distributed in soil and associated with plants1. Most species are harmless saprobes, and are relatively abundant members of the soil microbial community1. Some species produce mycotoxins in cereal crops that can affect human and animal health if they enter the food chain1. Despite most species apparently being harmless, some Fusarium species and subspecific groups are among the most important fungal pathogens of plants and animals. (draft)
+
 ```{r install.tree, warning=FALSE, message=FALSE}
 # Load required libraries
-library(phyloseq)   # For handling phylogenetic sequencing data
-library(ggtree)     # For tree visualisation
-library(scales)     # For scaling transformations
+library("phyloseq")   # For handling phylogenetic sequencing data
+# BiocManager::install("ggtree")
+library("ggtree")     # For tree visualisation
+library("scales")     # For scaling transformations
 ```
-
-There could be an error message and it could be ignored (https://github.com/YuLab-SMU/tidytree/issues/10)
 
 ```{r tree, warning=FALSE, message=FALSE}
 # Load the GlobalPatterns dataset and prune taxa
@@ -477,21 +477,140 @@ GP.chl <- subset_taxa(GP, Genus == "Fusarium")   # Subset data based on Phylum v
 
 
 # Create a ggtree plot
-p <- ggtree(GP.chl, ladderize = FALSE) +
-  geom_text2(aes(subset = !isTip, label = label), hjust = -0.3, size = 3.5) +
+p <- ggtree(GP.chl, ladderize = TRUE) +
+  # geom_text2(aes(subset = !isTip, label = label), hjust = -1.5, size = 3.5) +
   geom_tiplab(aes(label = Species), as_ylab=TRUE) +
   geom_point(aes(x = x + hjust, color = Group, 
                  shape = Group, size = Abundance), na.rm = TRUE) +
   scale_size_continuous(trans = log_trans(2)) +
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) + # Set custom
   # theme_classic() +   
-  theme(text = element_text(size=15, colour = "black"), 
+  scale_color_brewer(palette = "Paired") +
+  theme(text = element_text(size=13, colour = "black"), 
         axis.ticks = element_line(colour = "black", size = 1.25),
-        axis.line = element_line(colour = 'black', size = 1.25),
-        # axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 2.5),
-        axis.title.y = element_text(color="black", size=2.5,face="bold"), legend.position = "top")
+        axis.line = element_line(colour = 'black', size = 1.25) ,
+        
+        # axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 2.5),
+        axis.title.y = element_text(color="black", size=2.5,face="bold"), 
+        legend.position = "none"
+        )
 
 # Print the ggtree plot
 print(p)
+```
+
+Fusarium equiseti is a fungal species and plant pathogen on a varied range of crops. It is considered to be a weak pathogen on cereals and is occasionally found to be associated with ‘Fusarium head blight’ infected kernels. It is commonly found in tropical and sub-tropical areas. (draft)
+
+Fusarium nurragi has been isolated from heath species growing on the coasts in the Australian states of Victoria and Western Australia. Although F. nurragi has not been assigned to a Fusarium species complex, it is closely related to the F. heterosporum and F. tricinctum species complexes. (draft)
+
+Fusarium waltergamsii ....
+
+Fusarium culmorum and Fusarium tonkinense were identified in only one of the samples. This could potentially be attributed to errors in the Polymerase Chain Reaction (PCR) process or limitations inherent to ITS sequencing. 
+
+
+```{r fungi_2, warning=FALSE, message=FALSE}
+# Plotting for the abundance of one specific fungi
+# Subset the taxa to Genus from physeq.wheat 
+physeq.a.genus <- subset_taxa(physeq.a, Genus == "Fusarium")
+physeq.a.equiseti <- subset_taxa(physeq.a, Species == "Fusarium_equiseti")
+physeq.a.nurragi <- subset_taxa(physeq.a, Species == "Fusarium_nurragi")
+physeq.a.waltergamsii <- subset_taxa(physeq.a, Species == "Fusarium_waltergamsii")
+
+# Calculate the total abundance of Fusarium for each sample
+meta = physeq.a@sam_data
+otudf = as.data.frame(t(as.data.frame(physeq.a.genus@otu_table)))
+meta$Fusarium = rowSums(otudf)
+otudf = as.data.frame(t(as.data.frame(physeq.a.equiseti@otu_table)))
+meta$F.equiseti = rowSums(otudf)
+otudf = as.data.frame(t(as.data.frame(physeq.a.nurragi@otu_table)))
+meta$F.nurragi = rowSums(otudf)
+otudf = as.data.frame(t(as.data.frame(physeq.a.waltergamsii@otu_table)))
+meta$F.waltergamsii = rowSums(otudf)
+
+# Plot a graph of the abundance of Fusarium for each sample grouped by Group:
+p1 <- ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
+                                       "WH.CY.BU","WH.CY.YO",
+                                       "WH.SC.HE","WH.SC.SH",
+                                       "WH.SL.AN","WH.SL.BE",
+                                       "WH.SL.SH")),
+             aes(x = Group, y = Fusarium,  colour = interaction(Group))) +
+  geom_point(alpha = 1, position = "jitter", size = 4) + 
+  geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
+  theme_classic() +   scale_color_brewer(palette = "Paired") +
+  labs(x = "", y = "\n Fusarium") +
+  theme(text = element_text(size=15, colour = "black"), 
+        axis.ticks = element_line(colour = "black", size = 1.25),
+        axis.line = element_line(colour = 'black', size = 1.25),
+        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.title.y = element_text(color="black", size=12,face="bold"), legend.position = "none")
+
+p2 <- ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
+                                       "WH.CY.BU","WH.CY.YO",
+                                       "WH.SC.HE","WH.SC.SH",
+                                       "WH.SL.AN","WH.SL.BE",
+                                       "WH.SL.SH")),
+             aes(x = Group, y = F.equiseti,  colour = interaction(Group))) +
+  geom_point(alpha = 1, position = "jitter", size = 4) + 
+  geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
+  theme_classic() +   scale_color_brewer(palette = "Paired") +
+  labs(x = "", y = "\n F.nurragi") +
+  theme(text = element_text(size=15, colour = "black"), 
+        axis.ticks = element_line(colour = "black", size = 1.25),
+        axis.line = element_line(colour = 'black', size = 1.25),
+        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.title.y = element_text(color="black", size=12,face="bold"), 
+        legend.position = "none")
+
+p3 <- ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
+                                       "WH.CY.BU","WH.CY.YO",
+                                       "WH.SC.HE","WH.SC.SH",
+                                       "WH.SL.AN","WH.SL.BE",
+                                       "WH.SL.SH")),
+             aes(x = Group, y = F.nurragi,  colour = interaction(Group))) +
+  geom_point(alpha = 1, position = "jitter", size = 4) + 
+  geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
+  theme_classic() +   scale_color_brewer(palette = "Paired") +
+  labs(x = "", y = "\n F.nurragi") +
+  theme(text = element_text(size=15, colour = "black"), 
+        axis.ticks = element_line(colour = "black", size = 1.25),
+        axis.line = element_line(colour = 'black', size = 1.25),
+        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.title.y = element_text(color="black", size=12,face="bold"), 
+        legend.position = "none")
+
+p4 <- ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
+                                       "WH.CY.BU","WH.CY.YO",
+                                       "WH.SC.HE","WH.SC.SH",
+                                       "WH.SL.AN","WH.SL.BE",
+                                       "WH.SL.SH")),
+             aes(x = Group, y = F.waltergamsii,  colour = interaction(Group))) +
+  geom_point(alpha = 1, position = "jitter", size = 4) + 
+  geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
+  theme_classic() +   scale_color_brewer(palette = "Paired") +
+  labs(x = "", y = "\n F.waltergamsii") +
+  theme(text = element_text(size=15, colour = "black"), 
+        axis.ticks = element_line(colour = "black", size = 1.25),
+        axis.line = element_line(colour = 'black', size = 1.25),
+        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.title.y = element_text(color="black", size=12,face="bold"), 
+        legend.position = "none") 
+# Combine the plots
+# Arrange the plots
+fig <- ggarrange(p1, p2, p3, p4, labels = c("A", "B", "C", "D"), size = 5,
+                 ncol = 2, nrow = 2)
+
+# Add labels
+fig <- annotate_figure(fig)
+
+# Print the figure
+print(fig)
+
+```
+
+```{r sessionInfo, warning=FALSE, message=FALSE}
+sessionInfo()
 ```
