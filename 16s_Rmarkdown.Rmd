@@ -121,12 +121,12 @@ plot_ordination(
 # pdf(file = "bata_ori_plate.pdf", width = 9,height = 8)
 plot_ordination(
   physeq = physeq.ori,
-  ordination = pcoa,
+  ordination = NMDS,
   color = "Plate",
   shape = "Type"
 ) +
   theme_classic() + 
-  geom_point(aes(color = Plate), alpha = 1, size = 3) +
+  geom_point(aes(color = Plate), alpha = 1, size = 3.5) +
   theme(
     text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
@@ -194,6 +194,8 @@ rm(B, D, batchid, taxa_correct1, taxa_correct2, ASV, TAXA, sampledata, to_skip)
 ```{r tidyverse, warning=FALSE, message=FALSE}
 # install.packages("tidyverse")
 library("tidyverse")
+
+library("reshape2")
 ```
 
 ```{r Subgroupping, warning=FALSE, message=FALSE}
@@ -230,6 +232,8 @@ physeq.SU.subset <- subset_samples(physeq.SU, Soil.Location %in% groups_to_ellip
 # Convert physeq.SU.subset to a data frame
 df <- sample_data(physeq.SU.subset)
 
+my_palette <- c("darkgoldenrod", "limegreen")
+
 # Plot ordination
 # pdf(file = "bata_SU.pdf", width = 9,height = 8)
 
@@ -241,7 +245,10 @@ plot_ordination <- plot_ordination(
 )
 
 # Create the ordination plot
-plot_ordination <- plot_ordination(physeq = physeq.SU, ordination = NMDS, color = "Type", shape = "Soil.Location")
+plot_ordination <- plot_ordination(physeq = physeq.SU, 
+                                   ordination = NMDS, 
+                                   color = "Type", 
+                                   shape = "Soil.Location")
 
 # Extract ordination scores from the plot
 df <- plot_ordination$data
@@ -252,26 +259,31 @@ df_subset <- df[df$Soil.Location %in% groups_to_ellipse, ]
 # Add the ellipse for the subsetted data
 plot_ordination <- plot_ordination + 
   stat_ellipse(data = df_subset, type="norm", alpha=0.25, 
-               aes(group = Soil.Location), linetype = 1, size = 0.75, colour = "purple4")+
+               aes(group = Soil.Location), linetype = 1, 
+               size = 0.8, colour = "purple4") +
   theme_classic() + 
-  geom_point(aes(color = Type), alpha = 1, size = 3) +
+  geom_point(aes(color = Type), alpha = 1, size = 3.5) +
   theme(
     text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
     axis.line = element_line(colour = 'black', size = 1.1),
-    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
-    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
     axis.title.x = element_text(color = "black", size = 20, face = "bold")) +
-  scale_color_brewer(palette = "Dark2") + 
-  scale_fill_brewer(palette = "Dark2") + 
+  scale_color_manual(values = my_palette) +
+  scale_fill_manual(values = my_palette) +
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
 
 plot_ordination
 
+# Close the PDF device and save the plot to a file
+# dev.off()
   
 # Clean up by removing objects that are no longer needed
-# rm(pcoa, physeq.SU)
+# rm(NMDS, physeq.SU)
 
 ```
 
@@ -289,13 +301,15 @@ plot_ordination(
   shape = "Type"
 ) +
   theme_classic() + 
-  geom_point(aes(color = Plate), alpha = 1, size = 3) +
+  geom_point(aes(color = Plate), alpha = 1, size = 3.5) +
   theme(
     text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
     axis.line = element_line(colour = 'black', size = 1.1),
-    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
-    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
     axis.title.x = element_text(color = "black", size = 20, face = "bold")
   ) + 
@@ -330,35 +344,49 @@ Here, we pick Shannon as an example for the work
 
 ```{r Alpha, warning=FALSE, message=FALSE}
 # available measurements: "Observed" "Chao1" "ACE" "Shannon" "Simpson" "InvSimpson" "Fisher"
-# Calculate alpha diversity (Shannon) and store it in alpha.object
+# Calculate alpha diversity (Shannon) and store it in physeq.SU object
+
 alpha.object <- cbind(
-  x = sample_data(physeq.Sugarbeet),
-  y = estimate_richness(physeq.Sugarbeet, measures = 'Shannon')
+  x = sample_data(physeq.SU),
+  y = estimate_richness(physeq.SU, measures = 'Shannon')
 )
+
+selected_columns <- alpha.object[, c("x.Soil.Location", "x.Type", "Shannon")]
+selected_columns2 <- melt(selected_columns)
+names(selected_columns2) <- c("Soil/Location", "Type", "variable", "Shannon")
+my_palette <- c("darkgoldenrod", "limegreen")
 
 
 # Create a plot for alpha diversity
-ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group, fill = x.Group)) + 
-  scale_color_brewer(palette = "Set3") +
-  theme_classic() + 
-  labs(
-    x = element_blank(),                     # No x-axis label
-    y = "Alpha Diversity (Shannon)"          # y-axis label
+# pdf(file = "Fig5B_alpha.pdf", width = 8,height = 5)
+
+ggplot(data=selected_columns2) +
+  geom_boxplot(aes(x=`Soil/Location`, y= Shannon, fill = Type),
+               size = 1.1, width = 0.825, color = "grey20", 
+               position = position_dodge(0.9)) +
+  scale_fill_manual(values = my_palette) +
+  labs(x = element_blank(),                     # No x-axis label
+       y = "Alpha Diversity (Shannon)"          # y-axis label
   ) + 
-  geom_point(alpha = 1, position = "jitter", size = 4) + 
-  geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
+  theme_classic() + 
   theme(
     text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
     axis.line = element_line(colour = 'black', size = 1.1),
-    axis.text.x = element_text(colour = "black", angle = 45, hjust = 1, size = 13, face = "bold"),
-    axis.text.y = element_text(angle = 0, hjust = 0, colour = "black", size = 13, face = "bold"),
+    axis.text.x = element_text(colour = "black", angle = 45, hjust = 1, 
+                               size = 13, face = "bold"),
+    axis.text.y = element_text(angle = 0, hjust = 0, colour = "black", 
+                               size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 15, face = "bold"),
-    legend.position = "none"                 # Hide legend
-  ) 
+    legend.position = "right") +
+    scale_y_continuous(breaks = seq(6, 8, by = 0.5), limits = c(6, 8))  # Set breaks and limits here
+    
+
+# Close the PDF device and save the plot to a file
+# dev.off()
 
 # Clean up by removing the alpha.object
-# rm(alpha.object)
+# rm(alpha.object, selected_columns2)
 ```
 
 #### Calculate the number of taxa on each level and each group
@@ -505,7 +533,12 @@ p <- plot_bar(Rgsm10, "Group", fill = "Family") + coord_flip() +
         legend.key.width= unit(0.45, 'cm')
         )
 
+
+# Create a plot for alpha diversity
+pdf(file = "Fig6A_TOP10.pdf", width = 8,height = 5)
 print(p)
+# Close the PDF device and save the plot to a file
+dev.off()
 
 # Clean up by removing unnecessary objects
 # rm(proportions, Top10ASVs, Taxtab10, Rgsm10, title)
@@ -521,45 +554,52 @@ library("GGally")
 ```
 
 ```{r PERMANOVA, warning=FALSE, message=FALSE}
-metdat = as.data.frame(as.matrix(physeq.Sugarbeet@sam_data))
-dat = as.data.frame(t(as.data.frame(physeq.Sugarbeet@otu_table)))
-perma = pairwise.adonis(dat, metdat$Group, sim.function = "vegdist",
-                sim.method = "bray", p.adjust.m = "Bonferroni",
-                reduce = NULL, perm = 100000)
 
-print(perma)
-# Keep only the necessary columns
-df <- perma[, c("pairs", "p.adjusted")]
+metdat = as.data.frame(as.matrix(physeq.SU@sam_data))
+dat = as.data.frame(t(as.data.frame(physeq.SU@otu_table)))
 
-# Split the "pairs" column into two separate columns
-df_split <- strsplit(df$pairs, " vs ")
-df$A <- sapply(df_split, "[[", 1)
-df$B <- sapply(df_split, "[[", 2)
+# Define the pairs for comparison
+pairs <- list(
+  c("SU.CL.BO", "CO.CL.BO"),
+  c("SU.CL.YO", "CO.CL.YO"),
+  c("SU.CY.BU", "CO.CY.BU"),
+  c("SU.CY.YO", "CO.CY.YO"),
+  c("SU.SC.HE", "CO.SC.HE"),
+  c("SU.SC.SH", "CO.SC.SH"),
+  c("SU.SL.AN", "CO.SL.AN"),
+  c("SU.SL.BE", "CO.SL.BE"),
+  c("SU.SL.SH", "CO.SL.SH")
+)
 
-# Create a matrix
-cor_matrix <- matrix(NA, nrow = length(unique(df$A)), ncol = length(unique(df$B)))
-rownames(cor_matrix) <- unique(df$A)
-colnames(cor_matrix) <- unique(df$B)
+# Initialize an empty list to store the results
+results <- list()
 
-# Fill in the correlation matrix with p.adjusted sig values
-for (i in 1:nrow(cor_matrix)) {
-  for (j in 1:ncol(cor_matrix)) {
-    a <- rownames(cor_matrix)[i]
-    b <- colnames(cor_matrix)[j]
-    value <- df[df$A == a & df$B == b, "p.adjusted"]
-    if (length(value) > 0) {
-      cor_matrix[i, j] <- value
-    }
-  }
+# Loop over each pair
+for(i in seq_along(pairs)) {
+  pair <- pairs[[i]]
+  
+  dat$Group = metdat$Group
+  dat_subset <- dat[dat$Group %in% pair, ]
+  dat_subset$Group <- NULL
+  
+  metdat_subset <- metdat[metdat$Group %in% pair, ]
+  
+  # Perform the pairwise comparison
+  results[[i]] <- pairwise.adonis(dat_subset, 
+                                  metdat_subset$Group, 
+                                  sim.function = "vegdist",
+                                  sim.method = "bray",
+                                  reduce = NULL, perm = 10000)
 }
 
-# Clean up by removing unnecessary objects generated from the loop
-rm(a, b, i, j, value)
+# Convert the list of results to a data frame
+results_df <- do.call(rbind, lapply(results, function(x) data.frame(t(unlist(x)))))
 
-print(cor_matrix)
+print(results_df)
 
 # Clean up by removing unnecessary objects
-rm(metdat, dat, perma, df, cor_matrix)
+# rm(metdat, dat, pairs, i, dat_subset, metdat_subset, results, results_df)
+
 ```
 
 ### Upset plot using UpsetR
@@ -634,13 +674,18 @@ upset_plot <- upset(temp_df,
                     point.size=2
                     )
 
-# Print the UpSet plot
-print(upset_plot)
+# Create a plot for alpha diversity
+# Open a new PDF graphics device
+# pdf(file = "Fig8_Tree_ITS.pdf", width=12,height=5)
+# Print the ggtree plot
+print(p)
+
+# Close the PDF device and save the plot to a file
+# dev.off()
 
 # Clean up by removing unnecessary objects
-# rm(B, B2, D, E, binary_fun, temp_df, upset_plot, physeq.Sugarbeet.group)
+# rm(B, B2, D, E, binary_fun, temp_df, upset_plot, physeq.Sugarbeet.group, upset_plot)
 ```
-
 
 
 ```{r phyloseq_plot_bar, warning=FALSE, message=FALSE}
@@ -686,7 +731,7 @@ p + geom_bar(aes(), stat = "identity", position = "stack") +
         axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
         axis.title.y = element_text(color="black", size=15,face="bold"), legend.position = "right") # + guides(fill = guide_legend(nrow = 4))
 
-rm(p, data, remainder, medians,glom, physeq3, physeq2)
+# rm(p, data, remainder, medians,glom, physeq3, physeq2)
 ```
 
 #### Linear discriminant analysis effect size (LEFSe)

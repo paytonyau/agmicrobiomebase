@@ -4,7 +4,7 @@ output:
   pdf_document: default
   html_document:
     df_print: paged
-date: "2023-08-23"
+date: "2023-09-23"
 ---
 
 ## ITS of Wheat
@@ -26,10 +26,9 @@ library("qiime2R")
 #   install.packages("BiocManager")
 # BiocManager::install("phyloseq")
 library("phyloseq")
-
+# install.packages("tidyverse")
 library("tidyverse")
-
-
+# install.packages("ggpubr")
 library("ggpubr")
 ```
 
@@ -42,6 +41,14 @@ physeq.a <- qza_to_phyloseq(
   metadata = "ITS/meta-table.txt"
 )
 physeq.a ## confirm the object
+
+
+## (3A) Merge the replicate samples for each Group
+physeq.a.group = merge_samples(physeq.a, "Group") # Sum between replicate samples
+
+# (3B) repair factors in the sample metadata
+sample_data(physeq.a.group)$Group <- levels(sample_data(physeq.a)$Group)[get_variable(physeq.a.group, "Group")]
+sample_data(physeq.a.group)$Soil <- levels(sample_data(physeq.a)$Soil)[get_variable(physeq.a.group, "Soil")]
 ```
 
 ## Assessing ASV Distribution (merged and filtered)
@@ -84,7 +91,7 @@ Beta diversity is a metric used in microbial community studies to assess species
 NMDS <- ordinate(physeq = physeq.a, method = "NMDS", distance = "bray")
 
 # pdf
-# pdf(file = "bata_ITS.pdf", width = 9,height = 8)
+# pdf(file = "Fig7A_bata_ITS.pdf", width = 9,height = 8)
 # Plot ordination
 plot_ordination(
   physeq = physeq.a,
@@ -126,10 +133,10 @@ alpha.object <- cbind(
 )
 
 #### pdf
-# pdf(file = "Alpha_ITS.pdf", width = 9,height = 5)
+# pdf(file = "Fig7B_Alpha_ITS.pdf", width = 8,height = 5)
 # Create a plot for alpha diversity
 ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group)) + 
-    scale_color_brewer(palette = "Paired") +
+  scale_color_brewer(palette = "Paired") +
   theme_classic() + 
   labs(
     x = element_blank(),                     # No x-axis label
@@ -148,6 +155,7 @@ ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group)) +
   ) 
 # Close the PDF device and save the plot to a file
 # dev.off()
+
 
 # Clean up by removing the alpha.object
 rm(alpha.object)
@@ -213,13 +221,6 @@ library("plyr")
 
 ```{r Bar, warning=FALSE, message=FALSE}
 # https://github.com/joey711/phyloseq/issues/901
-
-## (3A) Merge the replicate samples for each Group
-physeq.a.group = merge_samples(physeq.a, "Group") # Sum between replicate samples
-
-# (3B) repair factors in the sample metadata
-sample_data(physeq.a.group)$Group <- levels(sample_data(physeq.a)$Group)[get_variable(physeq.a.group, "Group")]
-sample_data(physeq.a.group)$Soil <- levels(sample_data(physeq.a)$Soil)[get_variable(physeq.a.group, "Soil")]
 
 # Filter taxa with mean abundance > 0.1
 physeq2 = filter_taxa(physeq.a.group, function(x) mean(x) > 0.1, TRUE)
@@ -319,12 +320,12 @@ data_long <- melt(B2, id.vars = "name", variable.name = "Level", value.name = "T
 
 # Plot the data as a line graph using ggplot
 # Open a new PDF graphics device
-# pdf(file = "line_graph_ITS.pdf", width=8,height=5)
+# pdf(file = "Fig7C_line_graph_ITS.pdf", width=8,height=5)
 ggplot(data_long, aes(x = Level, y = Taxa, color = name, group = name)) +
   geom_line() +
   geom_point(size = 4) +
   labs(x = "Taxonomic Level", y = "Count") +
-  theme_classic() + 
+  theme_classic() +   scale_color_brewer(palette = "Paired") +
   theme(
     text = element_text(size = 19, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
@@ -452,8 +453,14 @@ upset_plot <- upset(temp_df,
                     point.size=2
                     )
 
+# Open a new PDF graphics device
+# pdf(file = "Fig7D_UpSet_ITS.pdf", width=8,height=5)
+
 # Print the UpSet plot
 print(upset_plot)
+
+# Close the PDF device and save the plot to a file
+# dev.off()  
 ```
 
 ### Phylogenetic tree
@@ -495,8 +502,15 @@ p <- ggtree(GP.chl, ladderize = TRUE) +
         legend.position = "none"
         )
 
+
+# Open a new PDF graphics device
+# pdf(file = "Fig8_Tree_ITS.pdf", width=8,height=5)
 # Print the ggtree plot
 print(p)
+
+# Close the PDF device and save the plot to a file
+# dev.off() 
+
 ```
 
 Fusarium equiseti is a fungal species and plant pathogen on a varied range of crops. It is considered to be a weak pathogen on cereals and is occasionally found to be associated with ‘Fusarium head blight’ infected kernels. It is commonly found in tropical and sub-tropical areas. (draft)
