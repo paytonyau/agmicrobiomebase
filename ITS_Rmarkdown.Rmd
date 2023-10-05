@@ -1,14 +1,15 @@
 ---
-title: ITS of Wheat
+title: "The UK Crop Microbiome Cryobank (ITS - Wheat)"
 output:
   pdf_document: default
   html_document:
     df_print: paged
-date: "2023-09-23"
+date: "2023-10-03"
 ---
 
 ## ITS of Wheat
-The relationship between fungi and wheat encompasses significant importance in agricultural ecosystems, transcending beyond the realm of infections. The coexistence of these two entities profoundly impacts agricultural productivity, with the specter of wheat root rot disease, wrought by soil-borne fungal pathogens, casting a formidable shadow over global crop yields, resulting in staggering annual economic losses. In this case study, we investigated the nexus between rhizosphere soil fungal diversity and wheat roots in "normal" condition to find out the abundance of soil-borne fungal pathogens. 
+
+The relationship between fungi and wheat encompasses significant importance in agricultural ecosystems, transcending beyond the realm of infections. The coexistence of these two entities profoundly impacts agricultural productivity, with the specter of wheat root rot disease, wrought by soil-borne fungal pathogens, casting a formidable shadow over global crop yields, resulting in staggering annual economic losses. In this case study, we investigated the nexus between rhizosphere soil fungal diversity and wheat roots in "normal" condition to find out the abundance of soil-borne fungal pathogens.
 
 ### Qiime2 to Phyloseq
 
@@ -52,6 +53,7 @@ sample_data(physeq.a.group)$Soil <- levels(sample_data(physeq.a)$Soil)[get_varia
 ```
 
 ## Assessing ASV Distribution (merged and filtered)
+
 We evaluated the number of Amplicon Sequence Variants (ASVs) after merging and filtering, as well as visualised the raw read counts per sample within each group. This provided insights into the distribution of ASVs and the sequencing depth of each sample, allowing for a comprehensive assessment of data quality and quantity.
 
 ```{r Install_ASV, warning=FALSE, message=FALSE}
@@ -67,6 +69,8 @@ ASV <- sample_sums(physeq.a)
 ASV <- as.data.frame(ASV)
 ASV$Group <- physeq.a@sam_data$Group
 
+#### pdf
+# pdf(file = "Suppl_ASV_ITS.pdf", width = 8,height = 5)
 ggplot(ASV, aes(x = Group, y = ASV,  colour = Group))+
   scale_color_brewer(palette = "Paired") +
   geom_point(alpha = 1, position = "jitter", size = 4) + 
@@ -80,10 +84,14 @@ ggplot(ASV, aes(x = Group, y = ASV,  colour = Group))+
         axis.title.y = element_text(color="black", size=15,face="bold"),
         legend.position = "none")
 
+# Close the PDF device and save the plot to a file
+# dev.off()
+
 rm(ASV)
 ```
 
 ### Beta diversity
+
 Beta diversity is a metric used in microbial community studies to assess species composition dissimilarity between samples, providing insights into microbial community dynamics and their ecological significance. By quantifying variation in community structure and employing visualisation techniques, beta diversity analysis allows comparisons across habitats or treatments, revealing key drivers of community variation and functional implications. It aids our understanding of microbial assemblages and their responses to environmental changes in ecology, environmental science, and human health research.
 
 ```{r Beta diversity , message=FALSE, warning=FALSE}
@@ -91,15 +99,16 @@ Beta diversity is a metric used in microbial community studies to assess species
 NMDS <- ordinate(physeq = physeq.a, method = "NMDS", distance = "bray")
 
 # pdf
-# pdf(file = "Fig7A_bata_ITS.pdf", width = 9,height = 8)
+# pdf(file = "Fig7A_bata_ITS.pdf", width = 8,height = 5)
 # Plot ordination
-plot_ordination(
-  physeq = physeq.a,
-  ordination = NMDS,
-  color = "Group",
-  shape = "Group"
+plot_ordination(physeq = physeq.a,
+                      ordination = NMDS,
+                      color = "Group",
+                      shape = "Group"
 ) +
   theme_classic() + 
+    scale_color_brewer(palette = "Paired") + 
+  scale_fill_brewer(palette = "Paired") + 
   geom_point(aes(color = Group), alpha = 1, size = 3) +
   theme(
     text = element_text(size = 18, colour = "black"), 
@@ -110,8 +119,6 @@ plot_ordination(
     axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
     axis.title.x = element_text(color = "black", size = 20, face = "bold")
   ) + stat_ellipse(geom = "polygon", type="norm", alpha=0.25, aes(fill = Group)) +
-  scale_color_brewer(palette = "Paired") + 
-  scale_fill_brewer(palette = "Paired") + 
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
 # Close the PDF device and save the plot to a file
 # dev.off()
@@ -124,7 +131,7 @@ rm(NMDS)
 
 Alpha diversity is a fundamental concept in ecology and refers to the diversity or richness of species within a specific community or habitat. In the context of microbial ecology, alpha diversity represents the diversity of microorganisms within a given sample or microbiome. It provides insights into the variety and evenness of microbial species present in a particular environment. Common measures of alpha diversity include species richness, which counts the number of unique species, and evenness, which assesses the distribution of species abundances. Alpha diversity is crucial for understanding the stability, resilience, and functional potential of microbial communities. It can be influenced by various factors, including environmental conditions, host factors, and perturbations. By comparing alpha diversity across different samples or experimental groups, researchers can gain insights into the impact of factors such as disease, habitat changes, or interventions on microbial community structure.
 
-```{r Alpha diversity , message=FALSE, warning=FALSE}
+```{r Alpha diversity, message=FALSE, warning=FALSE}
 
 # available measurements [c("Observed", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher")]
 alpha.object <- cbind(
@@ -162,6 +169,7 @@ rm(alpha.object)
 ```
 
 ### Pairwise comparison using PERMANOVA
+
 Pairwise PERMANOVA is a statistical method used to compare multiple groups or treatments in ecological and microbial community studies. It assesses dissimilarity between samples and provides a p-value to determine the significance of observed differences. This approach is valuable for targeted group comparisons, allowing researchers to investigate the effects of specific factors on microbial communities and uncover significant variations in community composition. By considering within- and between-group variation, pairwise PERMANOVA provides robust statistical analysis and insights into microbial community dynamics and functioning.
 
 ```{r Install PERMANOVA, warning=FALSE, message=FALSE}
@@ -212,7 +220,8 @@ print(cor_matrix)
 ```
 
 ### Bar plot - relative abundance
-Bar plots illustrating relative abundance in microbiome enable to visually represent the proportions of different microbial taxa within a given sample. Each bar corresponds to a specific taxonomic group, with its height indicating the relative abundance of that group in the microbiome. 
+
+Bar plots illustrating relative abundance in microbiome enable to visually represent the proportions of different microbial taxa within a given sample. Each bar corresponds to a specific taxonomic group, with its height indicating the relative abundance of that group in the microbiome.
 
 ```{r Install Bar, warning=FALSE, message=FALSE}
 # install.packages("plyr")
@@ -265,14 +274,17 @@ p + geom_bar(aes(), stat = "identity", position = "stack") +
 ```
 
 ##### Number of taxa in groups
+
 Examining the cumulative count of taxa within a particular taxonomic group for each distinct subgroup involves the summation of the total number of taxa within that group while eliminating any overlapping taxa based on their names within individual subgroups. This process aids in comprehending the dynamics of microbiome populations.
 
 ```{R install_taxa, warning=FALSE, message=FALSE}
+
 library("dplyr")
 library("reshape2")
 ```
 
 ```{R num_taxa, warning=FALSE, message=FALSE}
+
 physeq <- merge_samples(physeq.a, "Group", fun = sum)
 gentab_levels <- list()
 observationThreshold <- 1
@@ -330,8 +342,10 @@ ggplot(data_long, aes(x = Level, y = Taxa, color = name, group = name)) +
     text = element_text(size = 19, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
     axis.line = element_line(colour = 'black', size = 1.5),
-    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
-    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 14, face = "bold"), 
     axis.title.x = element_text(color = "black", size = 14, face = "bold")
   ) +
@@ -344,7 +358,9 @@ ggplot(data_long, aes(x = Level, y = Taxa, color = name, group = name)) +
 ```
 
 ### Plotting the top 10 taxa at family level
+
 Generating a visual representation through the plotting of the top 10 taxa at the family level offers a concise overview of the predominant microbial groups within a dataset. This approach is instrumental in identifying and emphasizing significant contributors to the structure and function of microbial communities across diverse groups or conditions.
+
 ```{r top10, warning=FALSE, message=FALSE}
 
 ## Transform normalised ASVs to proportions 
@@ -382,6 +398,7 @@ rm(proportions, Top10ASVs, Taxtab10, Rgsm10, title)
 ```
 
 ### Upset plot using UpsetR
+
 When it comes to representing sets visually, the go-to option is usually a Venn diagram. These diagrams work well when dealing with up to five sets, providing a clear visualisation. However, as the dataset expands, such as when dealing with five sets, deriving the desired insights from the diagram becomes more complex. As a result, considering an UpSet graph for data visualisation becomes an appealing choice. UpSet graphs offer a more streamlined way to display intersections and complements, particularly when dealing with larger datasets or multiple sets. This option ensures a more intuitive and informative representation of the data.
 
 ```{r install UpSetR, warning=FALSE, message=FALSE}
@@ -513,14 +530,13 @@ print(p)
 
 ```
 
-Fusarium equiseti is a fungal species and plant pathogen on a varied range of crops. It is considered to be a weak pathogen on cereals and is occasionally found to be associated with ‘Fusarium head blight’ infected kernels. It is commonly found in tropical and sub-tropical areas. (draft)
+Fusarium equiseti is a fungal species and plant pathogen on a varied range of crops. It is considered to be a weak pathogen on cereals and is occasionally found to be associated with 'Fusarium head blight' infected kernels. It is commonly found in tropical and sub-tropical areas. (draft)
 
 Fusarium nurragi has been isolated from heath species growing on the coasts in the Australian states of Victoria and Western Australia. Although F. nurragi has not been assigned to a Fusarium species complex, it is closely related to the F. heterosporum and F. tricinctum species complexes. (draft)
 
 Fusarium waltergamsii ....
 
-Fusarium culmorum and Fusarium tonkinense were identified in only one of the samples. This could potentially be attributed to errors in the Polymerase Chain Reaction (PCR) process or limitations inherent to ITS sequencing. 
-
+Fusarium culmorum and Fusarium tonkinense were identified in only one of the samples. This could potentially be attributed to errors in the Polymerase Chain Reaction (PCR) process or limitations inherent to ITS sequencing.
 
 ```{r fungi_2, warning=FALSE, message=FALSE}
 # Plotting for the abundance of one specific fungi
@@ -612,8 +628,8 @@ p4 <- ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
         axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
         axis.title.y = element_text(color="black", size=12,face="bold"), 
         legend.position = "none") 
-# Combine the plots
-# Arrange the plots
+
+# Combine and Arrange the plots
 fig <- ggarrange(p1, p2, p3, p4, labels = c("A", "B", "C", "D"), size = 5,
                  ncol = 2, nrow = 2)
 

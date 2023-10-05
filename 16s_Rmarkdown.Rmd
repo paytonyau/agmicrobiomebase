@@ -1,7 +1,7 @@
 ---
 title: "The UK Crop Microbiome Cryobank"
 author: "Payton Yau"
-date: "2023-08-10"
+date: "2023-10-05"
 output:
   pdf_document: default
   html_document: default
@@ -9,11 +9,11 @@ output:
 
 # The UK Crop Microbiome Cryobank
 
-The UK Crop Microbiome Cryobank integrates genomic (DNA) data with a cryobank collection of samples for the soil microbiomes of the UK major crop plant systems. For this project, the microbiomes are from the rhizosphere (the soil surrounding the crop plant roots) and from bulk soil (soil outside the rhizosphere). The Cryobank  provides a facility for researchers to source data and samples, including cryo-preserved microbial material, as well as genomic and metagenomic sequences from different soil microbiome environments. 
+The UK Crop Microbiome Cryobank integrates genomic (DNA) data with a cryobank collection of samples for the soil microbiomes of the UK major crop plant systems. For this project, the microbiomes are from the rhizosphere (the soil surrounding the crop plant roots) and from bulk soil (soil outside the rhizosphere). The Cryobank provides a facility for researchers to source data and samples, including cryo-preserved microbial material and genomic and metagenomic sequences from different soil microbiome environments.
 
-An integrated cryopreserved collection of samples (rhizophere and bulk soil, bacterial and fungal isolates and DNA) from crop plant systems (barley, oats, oil seed rape, sugar beet and wheat) An open access AgMicrobiomeBase of microbiome data and associated meta-data linked to current public resources such as MGnify.
+An integrated cryopreserved collection of samples (rhizosphere and bulk soil, bacterial and fungal isolates and DNA) from crop plant systems (barley, oats, oil seed rape, sugar beet and wheat). An open access AgMicrobiomeBase of microbiome data and associated meta-data linked to current public resources such as MGnify.
 
-#### Qiime2 to Phyloseq
+#### Convert Qiime2 objects to Phyloseq objects
 
 Qiime2 is a powerful tool for microbial community analysis which we used for sequencing analysis; Phyloseq is a package in R that provides a flexible and comprehensive framework for the analysis of high-throughput sequencing data. To convert Qiime2 data to Phyloseq, users can use an external package called Qiime2R for the conversion. Qiime2R facilitates the transformation of Qiime2 data structures into phyloseq data structures within the R programming environment.
 
@@ -66,85 +66,7 @@ physeq.ori <- subset_samples(physeq, Analysis == "Include")
 rm(physeq)
 ```
 
-#### Bata diversity
-
-Beta diversity is a measure of the differences or similarities between two or more microbial communities or samples. It quantifies the degree of variation in microbial composition among different samples. Beta diversity analysis can help identify patterns in the distribution of microbial communities and reveal relationships between different factors such as environment, host, and other ecological variables.
-
-Non-Metric Multidimensional Scaling (NMDS) and Principal Coordinates Analysis (PCoA) are both ordination techniques used in analyzing beta diversity, which captures the variation in species composition between different samples or sites. However, they have some differences in terms of methodology and interpretation:
-
-**NMDS (Non-Metric Multidimensional Scaling)** NMDS is a method that aims to represent the pairwise dissimilarities between samples in a lower-dimensional space while preserving the rank order of these dissimilarities. It is considered a non-metric method because it doesn't assume a linear relationship between the original dissimilarities and the distances in the ordination space. NMDS emphasizes preserving the relative ranking of dissimilarities, making it more suitable for cases where the distances between samples are not well-preserved in a lower-dimensional space. NMDS produces an ordination plot where the positions of samples are arranged based on their pairwise dissimilarities. The distances between points on the plot are not directly interpretable but reflect the similarities or dissimilarities between samples.
-
-**PCoA (Principal Coordinates Analysis)** PCoA is also used to visualise and analyse beta diversity by representing samples in a lower-dimensional space. It is a type of metric multidimensional scaling. PCoA is based on a metric approach, which means it attempts to preserve the actual distances between samples as closely as possible in the lower-dimensional space. PCoA produces an ordination plot where the distances between points reflect the actual dissimilarities between samples. Unlike NMDS, PCoA may not perform as well with non-linear or rank-based dissimilarity measures.
-
-### bata diversity - before normalisation
-
-```{r ggplot2, warning=FALSE, message=FALSE}
-# install.packages("ggplot2")
-library("ggplot2")
-```
-
-```{r beta_before_1, warning=FALSE, message=FALSE}
-# Based on Type and Soil.Location
-# method options: NMDS / PCoA
-NMDS <- ordinate(physeq = physeq.ori, method = "NMDS", distance = "bray")
-
-# Plot ordination
-# pdf(file = "bata_ori.pdf", width = 9,height = 8)
-plot_ordination(
-  physeq = physeq.ori,
-  ordination = NMDS,
-  color = "Type",
-  shape = "Soil.Location"
-) +
-  theme_classic() + 
-  geom_point(aes(color = Type), alpha = 1, size = 3) +
-  theme(
-    text = element_text(size = 18, colour = "black"), 
-    axis.ticks = element_line(colour = "black", size = 1.1),
-    axis.line = element_line(colour = 'black', size = 1.1),
-    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
-    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
-    axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
-    axis.title.x = element_text(color = "black", size = 20, face = "bold")
-  ) +
-  scale_color_brewer(palette = "Dark2") + 
-  scale_fill_brewer(palette = "Dark2") + 
-  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
-
-# Close the PDF device and save the plot to a file
-# dev.off()  
-```
-
-```{r beta_before_2, warning=FALSE, message=FALSE}
-##### based on Plate and Type
-# Plot ordination
-# pdf(file = "bata_ori_plate.pdf", width = 9,height = 8)
-plot_ordination(
-  physeq = physeq.ori,
-  ordination = NMDS,
-  color = "Plate",
-  shape = "Type"
-) +
-  theme_classic() + 
-  geom_point(aes(color = Plate), alpha = 1, size = 3.5) +
-  theme(
-    text = element_text(size = 18, colour = "black"), 
-    axis.ticks = element_line(colour = "black", size = 1.1),
-    axis.line = element_line(colour = 'black', size = 1.1),
-    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
-    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
-    axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
-    axis.title.x = element_text(color = "black", size = 20, face = "bold")
-  ) + 
-  scale_color_brewer(palette = "Dark2") + 
-  scale_fill_brewer(palette = "Dark2") + 
-  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
-
-# Close the PDF device and save the plot to a file
-# dev.off()
-```
-
-#### normalisation using ConQUR
+#### Batch effects correction using Constrained Quantile Normalisation (ConQUR) 
 
 Constrained Quantile Normalisation (ConQUR) <https://www.nature.com/articles/s41467-022-33071-9> is a normalisation technique used in high-throughput sequencing data, particularly in microbiome studies. It is a type of **quantile normalisation** approach that preserves the relative abundances of taxa between samples while simultaneously removing systematic technical variations that can arise due to differences in sequencing depth, PCR amplification bias, or other factors. ConQUR uses kernel density estimation to model the distribution of taxon abundances across all samples, and then constrains the normalisation process to maintain the relative position of each taxon within that distribution.
 
@@ -172,7 +94,11 @@ summary(D)
 
 # Correct for batch effects using ConQuR package
 options(warn=-1) # required to call
-taxa_correct1 = ConQuR(tax_tab = B, batchid = batchid, covariates = D, batch_ref="1") #  warning messages may appear & it can be ignored
+taxa_correct1 = ConQuR(tax_tab = B, 
+                       batchid = batchid, 
+                       covariates = D, 
+                       batch_ref="1"
+                       ) #  warning messages may appear & it can be ignored
 
 # Transpose the corrected matrix and convert it to a data frame
 taxa_correct2 <- t(taxa_correct1)
@@ -191,10 +117,10 @@ rm(B, D, batchid, taxa_correct1, taxa_correct2, ASV, TAXA, sampledata, to_skip)
 ```
 
 #### Subgroupping
+
 ```{r tidyverse, warning=FALSE, message=FALSE}
 # install.packages("tidyverse")
 library("tidyverse")
-
 library("reshape2")
 ```
 
@@ -220,49 +146,40 @@ sample_data(physeq.Sugarbeet.group)$Soil <- levels(sample_data(physeq.norm)$Soil
 physeq.Sugarbeet.vs <- physeq.Sugarbeet %>% subset_samples(Group %in% c("SU.CL.BO", "SU.CL.YO"))
 ```
 
-## bata-diversity - after the normalisation
-```{r Bata_after_1, warning=FALSE, message=FALSE}
-### based on Type and Soil.Location
+## Bata diversity - before and after the normalisation
+
+Beta diversity is a measure of the differences or similarities between two or more microbial communities or samples. It quantifies the degree of variation in microbial composition among different samples. Beta diversity analysis can help identify patterns in the distribution of microbial communities and reveal relationships between different factors such as environment, host, and other ecological variables.
+
+Non-Metric Multidimensional Scaling (NMDS) and Principal Coordinates Analysis (PCoA) are both ordination techniques used in analyzing beta diversity, which captures the variation in species composition between different samples or sites. However, they have some differences in terms of methodology and interpretation:
+
+**NMDS (Non-Metric Multidimensional Scaling)** NMDS is a method that aims to represent the pairwise dissimilarities between samples in a lower-dimensional space while preserving the rank order of these dissimilarities. It is considered a non-metric method because it doesn't assume a linear relationship between the original dissimilarities and the distances in the ordination space. NMDS emphasizes preserving the relative ranking of dissimilarities, making it more suitable for cases where the distances between samples are not well-preserved in a lower-dimensional space. NMDS produces an ordination plot where the positions of samples are arranged based on their pairwise dissimilarities. The distances between points on the plot are not directly interpretable but reflect the similarities or dissimilarities between samples.
+
+**PCoA (Principal Coordinates Analysis)** PCoA is also used to visualise and analyse beta diversity by representing samples in a lower-dimensional space. It is a type of metric multidimensional scaling. PCoA is based on a metric approach, which means it attempts to preserve the actual distances between samples as closely as possible in the lower-dimensional space. PCoA produces an ordination plot where the distances between points reflect the actual dissimilarities between samples. Unlike NMDS, PCoA may not perform as well with non-linear or rank-based dissimilarity measures.
+
+Here, we use NMDS approach for Beta diversity. 
+
+#### Before normalisation
+```{r ggplot2, warning=FALSE, message=FALSE}
+# install.packages("ggplot2")
+library("ggplot2")
+```
+
+```{r Beta_1, warning=FALSE, message=FALSE}
+##### based on Plate and Type - before the normalisation
 # method options: NMDS / PCoA
-NMDS <- ordinate(physeq = physeq.SU, method = "NMDS", distance = "bray")
+NMDS1 <- ordinate(physeq = physeq.ori, 
+                  method = "NMDS", 
+                  distance = "bray"
+                  )
 
-groups_to_ellipse <- c("SC.HE", "CY.BU") # Replace with your actual group names
-physeq.SU.subset <- subset_samples(physeq.SU, Soil.Location %in% groups_to_ellipse)
 
-# Convert physeq.SU.subset to a data frame
-df <- sample_data(physeq.SU.subset)
-
-my_palette <- c("darkgoldenrod", "limegreen")
-
-# Plot ordination
-# pdf(file = "bata_SU.pdf", width = 9,height = 8)
-
-plot_ordination <- plot_ordination(
-  physeq = physeq.SU,
-  ordination = NMDS,
-  color = "Type",
-  shape = "Soil.Location"
-)
-
-# Create the ordination plot
-plot_ordination <- plot_ordination(physeq = physeq.SU, 
-                                   ordination = NMDS, 
-                                   color = "Type", 
-                                   shape = "Soil.Location")
-
-# Extract ordination scores from the plot
-df <- plot_ordination$data
-
-# Subset the data for the groups to ellipse
-df_subset <- df[df$Soil.Location %in% groups_to_ellipse, ]
-
-# Add the ellipse for the subsetted data
-plot_ordination <- plot_ordination + 
-  stat_ellipse(data = df_subset, type="norm", alpha=0.25, 
-               aes(group = Soil.Location), linetype = 1, 
-               size = 0.8, colour = "purple4") +
+P1 <- plot_ordination(physeq = physeq.ori,
+                      ordination = NMDS1,
+                      color = "Plate",
+                      shape = "Type"
+                      ) + 
   theme_classic() + 
-  geom_point(aes(color = Type), alpha = 1, size = 3.5) +
+  geom_point(aes(color = Plate), alpha = 1, size = 3.5) +
   theme(
     text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
@@ -272,34 +189,28 @@ plot_ordination <- plot_ordination +
     axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, 
                                size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
-    axis.title.x = element_text(color = "black", size = 20, face = "bold")) +
-  scale_color_manual(values = my_palette) +
-  scale_fill_manual(values = my_palette) +
+    axis.title.x = element_text(color = "black", size = 20, face = "bold")) + 
+  scale_color_brewer(palette = "Dark2") + 
+  scale_fill_brewer(palette = "Dark2") + 
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
-
-plot_ordination
 
 # Close the PDF device and save the plot to a file
 # dev.off()
-  
-# Clean up by removing objects that are no longer needed
-# rm(NMDS, physeq.SU)
 
-```
-
-```{r Bata_after_2, warning=FALSE, message=FALSE}
-#### Based on Plate and Type
+##### based on Plate and Type - after the normalisation
 # method options: NMDS / PCoA
-NMDS <- ordinate(physeq = physeq.norm, method = "NMDS", distance = "bray")
+NMDS2 <- ordinate(physeq = physeq.norm, 
+                  method = "NMDS", 
+                  distance = "bray"
+                  )
 
 # Plot ordination
 # pdf(file = "bata_norm_plate.pdf", width = 9,height = 8)
-plot_ordination(
-  physeq = physeq.norm,
-  ordination = NMDS,
-  color = "Plate",
-  shape = "Type"
-) +
+P2 <- plot_ordination(physeq = physeq.norm,
+                ordination = NMDS2,
+                color = "Plate",
+                shape = "Type"
+                ) +
   theme_classic() + 
   geom_point(aes(color = Plate), alpha = 1, size = 3.5) +
   theme(
@@ -317,11 +228,93 @@ plot_ordination(
   scale_fill_brewer(palette = "Dark2") + 
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
 
+# Combine and arrange the plots
+fig <- ggarrange(P1, P2, labels = c("A", "B"), size = 5,
+                 ncol = 2, nrow = 1)
+
+# Add labels
+fig <- annotate_figure(fig)
+
+
+# Plot ordination
+# pdf(file = "bata_ori_plate.pdf", width = 9,height = 8)
+# Print the figure
+print(fig)
+
 # Close the PDF device and save the plot to a file
 # dev.off()
 ```
 
+#### based on Type and Soil.Location on wheat and bulk soil
+
+```{r Bata_2, warning=FALSE, message=FALSE}
+# method options: NMDS / PCoA
+NMDS <- ordinate(physeq = physeq.SU, 
+                 method = "NMDS", 
+                 distance = "bray"
+                 )
+
+groups_to_ellipse <- c("SC.HE", "CY.BU") # Replace with your actual group names
+
+physeq.SU.subset <- subset_samples(physeq.SU, Soil.Location %in% groups_to_ellipse)
+
+# Convert physeq.SU.subset to a data frame
+df <- sample_data(physeq.SU.subset)
+
+my_palette <- c("darkgoldenrod", "limegreen")
+
+# Create the ordination plot
+plot_ordination <- plot_ordination(physeq = physeq.SU, 
+                                   ordination = NMDS, 
+                                   color = "Type", 
+                                   shape = "Soil.Location")
+
+# Extract ordination scores from the plot
+df <- plot_ordination$data
+
+# Subset the data for the groups to ellipse
+df_subset <- df[df$Soil.Location %in% groups_to_ellipse, ]
+
+# Add the ellipse for the subsetted data
+
+plot_ordination <- plot_ordination + 
+  stat_ellipse(data = df_subset, 
+               type="norm", 
+               alpha=0.25, 
+               aes(group = Soil.Location), 
+               linetype = 1, 
+               size = 0.8, 
+               colour = "purple4"
+               ) +
+  theme_classic() + 
+  geom_point(aes(color = Type), alpha = 1, size = 3.5) +
+  theme(
+    text = element_text(size = 18, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
+    axis.title.x = element_text(color = "black", size = 20, face = "bold")) +
+  scale_color_manual(values = my_palette) +
+  scale_fill_manual(values = my_palette) +
+  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
+
+# Plot ordination
+pdf(file = "bata_SU.pdf", width = 9,height = 6)
+plot_ordination
+# Close the PDF device and save the plot to a file
+dev.off()
+  
+# Clean up by removing objects that are no longer needed
+# rm(NMDS, physeq.SU)
+
+```
+
 #### Alpha diversity
+
 Alpha diversity refers to the diversity of species within a single ecosystem or habitat. It is measured by analysing the number and distribution of species within a specific area or sample. Alpha diversity indices take into account the richness (number of species) and evenness (relative abundance of species) of a community. It provides insights into the complexity and stability of ecosystems. A high level of alpha diversity indicates a more complex ecosystem with a greater number of species, which is often associated with greater ecological resilience and stability. In contrast, a low level of alpha diversity can be an indicator of ecosystem disturbance, degradation, or vulnerability.
 
 Please noted that different types of alpha diversity metrics capture various aspects of biodiversity within a specific community. Here's a brief explanation of each:
@@ -360,10 +353,13 @@ my_palette <- c("darkgoldenrod", "limegreen")
 # Create a plot for alpha diversity
 # pdf(file = "Fig5B_alpha.pdf", width = 8,height = 5)
 
-ggplot(data=selected_columns2) +
+ggplot(data=selected_columns2) + 
   geom_boxplot(aes(x=`Soil/Location`, y= Shannon, fill = Type),
-               size = 1.1, width = 0.825, color = "grey20", 
-               position = position_dodge(0.9)) +
+               size = 1.1, 
+               width = 0.825, 
+               color = "grey20", 
+               position = position_dodge(0.9)
+               ) +
   scale_fill_manual(values = my_palette) +
   labs(x = element_blank(),                     # No x-axis label
        y = "Alpha Diversity (Shannon)"          # y-axis label
@@ -389,7 +385,7 @@ ggplot(data=selected_columns2) +
 # rm(alpha.object, selected_columns2)
 ```
 
-#### Calculate the number of taxa on each level and each group
+#### Calculate the number of taxa on each level and each group (Replot required)
 
 The purpose of this process is to visualise the distribution of the number of matched abundance across different groups and to identify any patterns in the distribution of the processed abundance within individual group.
 
@@ -401,7 +397,8 @@ gentab_levels <- list()
 observationThreshold <- 1
 
 # Define the taxonomic levels
-genus_levels <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+genus_levels <- c("Kingdom", "Phylum", "Class", "Order", 
+                  "Family", "Genus", "Species")
 
 # loop through all the taxonomic levels
 for (level in genus_levels) {
@@ -440,65 +437,72 @@ print(B2)
 rm(gentab_levels, BB)
 ```
 
-#### Calculate the sum of ASV (Sugarbeet)
-```{r ASV_individual, warning=FALSE, message=FALSE}
-# Calculate the sum of ASVs across samples and create a data frame
-ASV <- sample_sums(physeq.Sugarbeet)
-ASV <- as.data.frame(ASV)
-ASV$Sugarbeet <- rownames(ASV)
+#### Pairwise comparison using PERMANOVA
 
-# Remove the suffix from the ASV names
-new_names <- sub("-\\d+$", "", ASV$Sugarbeet)
+Pairwise PERMANOVA is a statistical method used to compare multiple groups or treatments in ecological and microbial community studies. It assesses dissimilarity between samples and provides a p-value to determine the significance of observed differences. This approach is valuable for targeted group comparisons, allowing researchers to investigate the effects of specific factors on microbial communities and uncover significant variations in community composition. By considering within- and between-group variation, pairwise PERMANOVA provides robust statistical analysis and insights into microbial community dynamics and functioning.
 
-# Update the row names of the data frame
-ASV$Sugarbeet <- new_names
-
-# Create a scatter plot with jittered points and overlaid boxplots
-ggplot(ASV, aes(x = Sugarbeet, y = ASV,  colour = Sugarbeet)) +
-  geom_point(alpha = 1, position = "jitter", size = 4) + 
-  geom_boxplot(alpha = 0, colour = "black", size = 0.8) + 
-  theme_classic() + scale_color_brewer(palette = "Set3") +
-  theme(text = element_text(size=15, colour = "black"), 
-        axis.ticks = element_line(colour = "black", size = 1.25),
-        axis.line = element_line(colour = 'black', size = 1.25),
-        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black", size = 13),
-        axis.title.y = element_text(color="black", size=15, face="bold"),
-        legend.position = "none")
+```{r PERMANOVA Install, warning=FALSE, message=FALSE}
+# devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")
+library("pairwiseAdonis")
+library("GGally")
 ```
 
-#### Plotting for the abundance of one specific bacteria
-```{r Bacteria, warning=FALSE, message=FALSE}
-# Subset the taxa to Genus from physeq.Sugarbeet 
-physeq.Sugarbeet.genus <- subset_taxa(physeq.Sugarbeet, Genus == "Azospirillum")
+```{r PERMANOVA, warning=FALSE, message=FALSE}
 
-# Calculate the total abundance of Azospirillum for each sample
-meta = physeq.Sugarbeet.genus@sam_data
-otudf = as.data.frame(t(as.data.frame(physeq.Sugarbeet.genus@otu_table)))
-meta$Azospirillum = rowSums(otudf)
+metdat = as.data.frame(as.matrix(physeq.SU@sam_data))
+dat = as.data.frame(t(as.data.frame(physeq.SU@otu_table)))
 
-# Plot a graph of the abundance of Azospirillum for each sample grouped by Group:
-ggplot(subset(meta, Group %in% c("SU.CL.BO","SU.CL.YO",
-                                 "SU.CY.BU","SU.CY.YO",
-                                 "SU.SC.HE","SU.SC.SH",
-                                 "SU.SL.AN","SU.SL.BE",
-                                 "SU.SL.SH")),
-       aes(x = Group, y = Azospirillum,  colour = interaction(Group))) +
-  geom_point(alpha = 1, position = "jitter", size = 4) + 
-  geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
-  theme_classic() +   
-  theme(text = element_text(size=15, colour = "black"), 
-        axis.ticks = element_line(colour = "black", size = 1.25),
-        axis.line = element_line(colour = 'black', size = 1.25),
-        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
-        axis.title.y = element_text(color="black", size=15,face="bold"), legend.position = "none")
+# Define the pairs for comparison
+pairs <- list(
+  c("SU.CL.BO", "CO.CL.BO"),
+  c("SU.CL.YO", "CO.CL.YO"),
+  c("SU.CY.BU", "CO.CY.BU"),
+  c("SU.CY.YO", "CO.CY.YO"),
+  c("SU.SC.HE", "CO.SC.HE"),
+  c("SU.SC.SH", "CO.SC.SH"),
+  c("SU.SL.AN", "CO.SL.AN"),
+  c("SU.SL.BE", "CO.SL.BE"),
+  c("SU.SL.SH", "CO.SL.SH")
+)
+
+# Initialize an empty list to store the results
+results <- list()
+
+# Loop over each pair
+for(i in seq_along(pairs)) {
+  pair <- pairs[[i]]
+  
+  dat$Group = metdat$Group
+  dat_subset <- dat[dat$Group %in% pair, ]
+  dat_subset$Group <- NULL
+  
+  metdat_subset <- metdat[metdat$Group %in% pair, ]
+  
+  # Perform the pairwise comparison
+  results[[i]] <- pairwise.adonis(dat_subset, 
+                                  metdat_subset$Group, 
+                                  sim.function = "vegdist",
+                                  sim.method = "bray",
+                                  reduce = NULL, perm = 100000)
+}
+
+# Convert the list of results to a data frame
+results_df <- do.call(rbind, lapply(results, function(x) data.frame(t(unlist(x)))))
+
+# Add the adjusted p-value
+# "bonferroni", "holm", "hochberg", "hommel", "BH" or "BY" 
+results_df$p.adjusted <- p.adjust(results_df$p.value, method = "BH")
+
+# Print the dataframe to check the new column
+print(results_df)
 
 # Clean up by removing unnecessary objects
-rm(physeq.Sugarbeet.genus, meta, otudf)
+# rm(metdat, dat, pairs, i, dat_subset, metdat_subset, results, results_df)
+
 ```
 
 ### Plotting the top 10 taxa at family level
+
 ```{r Top100_5, warning=FALSE, message=FALSE}
 ## Transform normalised ASVs to proportions 
 proportions = transform_sample_counts(physeq.Sugarbeet.group, function(x) 100 * x/sum(x))
@@ -544,65 +548,8 @@ dev.off()
 # rm(proportions, Top10ASVs, Taxtab10, Rgsm10, title)
 ```
 
-#### Pairwise comparison using PERMANOVA
-Pairwise PERMANOVA is a statistical method used to compare multiple groups or treatments in ecological and microbial community studies. It assesses dissimilarity between samples and provides a p-value to determine the significance of observed differences. This approach is valuable for targeted group comparisons, allowing researchers to investigate the effects of specific factors on microbial communities and uncover significant variations in community composition. By considering within- and between-group variation, pairwise PERMANOVA provides robust statistical analysis and insights into microbial community dynamics and functioning.
-
-```{r PERMANOVA Install, warning=FALSE, message=FALSE}
-# devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")
-library("pairwiseAdonis")
-library("GGally")
-```
-
-```{r PERMANOVA, warning=FALSE, message=FALSE}
-
-metdat = as.data.frame(as.matrix(physeq.SU@sam_data))
-dat = as.data.frame(t(as.data.frame(physeq.SU@otu_table)))
-
-# Define the pairs for comparison
-pairs <- list(
-  c("SU.CL.BO", "CO.CL.BO"),
-  c("SU.CL.YO", "CO.CL.YO"),
-  c("SU.CY.BU", "CO.CY.BU"),
-  c("SU.CY.YO", "CO.CY.YO"),
-  c("SU.SC.HE", "CO.SC.HE"),
-  c("SU.SC.SH", "CO.SC.SH"),
-  c("SU.SL.AN", "CO.SL.AN"),
-  c("SU.SL.BE", "CO.SL.BE"),
-  c("SU.SL.SH", "CO.SL.SH")
-)
-
-# Initialize an empty list to store the results
-results <- list()
-
-# Loop over each pair
-for(i in seq_along(pairs)) {
-  pair <- pairs[[i]]
-  
-  dat$Group = metdat$Group
-  dat_subset <- dat[dat$Group %in% pair, ]
-  dat_subset$Group <- NULL
-  
-  metdat_subset <- metdat[metdat$Group %in% pair, ]
-  
-  # Perform the pairwise comparison
-  results[[i]] <- pairwise.adonis(dat_subset, 
-                                  metdat_subset$Group, 
-                                  sim.function = "vegdist",
-                                  sim.method = "bray",
-                                  reduce = NULL, perm = 10000)
-}
-
-# Convert the list of results to a data frame
-results_df <- do.call(rbind, lapply(results, function(x) data.frame(t(unlist(x)))))
-
-print(results_df)
-
-# Clean up by removing unnecessary objects
-# rm(metdat, dat, pairs, i, dat_subset, metdat_subset, results, results_df)
-
-```
-
 ### Upset plot using UpsetR
+
 When it comes to representing sets visually, the go-to option is usually a Venn diagram. These diagrams work well when dealing with up to five sets, providing a clear visualisation. However, as the dataset expands, such as when dealing with five sets, deriving the desired insights from the diagram becomes more complex. As a result, considering an UpSet graph for data visualisation becomes an appealing choice. UpSet graphs offer a more streamlined way to display intersections and complements, particularly when dealing with larger datasets or multiple sets. This option ensures a more intuitive and informative representation of the data.
 
 ```{r UpsetR_Install, warning=FALSE, message=FALSE}
@@ -687,7 +634,6 @@ print(p)
 # rm(B, B2, D, E, binary_fun, temp_df, upset_plot, physeq.Sugarbeet.group, upset_plot)
 ```
 
-
 ```{r phyloseq_plot_bar, warning=FALSE, message=FALSE}
 # https://github.com/joey711/phyloseq/issues/901
 # Filter taxa with mean abundance > 0.1
@@ -735,11 +681,13 @@ p + geom_bar(aes(), stat = "identity", position = "stack") +
 ```
 
 #### Linear discriminant analysis effect size (LEFSe)
+
 Linear discriminant analysis effect size (LEFSe) is a powerful computational tool commonly used in microbiome analysis to identify microbial biomarkers that are differentially abundant between different experimental groups. Microbiome analysis involves studying the composition and diversity of microbial communities present in various environments, such as the human gut, soil, water, and more. LEFSe is specifically designed to address the challenge of identifying microbial taxa that drive differences between different experimental conditions or groups.
 
 LEFSe combines linear discriminant analysis (LDA), which is a statistical technique used for classification and feature selection, with the concept of effect size. Effect size refers to the magnitude of a difference between two groups and provides insights into the biological relevance of the observed differences.
 
-P,S.ALDEx2 and ANCOM-II produce the most consistent results (https://www.nature.com/articles/s41467-022-28034-z )
+P,S.ALDEx2 and ANCOM-II produce the most consistent results (<https://www.nature.com/articles/s41467-022-28034-z> )
+
 ```{r LEFSe_install, warning=FALSE, message=FALSE}
 BiocManager::install("microbiomeMarker")
 library("microbiomeMarker")
@@ -754,6 +702,7 @@ plot_ef_bar(lef_out)
 ```
 
 #### Visualising the marker table as cladogram
+
 The default is 4 which is showing the kingdom, Phylum, Class on the cladogram.
 
 ```{r cladogram, warning=FALSE, message=FALSE}

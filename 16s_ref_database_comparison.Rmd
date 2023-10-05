@@ -118,12 +118,12 @@ In this section, we load additional visualization libraries and create a line gr
 library(reshape2)
 library(ggplot2)
 
-GreenGenes.1 = read.csv("[Qiime2]GreenGenes_13_8/level_counts_by_group.csv")[5,]
+GreenGenes.1 = read.csv("[Qiime2]GreenGenes_13_8/level_counts_by_group_gg1.csv")[5,]
 GreenGenes.2 = read.csv("[Qiime2]GreenGenes2_2022_10/level_counts_by_group_gg2.csv")[5,]
-sliva.138 = read.csv("[Qiime2]Silva_138//level_counts_by_group.csv")[5,]
+sliva.138 = read.csv("[Qiime2]Silva_138//level_counts_by_group_silva138.csv")[5,]
 
 combined_df <- rbind(GreenGenes.1, GreenGenes.2, sliva.138)
-combined_df$X <- c("GreenGenes.1", "GreenGenes.2", "sliva.138")
+combined_df$X <- c("GreenGenes.1", "GreenGenes.2", "Sliva.138")
 
 data_long <- melt(combined_df, id.vars = "X", variable.name = "Dataset", value.name = "Count")
 
@@ -131,23 +131,26 @@ colnames(data_long) = c("Database","Taxonomic.Level","Count")
 
 # Convert Taxonomic.Level to a factor and specify the desired order of the levels
 data_long$Taxonomic.Level <- factor(data_long$Taxonomic.Level,
-                               levels = c("Kingdom", "Phylum", "Class", "Order", 
-                                          "Family", "Genus", "Species"))
-
+                                    levels = c("Kingdom", "Phylum", "Class", "Order", 
+                                               "Family", "Genus", "Species"))
 
 # Plot the data as a line graph using ggplot
 # Open a new PDF graphics device
-pdf(file = "line_graph.pdf", width=8,height=5)
-ggplot(data_long, aes(x = Taxonomic.Level, y = Count, color = Database, group = Database)) +
-  geom_line() +
+pdf(file = "line_graph.pdf", width=6.5,height=4)
+ggplot(data_long, aes(x = Taxonomic.Level, 
+                      y = Count, 
+                      color = Database, 
+                      group = Database)) +
+  geom_line(size = 1.5) +
   geom_point(size = 4) +
-  scale_color_manual(values = c("sliva.138" = "red", 
-                                "GreenGenes.2" = "blue", 
-                                "GreenGenes.1" = "green")) +
+  scale_fill_discrete(name = "New Legend Title") + 
+  scale_color_manual(values = c("Sliva.138" = "cornflowerblue", 
+                                "GreenGenes.2" = "lightgreen", 
+                                "GreenGenes.1" = "forestgreen")) +
   labs(x = "Taxonomic Level", y = "Count") +
   theme_classic() + 
   theme(
-    text = element_text(size = 19, colour = "black"), 
+    text = element_text(size = 15, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
     axis.line = element_line(colour = 'black', size = 1.1),
     axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
@@ -164,4 +167,6 @@ dev.off()
 ```
 
 
-
+```{r sessionInfo, warning=FALSE, message=FALSE}
+sessionInfo()
+```
