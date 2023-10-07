@@ -1,5 +1,3 @@
-## Required Packages
-
 ##### Install required packages
 # if (!requireNamespace("devtools", quietly = TRUE)){install.packages("devtools")}
 # devtools::install_github("jbisanz/qiime2R") # current version is 0.99.20
@@ -98,9 +96,9 @@ for (dataset in dataset_info) {
 library(reshape2)
 library(ggplot2)
 
-GreenGenes.v1 = read.csv("[Qiime2]GreenGenes_13_8/level_counts_by_group.csv")[5,]
+GreenGenes.v1 = read.csv("[Qiime2]GreenGenes_13_8/level_counts_by_group_gg1.csv")[5,]
 GreenGenes.v2 = read.csv("[Qiime2]GreenGenes2_2022_10/level_counts_by_group_gg2.csv")[5,]
-Sliva.v138 = read.csv("[Qiime2]Silva_138//level_counts_by_group.csv")[5,]
+Sliva.v138 = read.csv("[Qiime2]Silva_138/level_counts_by_group_silva138.csv")[5,]
 
 combined_df <- rbind(GreenGenes.v1, GreenGenes.v2, Sliva.v138)
 combined_df$X <- c("GreenGenes.v1", "GreenGenes.v2", "Sliva.v138")
@@ -125,7 +123,7 @@ ggplot(data_long, aes(x = Taxonomic.Level, y = Count, color = Ref.Database, grou
   scale_color_manual(values = c("Sliva.v138" = "cornflowerblue", 
                                 "GreenGenes.v2" = "greenyellow", 
                                 "GreenGenes.v1" = "forestgreen")) +
-  labs(x = "Taxonomic Level", y = "Count") +
+  labs(x = "Taxonomic Level", y = "Count", color = "Reference\nDatabase") +
   theme_classic() + 
   theme(
     text = element_text(size = 19, colour = "black"), 
@@ -134,7 +132,10 @@ ggplot(data_long, aes(x = Taxonomic.Level, y = Count, color = Ref.Database, grou
     axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
     axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 14, face = "bold"), 
-    axis.title.x = element_text(color = "black", size = 14, face = "bold")
+    axis.title.x = element_text(color = "black", size = 14, face = "bold"),
+    legend.title = element_text(size = 13.5, face = "bold"),
+    legend.text = element_text(size = 12),
+    legend.key.size=unit(0.4,"cm")
   ) +
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
   scale_y_continuous(breaks=seq(0,1500,by=250))

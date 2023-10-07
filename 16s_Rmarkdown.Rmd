@@ -162,6 +162,10 @@ Here, we use NMDS approach for Beta diversity.
 ```{r ggplot2, warning=FALSE, message=FALSE}
 # install.packages("ggplot2")
 library("ggplot2")
+# install.packages("dplyr")
+library("dplyr")
+# install.packages("ggpubr")
+library("ggpubr")
 ```
 
 ```{r Beta_1, warning=FALSE, message=FALSE}
@@ -303,10 +307,10 @@ plot_ordination <- plot_ordination +
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
 
 # Plot ordination
-pdf(file = "bata_SU.pdf", width = 9,height = 6)
+# pdf(file = "bata_SU.pdf", width = 9,height = 6)
 plot_ordination
 # Close the PDF device and save the plot to a file
-dev.off()
+# dev.off()
   
 # Clean up by removing objects that are no longer needed
 # rm(NMDS, physeq.SU)
@@ -315,7 +319,7 @@ dev.off()
 
 #### Alpha diversity
 
-Alpha diversity refers to the diversity of species within a single ecosystem or habitat. It is measured by analysing the number and distribution of species within a specific area or sample. Alpha diversity indices take into account the richness (number of species) and evenness (relative abundance of species) of a community. It provides insights into the complexity and stability of ecosystems. A high level of alpha diversity indicates a more complex ecosystem with a greater number of species, which is often associated with greater ecological resilience and stability. In contrast, a low level of alpha diversity can be an indicator of ecosystem disturbance, degradation, or vulnerability.
+Alpha diversity refers to the diversity of species within a single ecosystem or habitat. It is measured by analysing the number and distribution of species within a specific area or sample. Alpha diversity indices take into account the richness (number of species) and evenness (relative abundance of species) of a community. It provides insights into the complexity and stability of ecosystems. A high level of alpha diversity indicates a more complex ecosystem with a greater number of species, which is often associated with greater ecological resilience and stability. In contrast, a low level of alpha diversity can be an indicator of ecosystem disturbance, degradation, or vulnerability. (https://docs.cosmosid.com/docs/alpha-diversity)
 
 Please noted that different types of alpha diversity metrics capture various aspects of biodiversity within a specific community. Here's a brief explanation of each:
 
@@ -338,31 +342,70 @@ Here, we pick Shannon as an example for the work
 ```{r Alpha, warning=FALSE, message=FALSE}
 # available measurements: "Observed" "Chao1" "ACE" "Shannon" "Simpson" "InvSimpson" "Fisher"
 # Calculate alpha diversity (Shannon) and store it in physeq.SU object
-
 alpha.object <- cbind(
   x = sample_data(physeq.SU),
   y = estimate_richness(physeq.SU, measures = 'Shannon')
 )
 
-selected_columns <- alpha.object[, c("x.Soil.Location", "x.Type", "Shannon")]
+# Data preparation (formatting)
+selected_columns <- alpha.object[, c("x.Soil.Location", "x.Group", "x.Type", "Shannon")]
 selected_columns2 <- melt(selected_columns)
-names(selected_columns2) <- c("Soil/Location", "Type", "variable", "Shannon")
+names(selected_columns2) <- c("Soil_Location","Group" , "Type", "variable", "Shannon")
+
+# Define the comparisons
+my_comparisons <- list(
+  c("SU.CL.BO", "CO.CL.BO"),
+  c("SU.CL.YO", "CO.CL.YO"),
+  c("SU.CY.BU", "CO.CY.BU"),
+  c("SU.CY.YO", "CO.CY.YO"),
+  c("SU.SC.HE", "CO.SC.HE"),
+  c("SU.SC.SH", "CO.SC.SH"),
+  c("SU.SL.AN", "CO.SL.AN"),
+  c("SU.SL.BE", "CO.SL.BE"),
+  c("SU.SL.SH", "CO.SL.SH")
+)
+
+# Initialise an empty data frame to store the results
+results <- data.frame()
+
+# Perform t-tests for each pair of groups
+for (i in seq_along(my_comparisons)) {
+  group1_data <- selected_columns2$Shannon[selected_columns2$Group == my_comparisons[[i]][1]]
+  group2_data <- selected_columns2$Shannon[selected_columns2$Group == my_comparisons[[i]][2]]
+  
+  wilcox_test_result <- wilcox.test(group1_data, group2_data)
+  
+  results <- rbind(results, data.frame(
+    group1 = my_comparisons[[i]][1],
+    group2 = my_comparisons[[i]][2],
+    p.value = wilcox_test_result$p.value
+  ))
+}
+
+# Adjust the p-values for multiple comparisons using the Benjamini-Hochberg procedure
+results$p.adjusted <- p.adjust(results$p.value, method = "BH")
+
+# Add significance levels based on the adjusted p-values
+results$p.signif <- symnum(results$p.adjusted, corr = FALSE, na = FALSE,
+                           cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1),
+                           symbols = c("***", "**", "*", ".", " "))
+
+# print result
+print(results)
+
+# Defind colour
 my_palette <- c("darkgoldenrod", "limegreen")
 
-
-# Create a plot for alpha diversity
-# pdf(file = "Fig5B_alpha.pdf", width = 8,height = 5)
-
-ggplot(data=selected_columns2) + 
-  geom_boxplot(aes(x=`Soil/Location`, y= Shannon, fill = Type),
-               size = 1.1, 
+# Create the boxplot
+p <- ggplot(data=selected_columns2, aes(x=Soil_Location, y= Shannon, fill = Type)) + 
+  geom_boxplot(size = 1.1, 
                width = 0.825, 
                color = "grey20", 
                position = position_dodge(0.9)
-               ) +
+  ) +
   scale_fill_manual(values = my_palette) +
-  labs(x = element_blank(),                     # No x-axis label
-       y = "Alpha Diversity (Shannon)"          # y-axis label
+  labs(x = element_blank(),                     
+       y = "Alpha Diversity (Shannon)"          
   ) + 
   theme_classic() + 
   theme(
@@ -375,14 +418,32 @@ ggplot(data=selected_columns2) +
                                size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 15, face = "bold"),
     legend.position = "right") +
-    scale_y_continuous(breaks = seq(6, 8, by = 0.5), limits = c(6, 8))  # Set breaks and limits here
-    
+  scale_y_continuous(breaks = seq(6, 8, by = 0.5), limits = c(6, 8.2))  
+
+# Add the results of the comparisons to the plot
+for (i in seq_len(nrow(results))) {
+  
+  # Set the y position for the label
+  y_position <- 8.15
+  
+  # Add the label to the plot
+p <- p + annotate("text", x = i, 
+                  y=y_position , 
+                  label=round(results$p.adjusted[i], 4), 
+                  size= 3.75, face = "bold")
+}
+
+# Create a plot for alpha diversity
+# pdf(file = "Fig5B_alpha.pdf", width = 8,height = 5)
+
+# Print the plot
+print(p)
 
 # Close the PDF device and save the plot to a file
 # dev.off()
 
 # Clean up by removing the alpha.object
-# rm(alpha.object, selected_columns2)
+# rm(alpha.object, selected_columns, selected_columns2, my_comparisons, results, my_palette, group1_data, group2_data, t_test_result)
 ```
 
 #### Calculate the number of taxa on each level and each group (Replot required)
@@ -483,7 +544,7 @@ for(i in seq_along(pairs)) {
                                   metdat_subset$Group, 
                                   sim.function = "vegdist",
                                   sim.method = "bray",
-                                  reduce = NULL, perm = 100000)
+                                  reduce = NULL, perm = 1000000)
 }
 
 # Convert the list of results to a data frame
@@ -502,6 +563,10 @@ print(results_df)
 ```
 
 ### Plotting the top 10 taxa at family level
+
+Plotting the top 10 taxa at the family level provides a succinct overview of microbial composition, highlighting the most prevalent families in the sample. This approach simplifies complex microbiome data, aiding in comparative analysis across different sample groups and revealing trends and patterns in an easily interpretable manner.
+
+provides a clear and concise overview of the microbial composition at the family level and quickly identify which families are most prevalent in the corresponding sample groups.
 
 ```{r Top100_5, warning=FALSE, message=FALSE}
 ## Transform normalised ASVs to proportions 
@@ -539,10 +604,10 @@ p <- plot_bar(Rgsm10, "Group", fill = "Family") + coord_flip() +
 
 
 # Create a plot for alpha diversity
-pdf(file = "Fig6A_TOP10.pdf", width = 8,height = 5)
+# pdf(file = "Fig6A_TOP10.pdf", width = 8,height = 5)
 print(p)
 # Close the PDF device and save the plot to a file
-dev.off()
+# dev.off()
 
 # Clean up by removing unnecessary objects
 # rm(proportions, Top10ASVs, Taxtab10, Rgsm10, title)
@@ -559,8 +624,11 @@ library("microbiome")
 # devtools::install_github("mikemc/speedyseq")
 library("speedyseq")
 
+# install.packages("UpSetR")
 library("UpSetR")
+# install.packages("plyr")
 library("plyr")
+# install.packages("reshape2")
 library("reshape2")
 # install.packages("RColorBrewer")
 library("RColorBrewer")
@@ -585,7 +653,6 @@ D <- as_tibble(B2) %>%
   group_by(Sample) %>%
   filter(rank(desc(Abundance)) <= 100) %>% # Filter <= 100
   ungroup()
-
 
 # Remove the Abundance column
 D$Abundance <- NULL
@@ -634,59 +701,13 @@ print(p)
 # rm(B, B2, D, E, binary_fun, temp_df, upset_plot, physeq.Sugarbeet.group, upset_plot)
 ```
 
-```{r phyloseq_plot_bar, warning=FALSE, message=FALSE}
-# https://github.com/joey711/phyloseq/issues/901
-# Filter taxa with mean abundance > 0.1
-physeq2 = filter_taxa(physeq.Sugarbeet.vs, function(x) mean(x) > 0.1, TRUE)
-
-# Transform sample counts to relative abundances
-physeq3 = transform_sample_counts(physeq2, function(x) x / sum(x))
-
-# Aggregate taxa at the Phylum level
-glom <- tax_glom(physeq3, taxrank = 'Phylum')
-
-# Convert the aggregated phyloseq object to a dataframe
-data <- psmelt(glom)
-# Convert Phylum column to character
-data$Phylum <- as.character(data$Phylum)
-
-# Rename phyla with abundance < 1% to "< 1% abund."
-data$Phylum[data$Abundance < 0.01] <- "< 1% abund."
-
-# Calculate medians of abundance for each Phylum
-medians <- ddply(data, ~Phylum, function(x) c(median = median(x$Abundance)))
-
-# Extract phyla with median abundance <= 0.01
-remainder <- medians[medians$median <= 0.01, ]$Phylum
-
-# Rename selected phyla to "Phyla < 1% abund."
-data[data$Phylum %in% remainder, ]$Phylum <- "Phyla < 1% abund."
-
-# Rename phyla with abundance < 1% to "Phyla < 1% abund."
-data$Phylum[data$Abundance < 0.01] <- "Phyla < 1% abund."
-
-# Plot the data with condensed phyla categories
-p <- ggplot(data = data, aes(x = Sample, y = Abundance, fill = Phylum))
-p + geom_bar(aes(), stat = "identity", position = "stack") +
-    scale_color_brewer(palette = "Paired") +
-  theme_classic() +   
-  theme(text = element_text(size=15, colour = "black"), 
-        axis.ticks = element_line(colour = "black", size = 1.25),
-        axis.line = element_line(colour = 'black', size = 1.25),
-        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
-        axis.title.y = element_text(color="black", size=15,face="bold"), legend.position = "right") # + guides(fill = guide_legend(nrow = 4))
-
-# rm(p, data, remainder, medians,glom, physeq3, physeq2)
-```
-
 #### Linear discriminant analysis effect size (LEFSe)
 
 Linear discriminant analysis effect size (LEFSe) is a powerful computational tool commonly used in microbiome analysis to identify microbial biomarkers that are differentially abundant between different experimental groups. Microbiome analysis involves studying the composition and diversity of microbial communities present in various environments, such as the human gut, soil, water, and more. LEFSe is specifically designed to address the challenge of identifying microbial taxa that drive differences between different experimental conditions or groups.
 
 LEFSe combines linear discriminant analysis (LDA), which is a statistical technique used for classification and feature selection, with the concept of effect size. Effect size refers to the magnitude of a difference between two groups and provides insights into the biological relevance of the observed differences.
 
-P,S.ALDEx2 and ANCOM-II produce the most consistent results (<https://www.nature.com/articles/s41467-022-28034-z> )
+P.S. ALDEx2 and ANCOM-II produce the most consistent results (<https://www.nature.com/articles/s41467-022-28034-z> )
 
 ```{r LEFSe_install, warning=FALSE, message=FALSE}
 BiocManager::install("microbiomeMarker")
@@ -694,11 +715,12 @@ library("microbiomeMarker")
 ```
 
 ```{r LEFSe, warning=FALSE, message=FALSE}
-lef_out <- run_lefse(physeq.Sugarbeet.vs, group = "Group", 
-                     norm = "CPM", 
+lef_out <- run_ancom(physeq.Sugarbeet.vs, group = "Group"
+                     # norm = "CPM", 
                      # taxa_rank = "Genus",
-                     kw_cutoff = 0.01, lda_cutoff = 4)
-plot_ef_bar(lef_out)
+                     # kw_cutoff = 0.05, lda_cutoff = 2
+                     )
+plot_ef_dot(lef_out)
 ```
 
 #### Visualising the marker table as cladogram

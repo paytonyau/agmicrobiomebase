@@ -79,8 +79,10 @@ ggplot(ASV, aes(x = Group, y = ASV,  colour = Group))+
   theme(text = element_text(size=15, colour = "black"), 
         axis.ticks = element_line(colour = "black", size = 1.25),
         axis.line = element_line(colour = 'black', size = 1.25),
-        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.text.x = element_text(angle=45, hjust=1, 
+                                   colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, 
+                                   colour = "black",size = 13),
         axis.title.y = element_text(color="black", size=15,face="bold"),
         legend.position = "none")
 
@@ -114,8 +116,10 @@ plot_ordination(physeq = physeq.a,
     text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
     axis.line = element_line(colour = 'black', size = 1.1),
-    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
-    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
     axis.title.x = element_text(color = "black", size = 20, face = "bold")
   ) + stat_ellipse(geom = "polygon", type="norm", alpha=0.25, aes(fill = Group)) +
@@ -155,8 +159,10 @@ ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group)) +
     text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
     axis.line = element_line(colour = 'black', size = 1.1),
-    axis.text.x = element_text(colour = "black", angle = 45, hjust = 1, size = 13, face = "bold"),
-    axis.text.y = element_text(angle = 0, hjust = 0, colour = "black", size = 13, face = "bold"),
+    axis.text.x = element_text(colour = "black", angle = 45, 
+                               hjust = 1, size = 13, face = "bold"),
+    axis.text.y = element_text(angle = 0, hjust = 0, 
+                               colour = "black", size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 15, face = "bold"),
     legend.position = "none"                 # Hide legend
   ) 
@@ -196,7 +202,8 @@ df$A <- sapply(df_split, "[[", 1)
 df$B <- sapply(df_split, "[[", 2)
 
 # Create a matrix
-cor_matrix <- matrix(NA, nrow = length(unique(df$A)), ncol = length(unique(df$B)))
+cor_matrix <- matrix(NA, nrow = length(unique(df$A)), 
+                     ncol = length(unique(df$B)))
 rownames(cor_matrix) <- unique(df$A)
 colnames(cor_matrix) <- unique(df$B)
 
@@ -268,9 +275,12 @@ p + geom_bar(aes(), stat = "identity", position = "stack") +
   theme(text = element_text(size=15, colour = "black"), 
         axis.ticks = element_line(colour = "black", size = 1.25),
         axis.line = element_line(colour = 'black', size = 1.25),
-        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
-        axis.title.y = element_text(color="black", size=15,face="bold"), legend.position = "right") # + guides(fill = guide_legend(nrow = 4))
+        axis.text.x = element_text(angle=45, hjust=1, 
+                                   colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, 
+                                   colour = "black",size = 13),
+        axis.title.y = element_text(color="black", size=15,face="bold"), 
+        legend.position = "right") 
 ```
 
 ##### Number of taxa in groups
@@ -327,16 +337,19 @@ print(B2)
 # write.csv(B2, file = "ITS/level_counts_by_group.csv", row.names = TRUE)
 B2$name = row.names(B2)
 data_long <- melt(B2)
-data_long <- melt(B2, id.vars = "name", variable.name = "Level", value.name = "Taxa")
+data_long <- melt(B2, id.vars = "name", 
+                  variable.name = "Level", 
+                  value.name = "Taxa")
 
 
 # Plot the data as a line graph using ggplot
 # Open a new PDF graphics device
 # pdf(file = "Fig7C_line_graph_ITS.pdf", width=8,height=5)
-ggplot(data_long, aes(x = Level, y = Taxa, color = name, group = name)) +
+ggplot(data_long, aes(x = Level, y = Taxa, 
+                      color = name, group = name)) +
   geom_line() +
   geom_point(size = 4) +
-  labs(x = "Taxonomic Level", y = "Count") +
+  labs(x = "Taxonomic Level", y = "Count", color = "Group") +
   theme_classic() +   scale_color_brewer(palette = "Paired") +
   theme(
     text = element_text(size = 19, colour = "black"), 
@@ -347,10 +360,13 @@ ggplot(data_long, aes(x = Level, y = Taxa, color = name, group = name)) +
     axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, 
                                size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 14, face = "bold"), 
-    axis.title.x = element_text(color = "black", size = 14, face = "bold")
+    axis.title.x = element_text(color = "black", size = 14, face = "bold"),
+    legend.title = element_text(size = 13.5, face = "bold"),
+    legend.text = element_text(size = 12),
+    legend.key.size=unit(0.4,"cm")
   ) +
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
-  scale_y_continuous(breaks=seq(0,300,by=50))
+  scale_y_continuous(breaks=seq(0,400,by=100))
 
 
 # Close the PDF device and save the plot to a file
@@ -378,14 +394,16 @@ Rgsm10 = prune_taxa(Top10ASVs, proportions)
 title = "Top 10 - Family level"
 plot_bar(Rgsm10, "Group", fill = "Family", title = title) + 
   coord_flip() + 
-  ylab("Percentage of Sequences") + ylim(0, 50) +  
+  ylim(0, 50) +  
   scale_color_brewer(palette = "Paired") +
   theme_classic() +   
   theme(text = element_text(size=15, colour = "black"), 
         axis.ticks = element_line(colour = "black", size = 1.25),
         axis.line = element_line(colour = 'black', size = 1.25),
-        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.text.x = element_text(angle=45, hjust=1, 
+                                   colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, 
+                                   colour = "black",size = 13),
         axis.title.y = element_text(color="black", size=15,face="bold"), 
         legend.position = "right", 
         legend.text = element_text(size = 9.5), 
@@ -406,7 +424,7 @@ library("UpSetR")
 library("reshape2")
 library("plyr")
 library("dplyr")
-BiocManager::install("microbiome")
+# BiocManager::install("microbiome")
 library("microbiome")
 ```
 
@@ -508,17 +526,16 @@ p <- ggtree(GP.chl, ladderize = TRUE) +
                  shape = Group, size = Abundance), na.rm = TRUE) +
   scale_size_continuous(trans = log_trans(2)) +
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) + # Set custom
-  # theme_classic() +   
   scale_color_brewer(palette = "Paired") +
   theme(text = element_text(size=13, colour = "black"), 
         axis.ticks = element_line(colour = "black", size = 1.25),
         axis.line = element_line(colour = 'black', size = 1.25) ,
-        
-        # axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 2.5),
         axis.title.y = element_text(color="black", size=2.5,face="bold"), 
-        legend.position = "none"
-        )
-
+        legend.text = element_text(size = 8),
+        legend.key.size=unit(0.4,"cm"),
+        legend.title = element_text(size = 10, face = "bold"),
+        legend.position = "bottom"
+  ) 
 
 # Open a new PDF graphics device
 # pdf(file = "Fig8_Tree_ITS.pdf", width=8,height=5)
@@ -571,9 +588,12 @@ p1 <- ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
   theme(text = element_text(size=15, colour = "black"), 
         axis.ticks = element_line(colour = "black", size = 1.25),
         axis.line = element_line(colour = 'black', size = 1.25),
-        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
-        axis.title.y = element_text(color="black", size=12,face="bold"), legend.position = "none")
+        axis.text.x = element_text(angle=45, hjust=1, 
+                                   colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, 
+                                   colour = "black",size = 13),
+        axis.title.y = element_text(color="black", size=12,face="bold"), 
+        legend.position = "none")
 
 p2 <- ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
                                        "WH.CY.BU","WH.CY.YO",
@@ -588,8 +608,10 @@ p2 <- ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
   theme(text = element_text(size=15, colour = "black"), 
         axis.ticks = element_line(colour = "black", size = 1.25),
         axis.line = element_line(colour = 'black', size = 1.25),
-        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.text.x = element_text(angle=45, hjust=1, 
+                                   colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, 
+                                   colour = "black",size = 13),
         axis.title.y = element_text(color="black", size=12,face="bold"), 
         legend.position = "none")
 
@@ -606,8 +628,10 @@ p3 <- ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
   theme(text = element_text(size=15, colour = "black"), 
         axis.ticks = element_line(colour = "black", size = 1.25),
         axis.line = element_line(colour = 'black', size = 1.25),
-        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.text.x = element_text(angle=45, hjust=1, 
+                                   colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, 
+                                   colour = "black",size = 13),
         axis.title.y = element_text(color="black", size=12,face="bold"), 
         legend.position = "none")
 
@@ -624,13 +648,15 @@ p4 <- ggplot(subset(meta, Group %in% c("WH.CL.BO","WH.CL.YO",
   theme(text = element_text(size=15, colour = "black"), 
         axis.ticks = element_line(colour = "black", size = 1.25),
         axis.line = element_line(colour = 'black', size = 1.25),
-        axis.text.x = element_text(angle=45, hjust=1, colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, colour = "black",size = 13),
+        axis.text.x = element_text(angle=45, hjust=1, 
+                                   colour = "black", size = 13),
+        axis.text.y = element_text(angle=0, hjust=0.5, 
+                                   colour = "black",size = 13),
         axis.title.y = element_text(color="black", size=12,face="bold"), 
         legend.position = "none") 
 
 # Combine and Arrange the plots
-fig <- ggarrange(p1, p2, p3, p4, labels = c("A", "B", "C", "D"), size = 5,
+fig <- ggarrange(p1, p2, p3, p4, labels = c("A", "B", "C", "D"), size = 8,
                  ncol = 2, nrow = 2)
 
 # Add labels
