@@ -15,9 +15,9 @@ An integrated cryopreserved collection of samples (rhizosphere and bulk soil, ba
 
 #### Convert Qiime2 objects to Phyloseq objects
 
-Qiime2 is a powerful tool for microbial community analysis which we used for sequencing analysis; Phyloseq is a package in R that provides a flexible and comprehensive framework for the analysis of high-throughput sequencing data. To convert Qiime2 data to Phyloseq, users can use an external package called Qiime2R for the conversion. Qiime2R facilitates the transformation of Qiime2 data structures into phyloseq data structures within the R programming environment.
+`Qiime2` is a community-based tool for microbial community analysis which we used for sequencing analysis; `Phyloseq` is a package in R that provides a flexible and comprehensive framework for the analysis of high-throughput sequencing data. To convert `Qiime2` data structure to `Phyloseq`, an external package called `Qiime2R` can be used for the conversion within the R programming environment.
 
-In various programming languages, including R, features are enhanced through external packages. These packages encompass a range of functions, datasets, and documentation that can be imported into R to extend its capabilities. External R packages are available from diverse sources such as CRAN (The Comprehensive R Archive Network), Bioconductor, GitHub, and more. The process of acquiring packages varies. After installation, a package must be loaded into the R session using the **library()** function before its functions can be utilised.
+In various programming languages, including R, features are enhanced through external packages. These external R packages are available from diverse sources such as CRAN (The Comprehensive R Archive Network), Bioconductor, GitHub, and more. The process of acquiring packages varies. After installation, a package must be loaded into the R session using the **library()** function before its functions can be utilised.
 
 Once the data is imported, users can manipulate, analyse, and visualise the data using the various functions available in Phyloseq. This conversion allows users to take advantage of the many analysis tools available in R, such as ggplot2 for data visualisation, dplyr for data manipulation, and vegan for ecological community analysis.
 
@@ -152,11 +152,11 @@ Beta diversity is a measure of the differences or similarities between two or mo
 
 Non-Metric Multidimensional Scaling (NMDS) and Principal Coordinates Analysis (PCoA) are both ordination techniques used in analyzing beta diversity, which captures the variation in species composition between different samples or sites. However, they have some differences in terms of methodology and interpretation:
 
-**NMDS (Non-Metric Multidimensional Scaling)** NMDS is a method that aims to represent the pairwise dissimilarities between samples in a lower-dimensional space while preserving the rank order of these dissimilarities. It is considered a non-metric method because it doesn't assume a linear relationship between the original dissimilarities and the distances in the ordination space. NMDS emphasizes preserving the relative ranking of dissimilarities, making it more suitable for cases where the distances between samples are not well-preserved in a lower-dimensional space. NMDS produces an ordination plot where the positions of samples are arranged based on their pairwise dissimilarities. The distances between points on the plot are not directly interpretable but reflect the similarities or dissimilarities between samples.
+**NMDS** is a method that aims to represent the pairwise dissimilarities between samples in a lower-dimensional space while preserving the rank order of these dissimilarities. It is considered a non-metric method because it doesn't assume a linear relationship between the original dissimilarities and the distances in the ordination space. NMDS emphasizes preserving the relative ranking of dissimilarities, making it more suitable for cases where the distances between samples are not well-preserved in a lower-dimensional space. NMDS produces an ordination plot where the positions of samples are arranged based on their pairwise dissimilarities. The distances between points on the plot are not directly interpretable but reflect the similarities or dissimilarities between samples.
 
-**PCoA (Principal Coordinates Analysis)** PCoA is also used to visualise and analyse beta diversity by representing samples in a lower-dimensional space. It is a type of metric multidimensional scaling. PCoA is based on a metric approach, which means it attempts to preserve the actual distances between samples as closely as possible in the lower-dimensional space. PCoA produces an ordination plot where the distances between points reflect the actual dissimilarities between samples. Unlike NMDS, PCoA may not perform as well with non-linear or rank-based dissimilarity measures.
+**PCoA** is also used to visualise and analyse beta diversity by representing samples in a lower-dimensional space. It is a type of metric multidimensional scaling. PCoA is based on a metric approach, which means it attempts to preserve the actual distances between samples as closely as possible in the lower-dimensional space. PCoA produces an ordination plot where the distances between points reflect the actual dissimilarities between samples. Unlike NMDS, PCoA may not perform as well with non-linear or rank-based dissimilarity measures.
 
-Here, we use NMDS approach for Beta diversity. 
+Here, we use NMDS for Beta diversity. 
 
 #### Before normalisation
 ```{r ggplot2, warning=FALSE, message=FALSE}
@@ -175,7 +175,6 @@ NMDS1 <- ordinate(physeq = physeq.ori,
                   method = "NMDS", 
                   distance = "bray"
                   )
-
 
 P1 <- plot_ordination(physeq = physeq.ori,
                       ordination = NMDS1,
@@ -710,15 +709,16 @@ LEFSe combines linear discriminant analysis (LDA), which is a statistical techni
 P.S. ALDEx2 and ANCOM-II produce the most consistent results (<https://www.nature.com/articles/s41467-022-28034-z> )
 
 ```{r LEFSe_install, warning=FALSE, message=FALSE}
-BiocManager::install("microbiomeMarker")
+# BiocManager::install("microbiomeMarker")
 library("microbiomeMarker")
 ```
 
 ```{r LEFSe, warning=FALSE, message=FALSE}
-lef_out <- run_ancom(physeq.Sugarbeet.vs, group = "Group"
+lef_out <- run_lefse(physeq.Sugarbeet.vs, group = "Group",
                      # norm = "CPM", 
-                     # taxa_rank = "Genus",
-                     # kw_cutoff = 0.05, lda_cutoff = 2
+                     taxa_rank = "Genus",
+                     kw_cutoff = 0.01, 
+                     lda_cutoff = 5
                      )
 plot_ef_dot(lef_out)
 ```
