@@ -1,5 +1,12 @@
-
 # data extracted from "rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qzv"
+# The denoise setting is 
+# --p-trunc-len-f 233 \
+# --p-trunc-len-r 226 \
+# --p-trim-left-f 0 \
+# --p-trim-left-r 0 \
+# --p-max-ee-f 3 \
+# --p-max-ee-r 2 \
+# --p-n-threads 8 \
 
 # Unzip your file
 unzip("16s_length_distribution.zip")
@@ -31,8 +38,10 @@ p = ggplot(plot_df2, aes(x = SequenceLength, y = AccumulatedPercentage)) +
     text = element_text(size = 15, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
     axis.line = element_line(colour = 'black', size = 1.1),
-    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
-    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
     axis.title.x = element_text(color = "black", size = 20, face = "bold"))
 

@@ -1,10 +1,13 @@
 
+
 # UK Crop Microbiome Cryobank
 ## Agmicrobiomebase
 
 The UK Crop Microbiome Cryobank integrates genomic (DNA) data with a cryobank collection of samples for the soil microbiomes of the UK major crop plant systems. For this project, the microbiomes are from the rhizosphere (the soil surrounding the crop plant roots) and from bulk soil (soil outside the rhizosphere). The Cryobank provides a facility for researchers to source data and samples, including cryo-preserved microbial material and genomic and metagenomic sequences from different soil microbiome environments.
 
 An integrated cryopreserved collection of samples (rhizosphere and bulk soil, bacterial and fungal isolates and DNA) from crop plant systems (barley, oats, oil seed rape, sugar beet and wheat). An open access AgMicrobiomeBase of microbiome data and associated meta-data linked to current public resources such as MGnify.
+
+The detailed analysis (protocol) and the corresponding data for the how-to-guide paper can be found below, 
 
 ### Table of contents
 --------------------------------
@@ -15,8 +18,9 @@ An integrated cryopreserved collection of samples (rhizosphere and bulk soil, ba
 [02. 16s - Down Stream Analysis (R mark down)](https://github.com/paytonyau/agmicrobiomebase/blob/main/16s_Rmarkdown.Rmd)
 [*16s - Down Stream Analysis (pdf format)](https://github.com/paytonyau/agmicrobiomebase/blob/main/16s_Rmarkdown.pdf)
 
-[03. Reference Database Comparison (R markdown)](https://github.com/paytonyau/agmicrobiomebase/blob/main/16s_ref_database_comparison.Rmd) *may need to run it in non R markdown envernment
+[03. Reference Database Comparison Figure 3 (R markdown)](https://github.com/paytonyau/agmicrobiomebase/blob/main/16s_ref_database_comparison.Rmd) *may need to run it in non R markdown envernment
 
+Figure 2
 ------------------------------------
 #### 16S Documents/Data/Results
 [04. DADA2 analysis outcomes (Qiime2 data structure)](https://github.com/paytonyau/agmicrobiomebase/tree/main/16s/%5BQiime2%5DDADA2_outcomes)
@@ -27,7 +31,7 @@ An integrated cryopreserved collection of samples (rhizosphere and bulk soil, ba
 
 [07. GreenGenes2 [v2022.10] (Qiime2 data structure)](https://github.com/paytonyau/agmicrobiomebase/tree/main/16s/%5BQiime2%5DGreenGenes2_2022_10)
 
-[08A. Figure 2* Silva [v138] (Qiime2 data structure)](https://github.com/paytonyau/agmicrobiomebase/tree/main/16s/%5BQiime2%5DSilva_138_233_226_3_2_Figure2) *tested for the sequence length distribution
+[08A.  Silva [v138] for Figure 3 (Qiime2 data structure)](https://github.com/paytonyau/agmicrobiomebase/tree/main/16s/%5BQiime2%5DSilva_138_233_226_3_2_Figure2) *tested for the sequence length distribution
 
 [08B. Figure 2* data(tsv file in zip format)](https://github.com/paytonyau/agmicrobiomebase/tree/main/R-scripts/16s_length_distribution.zip) 
 

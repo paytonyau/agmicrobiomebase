@@ -1,26 +1,63 @@
-## QIIME2 Data Processing Pipeline for ITS (first draft)
 
-  
+# UK CROP MICROBIOME CRYOBANK (ITS amplicon sequencing analysis)
 
-### Install QIIME2
+ To perform a sequencing analysis on the 16S amplicon data from the UK Crop Microbiome Cryobank (https://agmicrobiomebase.org), it is necessary to prepare a Linux environment with specific pre-installed packages. These packages, crucial for processing sequencing data, encompass a range of tools for quality control, sequence alignment, taxonomic classification, and diversity analysis. Prior to initiating the analysis, ensure that your system is equipped with all the necessary packages to facilitate a seamless and successful analysis.
 
-To run the workflow in a specific conda environment, ensuring the correct version of required Python packages for QIIME2, refer to the following documentation: [Install QIIME 2 within a Conda environment](https://docs.qiime2.org/2023.5/install/native/#install-qiime-2-within-a-conda-environment)
+- [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+- [QIIME2 - the cummunity developed suite](https://qiime2.org/)
+- [FIGARO](https://github.com/Zymo-Research/figaro)
+- [FastQC](https://github.com/s-andrews/FastQC)
+- [MultiQC](https://multiqc.info/)
+- [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
 
-### Step 1: Sequence Quality Control
 
-#### FastQC and MultiQC
+### 1. Install packages/programs for 16s amplicon sequencing data process
 
-Visualise sequence quality and adapters using FastQC for each individual fastq file, then integrate the reports using MultiQC.
+#### Install Anaconda / Miniconda
 
-Activate the QC environment:
-`conda activate qc`
-Run FastQC and MultiQC:
-`fastqc *.fastq.gz`
-`multiqc .`
+To install QIIME2, you can use Anaconda or Miniconda, which provide a self-contained environment and package manager. Download and install Miniconda and create a new environment for QIIME2. This allows you to manage your QIIME2 installation and dependencies easily.
 
-  #### Step 2: Sequencing Reads Trimming for FIGARO
+#### Install sequence quality check packages
 
-Trim sequence reads to a length of 248nt and discard reads shorter than 248nt using Trimmomatic for FIGARO.
+For the installation of QIIME2, Anaconda or Miniconda can be utilised as they offer a self-contained environment and package manager. Begin by downloading and installing Miniconda, then create a new environment specifically for QIIME2. This approach simplifies the management of your QIIME2 installation and its dependencies.
+
+```conda create --name qc```
+
+```conda install -c bioconda fastqc multiqc```
+
+#### Install Trimmomatic
+
+```conda install -c conda-forge trimmomatic```
+Noted that Java may need to be installed before the run.
+
+#### Install FIGARO
+FIGARO is a software that assists in estimating the truncation parameters for the QIIME2 DADA2 plugin. A pre-print detailing its usage is readily available[^1].
+
+[^1]:Weinstein, M. et al. (2019) FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters. bioRxiv DOI: 10.1101/610394; Sasada, R. et al. (2020) FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters. J. Biomol. Tech. 31, S2
+
+```
+git clone https://github.com/Zymo-Research/figaro.git
+cd figaro
+```
+
+#### Install QIIME2
+
+Run the workflow in a specific conda environment, which makes sure the correct version of the Python required packages are being used for QIIME2.
+<https://docs.qiime2.org/2023.5/install/native/#install-qiime-2-within-a-conda-environment>
+
+### STEP 1
+#### Examine all the fastq files using FastQC and consolidate the results into a single report with the help of MultiQC
+This procedure is designed to visualize the quality of sequences and any remaining adaptors in each individual fastq file.
+``` conda activate qc ```
+
+``` fastqc *.fastq.gz ```
+``` multiqc . ```
+
+### STEP 2
+#### Sequencing reads trimming for FIGARO
+
+To maintain consistency as required by the program, sequence reads should be trimmed to a length of 248 nt, and any reads shorter than 248 nt should be discarded[^2]. This process can be accomplished using tools such as Cutadapt or Trimmomatic. In this case, Trimmomatic was used. Please note that the trimmed sequences are then ready for further analysis with FIGARO.
+[^2]: https://github.com/Zymo-Research/figaro/issues/37
 ```
 java -jar trimmomatic-0.39.jar PE \
 input_forward.fq.gz input_reverse.fq.gz \
@@ -29,17 +66,17 @@ output_reverse_paired.fq.gz output_reverse_unpaired.fq.gz \
 MINLEN:248 CROP: 248
 ```
 
-We use 300nt long as for the average merged length as ITS1 region has a roughly ranging from 220-520nt[^1](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5309391)
+We use 300 nt long as for the average merged length as ITS1 region has a roughly ranging from 220-520nt[^3].
+[^3]:https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5309391
 
 `python figaro.py -i (path) -o (path) -f 20 -r 20 -a 300 -m 12`
 
 Please replace `(path)` with actual paths, and ensure that you have the required software and resources available for each step of the pipeline.
+
 ### Generate a manifest.txt for QIIME2 artifact
 
-
 Generate a manifest.txt file containing the absolute file paths of the sequencing data, and then convert it to QIIME2-compatible format (manifest.csv).
-
-##### Generate a manifest.txt for QIIME2 artifact (medification required to fit for the QIIME2 format)
+#### Generate a manifest.txt for QIIME2 artifact (medification required to fit for the QIIME2 format)
 
 ```ls -d "$PWD"/* > manifest.txt```
 
@@ -75,6 +112,7 @@ echo "CSV file created: $output_file"
 Activate the QIIME2 environment:
 
 `conda activate qiime2-2023.5`
+
 Import the paired-end raw reads as a QIIME2 artifact:
 ```
 qiime tools import \
@@ -83,7 +121,7 @@ qiime tools import \
 --output-path demux \
 --input-format PairedEndFastqManifestPhred33
 ```
-### Summarize FASTQs
+#### Summarise FASTQs
 Obtain sequencing data quality information:
 ```
 qiime demux summarize \
@@ -91,18 +129,18 @@ qiime demux summarize \
 --o-visualization demux.qzv
 ```
 
-##### Trim primers using Cutadapt QIIME2 plugin
+#### Trim primers using `Cutadapt` from the QIIME2 plugin
 Screen out reads that do not begin with primer sequence and remove primer sequence from reads using the cutadapt QIIME2 plugin. The below primers correspond to the ITS1 region. DADA2's chimaera removal step requires primers to have been removed, as otherwise, the ambiguous nucleotides in most primer sets cause large numbers of false-positive chimaeras to be identified.
 
 The primes used in this dataset for ITS1 region
-###### TS1-Fl2 Primer-F	
+##### TS1-Fl2 Primer-F	
 5’ 
 TCGTCGGCAGCGTC
 ==AGATGTGTATAAGAGACAG== (Adaptor sequence)
 *GAACCWGCGGARGGATCA*  (Primer sequence)
 3’
 
-###### ITS2 Primer-R	
+##### ITS2 Primer-R	
 5’ 
 GTCTCGTGGGCTCGG
 ==AGATGTGTATAAGAGACAG== (Adaptor sequence)
@@ -121,9 +159,11 @@ qiime cutadapt trim-paired \
   --o-trimmed-sequences primer-trimmed-demux.qza \
   --verbose \
   &> primer_trimming.log
-
+```
 ### Step 4: DADA2 Denoising and Taxonomic Classification
-Denoise and perform taxonomic classification using DADA2 and the UNITE reference classifier.
+
+Denoise and perform taxonomic classification using DADA2 and the UNITE reference classifier. The pre-trained classifier was obtained from the QIIME forum [^4].
+[^4]:[pre-trained UNITE 9.0 classifiers for QIIME 2023.7 (and older!) - Community Contributions / Data resources - QIIME 2 Forum](https://forum.qiime2.org/t/pre-trained-unite-9-0-classifiers-for-qiime-2023-7-and-older/24140)
 ##### DADA2 Denoising:
 ```
 qiime dada2 denoise-paired \
@@ -152,7 +192,7 @@ qiime feature-classifier classify-sklearn \
 ### Step 5: Taxonomy-Based Filtering
 Filter tables and sequences based on taxonomy to exclude unwanted taxa (e.g., mitochondria and chloroplast).
 
-Filter Table:
+#### Filter Table:
 ```
 qiime taxa filter-table \
 --i-table table-its.qza \
@@ -161,11 +201,7 @@ qiime taxa filter-table \
 --p-exclude mitochondria,chloroplast \
 --o-filtered-table table-its-with-phyla-no-mitochondria-no-chloroplast.qza
 ```
-
-
-Filter Sequences:
-
-
+#### Filter Sequences:
 ```
 qiime taxa filter-seqs \
 --i-sequences rep-seqs-its.qza \
