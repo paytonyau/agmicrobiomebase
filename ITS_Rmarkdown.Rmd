@@ -53,6 +53,7 @@ physeq.a.group = merge_samples(physeq.a, "Group") # Sum between replicate sample
 
 # (3B) repair factors in the sample metadata
 sample_data(physeq.a.group)$Group <- levels(sample_data(physeq.a)$Group)[get_variable(physeq.a.group, "Group")]
+sample_data(physeq.a.group)$Soil.Type <- levels(sample_data(physeq.a)$Soil.Type)[get_variable(physeq.a.group, "Soil.Type")]
 sample_data(physeq.a.group)$Soil <- levels(sample_data(physeq.a)$Soil)[get_variable(physeq.a.group, "Soil")]
 ```
 
@@ -71,11 +72,11 @@ library("RColorBrewer")
 
 ASV <- sample_sums(physeq.a)
 ASV <- as.data.frame(ASV)
-ASV$Group <- physeq.a@sam_data$Group
+ASV$Soil.Type <- physeq.a@sam_data$Soil.Type
 
 #### pdf
 # pdf(file = "Suppl_ASV_ITS.pdf", width = 8,height = 5)
-ggplot(ASV, aes(x = Group, y = ASV,  colour = Group))+
+ggplot(ASV, aes(x = Soil.Type, y = ASV,  colour = Soil.Type))+
   scale_color_brewer(palette = "Paired") +
   geom_point(alpha = 1, position = "jitter", size = 4) + 
   geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
@@ -105,17 +106,17 @@ Beta diversity is a metric used in microbial community studies to assess species
 NMDS <- ordinate(physeq = physeq.a, method = "NMDS", distance = "bray")
 
 # pdf
-# pdf(file = "Fig7A_bata_ITS.pdf", width = 8,height = 5)
+# pdf(file = "Fig9A_bata_ITS.pdf", width = 8,height = 5)
 # Plot ordination
 plot_ordination(physeq = physeq.a,
                       ordination = NMDS,
-                      color = "Group",
-                      shape = "Group"
+                      color = "Soil.Type",
+                      shape = "Soil.Type"
 ) +
   theme_classic() + 
-    scale_color_brewer(palette = "Paired") + 
+  scale_color_brewer(palette = "Paired") + 
   scale_fill_brewer(palette = "Paired") + 
-  geom_point(aes(color = Group), alpha = 1, size = 3) +
+  geom_point(aes(color = Soil.Type), alpha = 1, size = 3) +
   theme(
     text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
@@ -126,7 +127,7 @@ plot_ordination(physeq = physeq.a,
                                size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
     axis.title.x = element_text(color = "black", size = 20, face = "bold")
-  ) + stat_ellipse(geom = "polygon", type="norm", alpha=0.25, aes(fill = Group)) +
+  ) + stat_ellipse(geom = "polygon", type="norm", alpha=0.25, aes(fill = Soil.Type)) +
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
 # Close the PDF device and save the plot to a file
 # dev.off()
@@ -150,9 +151,9 @@ alpha.object <- cbind(
 )
 
 #### pdf
-# pdf(file = "Fig7B_Alpha_ITS.pdf", width = 8,height = 5)
+# pdf(file = "Fig9B_Alpha_ITS.pdf", width = 8,height = 5)
 # Create a plot for alpha diversity
-ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group)) + 
+ggplot(data = alpha.object, aes(x = x.Soil.Type, y = Shannon, color = x.Soil.Type)) + 
   scale_color_brewer(palette = "Paired") +
   theme_classic() + 
   labs(
@@ -247,7 +248,7 @@ library("reshape2")
 ```
 
 ```{R num_taxa, warning=FALSE, message=FALSE}
-physeq <- merge_samples(physeq.a, "Group", fun = sum)
+physeq <- merge_samples(physeq.a, "Soil.Type", fun = sum)
 gentab_levels <- list()
 observationThreshold <- 1
 
@@ -271,25 +272,25 @@ genus_levels <- c("Phylum", "Class", "Order", "Family", "Genus", "Species")
     
     # create a data frame of level counts with genus names as row names
     BB <- as.data.frame(level_counts)
-    BB$name <- row.names(BB)
+    BB$Soil.Type <- row.names(BB)
     
     # add the data frame to the gentab_levels list
     gentab_levels[[level]] <- BB
   }
 
 # Combine all level counts data frames into one data frame
-B2 <- gentab_levels %>% reduce(full_join, by = "name")
+B2 <- gentab_levels %>% reduce(full_join, by = "Soil.Type")
   
 # Set row names and column names
-row.names(B2) <- B2$name
-B2$name <- NULL
+row.names(B2) <- B2$Soil.Type
+B2$Soil.Type <- NULL
 colnames(B2)[1:6] <- genus_levels
 
 print(B2)
 # write.csv(B2, file = "ITS/level_counts_by_group.csv", row.names = TRUE)
-B2$name = row.names(B2)
+B2$Soil.Type = row.names(B2)
 data_long <- melt(B2)
-data_long <- melt(B2, id.vars = "name", 
+data_long <- melt(B2, id.vars = "Soil.Type", 
                   variable.name = "Level", 
                   value.name = "Taxa")
 
@@ -298,7 +299,7 @@ data_long <- melt(B2, id.vars = "name",
 # Open a new PDF graphics device
 # pdf(file = "Fig7C_line_graph_ITS.pdf", width=8,height=5)
 ggplot(data_long, aes(x = Level, y = Taxa, 
-                      color = name, group = name)) +
+                      color = Soil.Type, group = Soil.Type)) +
   geom_line() +
   geom_point(size = 4) +
   labs(x = "Taxonomic Level", y = "Count", color = "Group") +
@@ -397,7 +398,7 @@ abundance <- as.vector(otu_table)
 
 # Create a tibble with the extracted data
 D <- tibble(
-  Sample = rep(sample_data$Group, each = nrow(otu_table)),
+  Sample = rep(sample_data$Soil.Type, each = nrow(otu_table)),
   ASV = rep(rownames(otu_table), times = ncol(otu_table)),
   Abundance = abundance
 ) %>%
@@ -412,9 +413,10 @@ D$Abundance <- NULL
 
 # Rename the second column to "ASV"
 names(D)[2] <- "ASV"
+names(D)[1] <- "Soil.Type"
 
 # Convert data from long to wide format
-E <- dcast(D, ASV ~ Sample)
+E <- dcast(D, ASV ~ Soil.Type)
 
 # Define a binary function
 binary_fun <- function(x) {
@@ -437,8 +439,12 @@ upset_plot <- upset(temp_df,
                     mainbar.y.label = "Counts by Pattern of Conditions", 
                     sets.x.label = "Counts by Condition",
                     matrix.color="blue", 
-                    point.size=2
-                    )
+                    mb.ratio = c(0.6, 0.4),
+                    point.size= 2.75,
+                    line.size = 1.25, 
+                    text.scale = 1.5
+)
+
 
 # Open a new PDF graphics device
 # pdf(file = "Fig7D_UpSet_ITS.pdf", width=8,height=5)

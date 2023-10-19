@@ -1,5 +1,6 @@
 
 
+
 # UK CROP MICROBIOME CRYOBANK (16S amplicon sequencing analysis)
 
 To perform a sequencing analysis on the 16S amplicon data from the UK Crop Microbiome Cryobank (https://agmicrobiomebase.org), it is necessary to prepare a Linux environment with specific pre-installed packages. These packages, crucial for processing sequencing data, encompass a range of tools for quality control, sequence alignment, taxonomic classification, and diversity analysis. Prior to initiating the analysis, ensure that your system is equipped with all the necessary packages to facilitate a seamless and successful analysis.
@@ -10,6 +11,7 @@ To perform a sequencing analysis on the 16S amplicon data from the UK Crop Micro
 - [FastQC](https://github.com/s-andrews/FastQC)
 - [MultiQC](https://multiqc.info/)
 - [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
+- [PICRUSt2](https://github.com/picrust/picrust2)
 
 ### 1. Install packages/programs for 16s amplicon sequencing data process
 
@@ -21,7 +23,13 @@ To install QIIME2, you can use Anaconda or Miniconda, which provide a self-conta
 
 For the installation of QIIME2, Anaconda or Miniconda can be utilised as they offer a self-contained environment and package manager. Begin by downloading and installing Miniconda, then create a new environment specifically for QIIME2. This approach simplifies the management of your QIIME2 installation and its dependencies.
 
+Create a new environment:
 ```conda create --name qc```
+
+Activate the conda environment
+``` conda activate qc ```
+
+#### Install fastqc & multiqc
 
 ```conda install -c bioconda fastqc multiqc```
 
@@ -31,14 +39,24 @@ For the installation of QIIME2, Anaconda or Miniconda can be utilised as they of
 Noted that Java may need to be installed before the run.
 
 #### Install FIGARO
-FIGARO is a software that assists in estimating the truncation parameters for the QIIME2 DADA2 plugin. A pre-print detailing its usage is readily available[^1].
+FIGARO is a software that assists in estimating the truncation parameters for the QIIME2 DADA2 plugin. A pre-print detailing its usage is readily available[^1]. The detailed process for installing the software can be found on the author’s GitHub page (https://github.com/Zymo-Research/figaro). Further guidance is provided in John Quensen’s tutorial (https://john-quensen.com/tutorials/figaro/).
 
 [^1]:Weinstein, M. et al. (2019) FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters. bioRxiv DOI: 10.1101/610394; Sasada, R. et al. (2020) FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters. J. Biomol. Tech. 31, S2
 
-```
-git clone https://github.com/Zymo-Research/figaro.git
-cd figaro
-```
+
+1.  `wget http://john-quensen.com/wp-content/uploads/2020/03/figaro.yml`
+    
+2.  `conda env create -n figaro -f figaro.yml`
+    
+3.  `git clone https://github.com/Zymo-Research/figaro.git`
+    
+4.  `unzip master.zip`
+    
+5.  `rm master.zip`
+    
+6.  `cd figaro-master/figaro`
+    
+7.  `chmod 755 *.py`
 
 #### Install QIIME2
 
@@ -48,7 +66,6 @@ Run the workflow in a specific conda environment, which makes sure the correct v
 ### STEP 1
 #### Examine all the fastq files using FastQC and consolidate the results into a single report with the help of MultiQC
 This procedure is designed to visualize the quality of sequences and any remaining adaptors in each individual fastq file.
-``` conda activate qc ```
 
 ``` fastqc *.fastq.gz ```
 ``` multiqc . ```
@@ -77,7 +94,7 @@ As the average length of **16s V3-V4** region is **460 nt** and minus the length
 Therefore, the **overlapped** nt for both sides, which can be used for merging, would be
 **460 - (209 + 209) = 42 nt** ......(1)
 
-In DADA2, the **minimum merging length or default setting** is **12 nt** [^3] . Ideally, if we set the merging overlap nucleotides as 12, there is room (*X*) for 30 nucleotides that can be trimmed on both sides.
+In DADA2, the **minimum merging length or default setting** is **12 nt** [^3]. Ideally, if we can set the merging overlap nucleotides as 12, there is room (*X*) for 30 nucleotides that can be trimmed on both sides.
 **42 nt -** *X* **nt = 12 nt**... (2)
 *X* **= 30 nt**
 [^3]:https://benjjneb.github.io/dada2/ReleaseNotes_1_8.html
@@ -86,23 +103,20 @@ The forward primer, which is used for the 16S V3-V4 region and is 17 nucleotides
 
 However, to maintain a longer length for more biological identities and considering the low quality of both ends of the sequencing reads, an optimal trimming setting needs to be taken into account. 
 
-Several iterations were undertaken to determine the optimal length for the 16S V3-V4 region in our dataset using the length of XXX setting for the initial analysis. The analysis revealed that at a level of 50%, the length of the region is 424 nt, and at a  level of 98%, the length is 428 nt. We took 428 nt as the target in order to maintain the most possible biological information and at the same time to trim down the low-quality reads.
+Several iterations were undertaken to determine the optimal length for the 16S V3-V4 region in our dataset using the length of 38 nt overlapped setting for the initial analysis. We revealed that at a level of 50%, the length of the region is 424 nt, and at a  level of 98%, the length is 428 nt. We took 428 nt as the target in order to maintain the most possible biological information and at the same time to trim down the low-quality reads.
 **428 - 422 = 6 nt**...(4)
  
- In another word, we added 6 nt for the merging.
+ Inother wordsd, we added 6 nt for the merging.
  From (2) and (4), we have 
  **12 + 6 = 18 nt**
 
-Moreover, according to the DADA2 tutorial, it is suggested to set the merging level to **20 nt** for the v3-v4 16S region [^4]. 
-[^4]:https://benjjneb.github.io/dada2/tutorial_1_8.html & https://forum.qiime2.org/t/extremely-low-merged-score-after-using-dada2/16085/3
-
-Therefore, the FIGARO setting would be  
+Therefore, in the FIGARO setting we use **428 nt** as the longest biologically meaningful read and the setting would be  
 ```python figaro.py -i (path) -o (path) -f 17 -r 21 -a 428 -m 20```
 
 Here `-f` indicates the length of the forward primer - **`17` nt**, and `-r` indicates the length of the reverse primer - **`21` nt**. `-a` indicates the length of the merged sequence - **`428` nt**, this required to exclude the length of the primers on both sides with the consideration of the total merging length. `-m` indicates the requirement of the merging base pair - **`20` nt**. 
 
 
-Below is the outcomes from using FIGARO with the setting above
+Below is the outcome from FIGARO with the setting above
 |Rank | T* position (F, R)| maxEE* (F, R)|Read Retention (%)|Score| 
 | ----------- | ----------- |----------- |----------- |----------- |
 |**1**|**245, 241**|**2, 2**|**80.49**|**78.4904**|
@@ -216,6 +230,11 @@ qiime demux summarize \
 #### Denoising the reads into amplicon sequence variants using DADA2
 
 Based on the projected outcomes of the FIGARO programme, the expected parameters - error rates (`--p-max-ee-f` & `--p-max-ee-r`) and the optimal truncation length (`--p-trunc-len-f` & `--p-trunc-len-r`) - can be utilised in this scenario to achieve the best denoising results.
+From Figaro, we have the trimming position of Forward = **245** and Reverse  = **241**, minus the length of the primers (as we previously trimmed). Therefore, 
+
+Forward: **245 - 17 = 228 nt**
+Reverse: **241 - 21 = 220 nt**
+
 ```
 qiime dada2 denoise-paired \
   --i-demultiplexed-seqs primer-trimmed-demux.qza \
@@ -231,13 +250,13 @@ qiime dada2 denoise-paired \
   --o-denoising-stats 428_228_220_stats.qza
 ```
 
-Please note that taxonomic classifiers exhibit optimal performance when they are tailored to your sample and sequencing processes. This encompasses factors such as the primers employed for amplification and the precise length of sequence reads utilised[^5]. It should be highlighted that employing full-length taxonomic classifiers remains a feasible approach. 
-[^5]: https://docs.qiime2.org/2023.7/tutorials/feature-classifier/
+Please note that taxonomic classifiers exhibit optimal performance when they are tailored to your sample and sequencing processes. This encompasses factors such as the primers employed for amplification and the precise length of sequence reads utilised[^4]. It should be highlighted that employing full-length taxonomic classifiers remains a feasible approach. 
+[^4]: https://docs.qiime2.org/2023.5/tutorials/feature-classifier/
 
 #### Assign taxonomy to ASVs by running taxonomic classification
 
-The command for running the taxonomic classification is one of the most time-consuming and memory-intensive commands in the SOP. If you encounter an error due to insufficient memory and cannot increase your memory usage, consider adjusting the `--p-reads-per-batch` option to a value lower than the default (which is dynamic, depending on sample depth and the number of threads), and try running the command with fewer jobs (for example, set `--p-n-jobs` to `1`). Additionally, you can assign taxonomy to your ASVs using a Naive-Bayes approach implemented in the scikit-learn Python library, along with the SILVA 138 or Greengene2 database. The pre-trained classifiers can be obtained from Qiime2 data-resources [^6]. 
-[^6]: https://docs.qiime2.org/2023.7/data-resources/
+The command for running the taxonomic classification is one of the most time-consuming and memory-intensive commands in the SOP. If you encounter an error due to insufficient memory and cannot increase your memory usage, consider adjusting the `--p-reads-per-batch` option to a value lower than the default (which is dynamic, depending on sample depth and the number of threads), and try running the command with fewer jobs (for example, set `--p-n-jobs` to `1`). Additionally, you can assign taxonomy to your ASVs using a Naive-Bayes approach implemented in the scikit-learn Python library, along with the SILVA 138 or Greengene2 database. The pre-trained classifiers can be obtained from Qiime2 data-resources [^5]. 
+[^5]: https://docs.qiime2.org/2023.7/data-resources/
 ```
 qiime feature-classifier classify-sklearn \
   --i-classifier /mnt/shared/scratch/pyau/ref/silva-138-99-nb-classifier.qza \
@@ -289,4 +308,30 @@ qiime phylogeny align-to-tree-mafft-fasttree \
   --output-dir phylogeny-align-to-tree-mafft-fasttree
 ```
 
-The framework structure established with QIIME2 can be utilized for various QIIME2 plugins dedicated to a range of downstream analyses. In this scenario, we plan to use the Phyloseq package within the R programming environment for our subsequent analysis.
+The framework structure established with QIIME2 can be utilised for various QIIME2 plugins dedicated to a range of downstream analyses. In this scenario, we plan to use the Phyloseq package within the R programming environment for our subsequent analysis.
+
+### Functional Prediction - `PICRUSt2`
+`PICRUSt2` is a software tool for predicting functional abundances based solely on marker gene sequences. Please refer to the `PICRUSt2` wiki for comprehensive documentation and tutorials. Remember, “function” typically refers to gene families such as KEGG orthologs and Enzyme Classification numbers, but predictions can be made for a variety of other entities. There is also a tutorial from YouTube ([PICRUSt2 Command Line Pipeline - YouTube](https://www.youtube.com/watch?v=xZ7yc-GKcSk)) that could be use and follow.
+
+**A.** Output `BIOMV210DirFmt` (BIOM) file
+
+`qiime tools export --input-path 428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza  --output-path table-exported`
+
+
+**B.** Output `DNASequencesDirectoryFormat` (FASTA) format file
+
+`qiime tools export --input-path 428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza --output-path sequences`
+
+Establish a fresh environment with PICRUSt2 implemented and initiate this environment. Should you encounter an error indicating the absence of default reference files when attempting to execute the software, you may need to consider installing from the source as an alternative[^6].
+[^6]:https://github.com/picrust/picrust2/wiki/Installation
+
+
+**C.** Create and activate the environment for `PICRUSt2`
+Use the following command to create a new conda environment named `picrust2`:
+`conda create -n picrust2 -c bioconda -c conda-forge picrust2=2.5.2`
+
+**D.** Activate the new conda environment
+`conda activate picrust2`
+
+**E.** Run the program
+`picrust2_pipeline.py -s sequences/dna-sequences.fasta -i table-exported/feature-table.biom -o picrust2_out_pipeline -p 1`
