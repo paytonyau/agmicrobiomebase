@@ -1,7 +1,7 @@
 ---
 title: "The UK Crop Microbiome Cryobank"
 author: "Payton Yau"
-date: "2023-10-05"
+date: "2024-01-17"
 output:
   pdf_document: default
   html_document: default
@@ -170,7 +170,9 @@ NMDS1 <- ordinate(physeq = physeq.ori,
                   distance = "bray"
                   )
 
-P1 <- plot_ordination(physeq = physeq.ori,
+# Plot ordination
+# pdf(file = "bata_ori_plate.pdf", width = 9,height = 8)
+plot_ordination(physeq = physeq.ori,
                       ordination = NMDS1,
                       color = "Plate",
                       shape = "Type"
@@ -204,7 +206,7 @@ NMDS2 <- ordinate(physeq = physeq.norm,
 
 # Plot ordination
 # pdf(file = "bata_norm_plate.pdf", width = 9,height = 8)
-P2 <- plot_ordination(physeq = physeq.norm,
+plot_ordination(physeq = physeq.norm,
                 ordination = NMDS2,
                 color = "Plate",
                 shape = "Type"
@@ -225,19 +227,6 @@ P2 <- plot_ordination(physeq = physeq.norm,
   scale_color_brewer(palette = "Dark2") + 
   scale_fill_brewer(palette = "Dark2") + 
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
-
-# Combine and arrange the plots
-fig <- ggarrange(P1, P2, labels = c("A", "B"), size = 5,
-                 ncol = 2, nrow = 1)
-
-# Add labels
-fig <- annotate_figure(fig)
-
-
-# Plot ordination
-# pdf(file = "bata_ori_plate.pdf", width = 9,height = 8)
-# Print the figure
-print(fig)
 
 # Close the PDF device and save the plot to a file
 # dev.off()
@@ -267,9 +256,11 @@ plot_ordination(physeq = physeq.norm,
   ) + 
   scale_color_brewer(palette = "Set1") + 
   scale_fill_brewer(palette = "Set1") + 
-  scale_shape_manual(values = c(15, 17, 25, 11, 16, 18, 21, 22, 23),
-                     guide = guide_legend(ncol = 2)) # Set custom shapes
-
+  scale_shape_manual(values = c(15, 17, 25, 11, 16, 18, 21, 22, 23) #,
+                     # guide = guide_legend(ncol = 2)
+                     ) # Set custom shapes
+# Close the PDF device and save the plot to a file
+# dev.off()
 ```
 
 #### colour the crop types
@@ -294,8 +285,9 @@ plot_ordination(physeq = physeq.norm,
   ) + 
   scale_color_brewer(palette = "Set1") + 
   scale_fill_brewer(palette = "Set1") + 
-  scale_shape_manual(values = c(15, 17, 25, 11, 16, 18, 21, 22, 23),
-                     guide = guide_legend(ncol = 2)) # Set custom shapes
+  scale_shape_manual(values = c(15, 17, 25, 11, 16, 18, 21, 22, 23) # ,
+                     # guide = guide_legend(ncol = 2)
+                     ) # Set custom shapes
 ```
 
 #### colour the soil texture
@@ -321,8 +313,9 @@ plot_ordination(physeq = physeq.norm,
   ) + 
   scale_color_brewer(palette = "Set1") + 
   scale_fill_brewer(palette = "Set1") + 
-  scale_shape_manual(values = c(15, 17, 25, 11, 16, 18, 21, 22, 23),
-                     guide = guide_legend(ncol = 2)) # Set custom shapes
+  scale_shape_manual(values = c(15, 17, 25, 11, 16, 18, 21, 22, 23) #,
+                     # guide = guide_legend(ncol = 2)
+                     ) # Set custom shapes
 
 ```
 
@@ -682,10 +675,10 @@ p <- plot_bar(Rgsm10, "Soil.Location", fill = "Family") + coord_flip() +
 
 
 # Create a plot for alpha diversity
-pdf(file = "Fig08A_TOP10.pdf", width = 8,height = 5)
+# pdf(file = "Fig08A_TOP10.pdf", width = 8,height = 5)
 print(p)
 # Close the PDF device and save the plot to a file
-dev.off()
+# dev.off()
 
 # Clean up by removing unnecessary objects
 # rm(proportions, Top10ASVs, Taxtab10, Rgsm10, title)
@@ -772,44 +765,49 @@ upset_plot <- upset(temp_df,
 
 # Create a plot for alpha diversity
 # Open a new PDF graphics device
-pdf(file = "Fig08B_UpSet.pdf", width=8,height=5)
+# pdf(file = "Fig08B_UpSet.pdf", width=8,height=5)
 # Print the ggtree plot
 print(upset_plot)
 
 # Close the PDF device and save the plot to a file
-dev.off()
+# dev.off()
 
 # Clean up by removing unnecessary objects
-# rm(B, B2, D, E, binary_fun, temp_df, upset_plot, physeq.Sugarbeet.group, upset_plot)
+rm(B, B2, D, E, binary_fun, upset_plot, physeq.Sugarbeet.group, upset_plot)
 ```
 
-#### Linear discriminant analysis effect size (LEFSe)
+```{r Venn-install, warning=FALSE, message=FALSE}
+# if (!require(devtools)) install.packages("devtools")
+# devtools::install_github("yanlinlin82/ggvenn")
 
-Linear discriminant analysis effect size (LEFSe) is a powerful computational tool commonly used in microbiome analysis to identify microbial biomarkers that are differentially abundant between different experimental groups. Microbiome analysis involves studying the composition and diversity of microbial communities present in various environments, such as the human gut, soil, water, and more. LEFSe is specifically designed to address the challenge of identifying microbial taxa that drive differences between different experimental conditions or groups. LEFSe combines linear discriminant analysis (LDA), which is a statistical technique used for classification and feature selection, with the concept of effect size. Effect size refers to the magnitude of a difference between two groups and provides insights into the biological relevance of the observed differences.
-
-P.S. ALDEx2 and ANCOM-II produce the most consistent results (<https://www.nature.com/articles/s41467-022-28034-z> )
-
-```{r LEFSe_install, warning=FALSE, message=FALSE}
-# BiocManager::install("microbiomeMarker")
-library("microbiomeMarker")
+library(ggvenn)
 ```
 
-```{r LEFSe, warning=FALSE, message=FALSE}
-lef_out <- run_lefse(physeq.Sugarbeet.vs, group = "Group",
-                     # norm = "CPM", 
-                     taxa_rank = "Genus",
-                     kw_cutoff = 0.01, 
-                     lda_cutoff = 5
-                     )
-plot_ef_dot(lef_out)
-```
+```{r Venn, warning=FALSE, message=FALSE}
+# Extract the rows where the value is 1 for each column
+CL.YO <- rownames(temp_df)[temp_df$CL.YO == 1]
+CY.YO <- rownames(temp_df)[temp_df$CY.YO == 1]
+SC.SH <- rownames(temp_df)[temp_df$SC.SH == 1]
+SL.SH <- rownames(temp_df)[temp_df$SL.SH == 1]
 
-Visualising the marker table as cladogram, The default is 4 which is showing the kingdom, Phylum, Class on the cladogram.
+# Create a list with the extracted data
+list_data <- list("CL.YO" = CL.YO, "CY.YO" = CY.YO, "SC.SH" = SC.SH, "SL.SH" = SL.SH)
 
-```{r cladogram, warning=FALSE, message=FALSE}
-# plot_cladogram(lef_out, color = c("red","blue"), 
-#                clade_label_level = 6)
-# rm(lef_out)
+# Use ggvenn to create the Venn diagram
+Venn <- ggvenn(
+  list_data, 
+  fill_color = c("#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF"),
+  stroke_size = 0.5, set_name_size = 4
+  )
+
+# Open a new PDF graphics device
+# pdf(file = "Fig08C_Venn.pdf", width=5,height=5)
+
+# Print the Venn plot
+print(Venn)
+
+# Close the PDF device and save the plot to a file
+# dev.off()
 ```
 
 ```{r sessionInfo, warning=FALSE, message=FALSE}

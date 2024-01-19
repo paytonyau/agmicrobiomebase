@@ -495,7 +495,7 @@ p <- ggtree(GP.chl, ladderize = TRUE) +
   ) 
 
 # Open a new PDF graphics device
-# pdf(file = "Fig8_Tree_ITS.pdf", width=8,height=5)
+# pdf(file = "Fig10_Tree_ITS.pdf", width=11,height=5)
 # Print the ggtree plot
 print(p)
 
