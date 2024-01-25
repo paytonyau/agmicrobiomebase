@@ -624,8 +624,13 @@ fig <- ggarrange(p1, p2, p3, p4, labels = c("A", "B", "C", "D"), size = 8,
 # Add labels
 fig <- annotate_figure(fig)
 
+# Open a new PDF graphics device
+# pdf(file = "Fig11_ITS.pdf", width=11,height=7.5)
 # Print the figure
 print(fig)
+
+# Close the PDF device and save the plot to a file
+# dev.off() 
 
 ```
 
