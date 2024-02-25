@@ -3,9 +3,8 @@
 
 The UK Crop Microbiome Cryobank integrates genomic (DNA) data with a cryobank collection of samples for the soil microbiomes of the UK major crop plant systems. For this project, the microbiomes are from the rhizosphere (the soil surrounding the crop plant roots) and from bulk soil (soil outside the rhizosphere). The Cryobank provides a facility for researchers to source data and samples, including cryo-preserved microbial material and genomic and metagenomic sequences from different soil microbiome environments.
 
-An integrated cryopreserved collection of samples (rhizosphere and bulk soil, bacterial and fungal isolates and DNA) from crop plant systems (barley, oats, oil seed rape, sugar beet and wheat). An open-access AgMicrobiomeBase (https://agmicrobiomebase.org/) of microbiome data and associated meta-data linked to current public resources such as MGnify.
-
-The detailed analysis (protocol) and the corresponding data for the how-to-guide paper can be found in section A,  and the data for the shotgun metagenomics sequencing are in section B.
+The data catalogue for this project can be accessed at https://agmicrobiomebase.org/.
+This repository contains the scripts used to process the fastq files from the 16S and ITS amplicon Illumina sequencing and for the metagenomic Illumina sequencing. 
 
 ### **Table of contents**
 --------------------------------

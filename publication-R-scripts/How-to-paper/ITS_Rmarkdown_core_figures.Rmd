@@ -4,7 +4,7 @@ output:
   pdf_document: default
   html_document:
     df_print: paged
-date: "2024-01-24"
+date: "2024-02-23"
 ---
 
 ## The Silent Scourge: Investigating Soil-Borne Fungal Diseases in Wheat Crops
@@ -40,10 +40,10 @@ library("ggpubr")
 ```{r qiime2R, warning=FALSE, message=FALSE}
 # Convert qiime2 to phyloseq format
 physeq.a <- qza_to_phyloseq(
-  features = "ITS/table-its-fungi-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
-  tree = "ITS/phylogeny-align-to-tree-mafft-fasttree/rooted_tree.qza",
-  taxonomy = "ITS/taxonomy-fungi.qza",
-  metadata = "ITS/meta-table.txt"
+  features = "~/GitHub/agmicrobiomebase/amplicon-sequence-analysis/amplicon-ITS/[Qiime2]UNITE_9/table-its-fungi-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
+  tree = "~/GitHub/agmicrobiomebase/amplicon-sequence-analysis/amplicon-ITS/[Qiime2]UNITE_9/phylogeny-align-to-tree-mafft-fasttree/rooted_tree.qza",
+  taxonomy = "~/GitHub/agmicrobiomebase/amplicon-sequence-analysis/amplicon-ITS/[Qiime2]UNITE_9/taxonomy-fungi.qza",
+  metadata = "ITS-meta-table.txt"
 )
 physeq.a ## confirm the object
 
@@ -143,7 +143,7 @@ Alpha diversity, a key ecological concept, denotes species richness within a spe
 Here we use Shannon for alpha diversity.
 
 ```{r Alpha diversity, message=FALSE, warning=FALSE}
-
+##########  alpha diversity (Shannon)
 # available measurements [c("Observed", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher")]
 alpha.object <- cbind(
   x = sample_data(physeq.a),
@@ -180,65 +180,125 @@ ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group)) +
 # Clean up by removing the alpha.object
 rm(alpha.object)
 ```
+```{R Alpha diversity Suppl A, warning=FALSE, message=FALSE}
+##########  alpha diversity (Simpson)
+# Calculate alpha diversity (Simpson) and store it in physeq.a object
+alpha.object <- cbind(
+  x = sample_data(physeq.a),
+  y = estimate_richness(physeq.a, measures = 'Simpson')
+)
 
-#### The proportions of different microbial taxa
+#### pdf
+# Open a PDF device to save the plot
+# pdf(file = "Alpha_ITS_Simpson.pdf", width = 8,height = 5)
 
-Bar plots illustrating relative abundance in microbiome enable to visually represent the proportions of different microbial taxa within a given sample. Each bar corresponds to a specific taxonomic group, with its height indicating the relative abundance of that group in the microbiome.
+# Create a plot for alpha diversity
+# This step creates a scatter plot of the Simpson alpha diversity for each group in the physeq.a object.
+ggplot(data = alpha.object, aes(x = x.Group, y = Simpson, color = x.Group)) + 
+  scale_color_brewer(palette = "Paired") +
+  theme_classic() + 
+  labs(
+    x = element_blank(),                     # No x-axis label
+    y = "Alpha Diversity (Simpson)"          # y-axis label
+  ) + 
+  geom_point(alpha = 1, position = "jitter", size = 4) + 
+  geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
+  theme(
+    text = element_text(size = 18, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 45, 
+                               hjust = 1, size = 13, face = "bold"),
+    axis.text.y = element_text(angle = 0, hjust = 0, 
+                               colour = "black", size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 15, face = "bold"),
+    legend.position = "none"                 # Hide legend
+  ) +  
+  scale_y_continuous(breaks = seq(0.95, 0.99, by = 0.01), limits = c(0.95, 0.99))  
 
-```{r Install Bar, warning=FALSE, message=FALSE}
-# install.packages("plyr")
-library("plyr")
+# Close the PDF device and save the plot to a file
+# dev.off()
 ```
 
-```{r Bar, warning=FALSE, message=FALSE}
-# https://github.com/joey711/phyloseq/issues/901
+```{R Alpha diversity Suppl B, warning=FALSE, message=FALSE}
+########## alpha diversity (InvSimpson)
+# Calculate alpha diversity (InvSimpson) and store it in physeq.a object
+alpha.object <- cbind(
+  x = sample_data(physeq.a),
+  y = estimate_richness(physeq.a, measures = 'InvSimpson')
+)
 
-# Filter taxa with mean abundance > 0.1
-physeq2 = filter_taxa(physeq.a.group, function(x) mean(x) > 0.1, TRUE)
+#### pdf
+# Open a PDF device to save the plot
+# pdf(file = "Alpha_ITS_InvSimpson.pdf", width = 8,height = 5)
 
-# Transform sample counts to relative abundances
-physeq3 = transform_sample_counts(physeq2, function(x) x / sum(x))
+# Create a plot for alpha diversity
+# This step creates a scatter plot of the Inverse Simpson alpha diversity for each group in the physeq.a object.
+ggplot(data=alpha.object, aes(x=x.Group, y=InvSimpson, color=x.Group)) + 
+  scale_color_brewer(palette="Paired") +
+  theme_classic() + 
+  labs(
+    x=element_blank(),                     # No x-axis label
+    y="Alpha Diversity (InvSimpson)"       # y-axis label
+  ) + 
+  geom_point(alpha=1, position="jitter", size=4) + 
+  geom_boxplot(alpha=0, colour="black", size=0.8)+ 
+  theme(
+    text=element_text(size=18, colour="black"), 
+    axis.ticks=element_line(colour="black", size=1.1),
+    axis.line=element_line(colour='black', size=1.1),
+    axis.text.x=element_text(colour="black", angle=45,
+                             hjust=1, size=13, face="bold"),
+    axis.text.y=element_text(angle=0, hjust=0,
+                             colour="black", size=13, face="bold"),
+    axis.title.y=element_text(color="black", size=15, face="bold"),
+    legend.position="none"                 # Hide legend
+  ) +
+  scale_y_continuous(breaks=seq(20,90,by=10), limits=c(20,90))  
 
-# Aggregate taxa at the Phylum level
-glom <- tax_glom(physeq3, taxrank = 'Phylum')
+# Close the PDF device and save the plot to a file
+# dev.off()
+```
 
-# Convert the aggregated phyloseq object to a dataframe
-data <- psmelt(glom)
-# Convert Phylum column to character
-data$Phylum <- as.character(data$Phylum)
+```{R Alpha diversity Suppl C, warning=FALSE, message=FALSE}
+##########  alpha diversity (Fisher)
+# Calculate alpha diversity (Fisher) and store it in physeq.a object
+# This step calculates the Fisher alpha diversity for each sample in the physeq.a object.
+alpha.object <- cbind(
+  x = sample_data(physeq.a),
+  y = estimate_richness(physeq.a, measures = 'Fisher')
+)
 
-# Rename phyla with abundance < 1% to "< 1% abund."
-data$Phylum[data$Abundance < 0.01] <- "< 1% abund."
+#### pdf
+# Open a PDF device to save the plot
+# pdf(file = "Alpha_ITS_Fisher.pdf", width = 8,height = 5)
 
-# Calculate medians of abundance for each Phylum
-medians <- ddply(data, ~Phylum, function(x) c(median = median(x$Abundance)))
+# Create a plot for alpha diversity
+# This step creates a scatter plot of the Fisher alpha diversity for each group in the physeq.a object.
+ggplot(data=alpha.object, aes(x=x.Group, y=Fisher, color=x.Group)) + 
+  scale_color_brewer(palette="Paired") +
+  theme_classic() + 
+  labs(
+    x=element_blank(),                     # No x-axis label
+    y="Alpha Diversity (Fisher)"           # y-axis label
+  ) + 
+  geom_point(alpha=1, position="jitter", size=4) + 
+  geom_boxplot(alpha=0, colour="black", size=0.8)+ 
+  theme(
+    text=element_text(size=18, colour="black"), 
+    axis.ticks=element_line(colour="black", size=1.1),
+    axis.line=element_line(colour='black', size=1.1),
+    axis.text.x=element_text(colour="black", angle=45,
+                             hjust=1, size=13, face="bold"),
+    axis.text.y=element_text(angle=0, hjust=0,
+                             colour="black", size=13, face="bold"),
+    axis.title.y=element_text(color="black", size=15, face="bold"),
+    legend.position="none"                 # Hide legend
+  ) +
+  scale_y_continuous(breaks=seq(20,70,by=10), limits=c(20,70))  
 
-# Extract phyla with median abundance <= 0.01
-remainder <- medians[medians$median <= 0.01, ]$Phylum
-
-# Rename selected phyla to "Phyla < 1% abund."
-data[data$Phylum %in% remainder, ]$Phylum <- "Phyla < 1% abund."
-
-# Rename phyla with abundance < 1% to "Phyla < 1% abund."
-data$Phylum[data$Abundance < 0.01] <- "Phyla < 1% abund."
-
-# Plot the data with condensed phyla categories
-p <- ggplot(data = data, aes(x = Group, y = Abundance, fill = Phylum))
-p + geom_bar(aes(), stat = "identity", position = "stack") +
-    scale_color_brewer(palette = "Paired") +
-  theme_classic() +   
-  theme(text = element_text(size=15, colour = "black"), 
-        axis.ticks = element_line(colour = "black", size = 1.25),
-        axis.line = element_line(colour = 'black', size = 1.25),
-        axis.text.x = element_text(angle=45, hjust=1, 
-                                   colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, 
-                                   colour = "black",size = 13),
-        axis.title.y = element_text(color="black", size=15,face="bold"), 
-        legend.position = "right") 
-
-# Clean up by removing the alpha.object
-rm(physeq2, physeq3, glom, data, medians, remainder, p)
+# Close the PDF device and save the plot to a file
+# dev.off()
 ```
 
 #### Number of taxa in groups
@@ -330,48 +390,6 @@ ggplot(data_long, aes(x = Level, y = Taxa,
 
 # Clean up by removing the alpha.object
 rm(physeq, gentab_levels, observationThreshold, B2, data_long, genfac, genus_levels, level, level_counts)
-```
-
-#### Plotting the top 10 taxa at family level
-
-Generating a visual representation through the plotting of the top 10 taxa at the family level offers a concise overview of the predominant microbial groups within a dataset. This approach is instrumental in identifying and emphasizing significant contributors to the structure and function of microbial communities across diverse groups or conditions.
-
-```{r top10, warning=FALSE, message=FALSE}
-
-## Transform normalised ASVs to proportions 
-proportions = transform_sample_counts(physeq.a.group, function(x) 100 * x/sum(x))
-
-##  S
-Top10ASVs = names(sort(taxa_sums(proportions), TRUE)[1:13])
-Taxtab10 = cbind(tax_table(proportions), Family30 = NA)
-Taxtab10[Top10ASVs, "Family30"] <- as(tax_table(proportions)[Top10ASVs, "Family"], "character")
-tax_table(proportions) <- tax_table(Taxtab10)
-
-Rgsm10 = prune_taxa(Top10ASVs, proportions)
-
-# plotting
-title = "Top 10 - Family level"
-plot_bar(Rgsm10, "Group", fill = "Family", title = title) + 
-  coord_flip() + 
-  ylim(0, 50) +  
-  scale_color_brewer(palette = "Paired") +
-  theme_classic() +   
-  theme(text = element_text(size=15, colour = "black"), 
-        axis.ticks = element_line(colour = "black", size = 1.25),
-        axis.line = element_line(colour = 'black', size = 1.25),
-        axis.text.x = element_text(angle=45, hjust=1, 
-                                   colour = "black", size = 13),
-        axis.text.y = element_text(angle=0, hjust=0.5, 
-                                   colour = "black",size = 13),
-        axis.title.y = element_text(color="black", size=15,face="bold"), 
-        legend.position = "right", 
-        legend.text = element_text(size = 9.5), 
-        legend.key.height= unit(0.45, 'cm'),
-        legend.key.width= unit(0.45, 'cm')
-        )
-
-# Clean up by removing unnecessary objects
-rm(proportions, Top10ASVs, Taxtab10, Rgsm10, title)
 ```
 
 ### Upset plot using UpsetR
