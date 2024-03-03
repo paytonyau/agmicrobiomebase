@@ -1,7 +1,7 @@
 
 # UK CROP MICROBIOME CRYOBANK (ITS amplicon sequencing analysis)
 
- To perform a sequencing analysis on the 16S amplicon data from the UK Crop Microbiome Cryobank (https://agmicrobiomebase.org), it is necessary to prepare a Linux environment with specific pre-installed packages. These packages, crucial for processing sequencing data, encompass a range of tools for quality control, sequence alignment, taxonomic classification, and diversity analysis. Prior to initiating the analysis, ensure that your system is equipped with all the necessary packages to facilitate a seamless and successful analysis.
+To perform a sequencing analysis on the ITS amplicon data from the UK Crop Microbiome Cryobank, it is necessary to prepare a Linux environment with specific pre-installed packages. These packages, crucial for processing sequencing data, encompass a range of tools for quality control, sequence alignment, taxonomic classification, and diversity analysis. Prior to initiating the analysis, ensure that your system is equipped with all the necessary packages to facilitate a seamless and successful analysis.
 
 - [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
 - [QIIME2 - the cummunity developed suite](https://qiime2.org/)
@@ -11,7 +11,7 @@
 - [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
 
 
-### 1. Install packages/programs for 16s amplicon sequencing data process
+### 1. Install packages/programs for ITS amplicon sequencing data process
 
 #### Install Anaconda / Miniconda
 
@@ -132,7 +132,7 @@ qiime demux summarize \
 #### Trim primers using `Cutadapt` from the QIIME2 plugin
 Screen out reads that do not begin with primer sequence and remove primer sequence from reads using the cutadapt QIIME2 plugin. The below primers correspond to the ITS1 region. DADA2's chimaera removal step requires primers to have been removed, as otherwise, the ambiguous nucleotides in most primer sets cause large numbers of false-positive chimaeras to be identified.
 
-The primes used in this dataset for ITS1 region
+The primers used in this dataset for ITS1 region
 ##### TS1-Fl2 Primer-F	
 5’ 
 TCGTCGGCAGCGTC
@@ -210,3 +210,14 @@ qiime taxa filter-seqs \
 --p-exclude mitochondria,chloroplast \
 --o-filtered-sequences rep-seqs-its-with-phyla-no-mitochondria-no-chloroplast.qza
 ```
+
+#### Unrooted Phylogenetic Tree Construction
+In evolutionary biology, an unrooted phylogenetic tree is used to illustrate the relationships and evolutionary distances between entities such as species or sequences. Unlike their rooted counterparts, unrooted trees do not designate a common ancestor, but rather focus on depicting branching patterns and relative relationships. These trees aid in deducing genetic diversity and shared ancestry by scrutinising molecular data and creating diagrams that underscore evolutionary links. Unrooted trees play a crucial role in elucidating the evolutionary landscape and the interconnections among biological entities.
+
+```
+qiime phylogeny align-to-tree-mafft-fasttree \  
+  --i-sequences rep-seqs-its-with-phyla-no-mitochondria-no-chloroplast.qza \  
+  --output-dir phylogeny-align-to-tree-mafft-fasttree
+```
+
+The framework structure established with QIIME2 can be utilised for various QIIME2 plugins dedicated to a range of downstream analyses. In this scenario, we plan to use the Phyloseq package within the R programming environment for our subsequent analysis.

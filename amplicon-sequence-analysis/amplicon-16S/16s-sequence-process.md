@@ -1,9 +1,6 @@
-
-
-
 # UK CROP MICROBIOME CRYOBANK (16S amplicon sequencing analysis)
 
-To perform a sequencing analysis on the 16S amplicon data from the UK Crop Microbiome Cryobank (https://agmicrobiomebase.org), it is necessary to prepare a Linux environment with specific pre-installed packages. These packages, crucial for processing sequencing data, encompass a range of tools for quality control, sequence alignment, taxonomic classification, and diversity analysis. Prior to initiating the analysis, ensure that your system is equipped with all the necessary packages to facilitate a seamless and successful analysis.
+To perform a sequencing analysis on the 16S amplicon data from the UK Crop Microbiome Cryobank (https://agmicrobiomebase.org), you need to prepare a Linux environment with specific pre-installed packages. These packages are crucial for processing sequencing data and include a range of tools for quality control, sequence alignment, taxonomic classification, and diversity analysis. Before initiating the analysis, ensure that your system is equipped with all the necessary packages to facilitate a seamless and successful analysis.
 
 - [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
 - [QIIME2 - the cummunity developed suite](https://qiime2.org/)
@@ -13,7 +10,7 @@ To perform a sequencing analysis on the 16S amplicon data from the UK Crop Micro
 - [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
 - [PICRUSt2](https://github.com/picrust/picrust2)
 
-### 1. Install packages/programs for 16s amplicon sequencing data process
+### 1. Install packages/programs for 16s amplicon sequencing data processing
 
 #### Install Anaconda / Miniconda
 
@@ -36,7 +33,7 @@ Activate the conda environment
 #### Install Trimmomatic
 
 ```conda install -c conda-forge trimmomatic```
-Noted that Java may need to be installed before the run.
+Noted that Java may need to be installed before running Trimmomatic.
 
 #### Install FIGARO
 FIGARO is a software that assists in estimating the truncation parameters for the QIIME2 DADA2 plugin. A pre-print detailing its usage is readily available[^1]. The detailed process for installing the software can be found on the author’s GitHub page (https://github.com/Zymo-Research/figaro). Further guidance is provided in John Quensen’s tutorial (https://john-quensen.com/tutorials/figaro/).
@@ -60,12 +57,12 @@ FIGARO is a software that assists in estimating the truncation parameters for th
 
 #### Install QIIME2
 
-Run the workflow in a specific conda environment, which makes sure the correct version of the Python required packages are being used for QIIME2.
+Run the workflow in a specific conda environment, which ensures that the correct version of the Python required packages are being used for QIIME2.
 <https://docs.qiime2.org/2023.5/install/native/#install-qiime-2-within-a-conda-environment>
 
 ### STEP 1
 #### Examine all the fastq files using FastQC and consolidate the results into a single report with the help of MultiQC
-This procedure is designed to visualize the quality of sequences and any remaining adaptors in each individual fastq file.
+This procedure is designed to visualise the quality of sequences and any remaining adaptors in each individual fastq file.
 
 ``` fastqc *.fastq.gz ```
 ``` multiqc . ```
@@ -85,7 +82,7 @@ MINLEN:248 CROP: 248
 
 #### Identify the optimal setting denosing in DADA2 by using FIGARO
 
-Following the trimming process, the Figaro program should be utilised. The program involved applying various read lengths to estimate the error rates for DADA2. The aim was to optimize the accuracy of the DADA2 algorithm and improve its performance in accurately identifying and correcting sequencing errors in the dataset.
+Following the trimming process, the Figaro program should be utilised. The program involves applying various read lengths to estimate the error rates for DADA2. The aim is to optimize the accuracy of the DADA2 algorithm and improve its performance in accurately identifying and correcting sequencing errors in the dataset.
 
 As the average length of **16s V3-V4** region is **460 nt** and minus the length of the maximum length of the reads, which is 251 nt, it has a gap of ~209 nt 
 **Forward: 460 - 251 = 209 nt**
@@ -101,12 +98,13 @@ In DADA2, the **minimum merging length or default setting** is **12 nt** [^3]. I
 
 The forward primer, which is used for the 16S V3-V4 region and is 17 nucleotides long, and the reverse primer, which spans 21 nucleotides, both directions need to be removed to minimise the errors induced by the primers. Therefore the length, **after the primer removal**, on average is **460 - (17 + 21) = 422 nt**...(3)
 
-However, to maintain a longer length for more biological identities and considering the low quality of both ends of the sequencing reads, an optimal trimming setting needs to be taken into account. 
+However, to maintain a longer length for more biological identities and considering the low quality of both ends of the sequencing reads, an optimal trimming setting needs to be taken into account.
 
-Several iterations were undertaken to determine the optimal length for the 16S V3-V4 region in our dataset using the length of 38 nt overlapped setting for the initial analysis. We revealed that at a level of 50%, the length of the region is 424 nt, and at a  level of 98%, the length is 428 nt. We took 428 nt as the target in order to maintain the most possible biological information and at the same time to trim down the low-quality reads.
+Several iterations were undertaken to determine the optimal length for the 16S V3-V4 region in our dataset using the length of 38 nt overlapped setting for the initial analysis. We revealed that at a level of 50%, the length of the region is 424 nt, and at a level of 98%, the length is 428 nt. We took 428 nt as the target in order to maintain the most possible biological information and at the same time to trim down the low-quality reads. 
+
 **428 - 422 = 6 nt**...(4)
  
- Inother wordsd, we added 6 nt for the merging.
+ In other words, we added 6 nt for the merging. 
  From (2) and (4), we have 
  **12 + 6 = 18 nt**
 
@@ -127,11 +125,11 @@ Below is the outcome from FIGARO with the setting above
 *T, Trim; **EE, expected error
 
 
-#### Generate a manifest.txt for QIIME2 artifact (medification required to fit for the QIIME2 format)
+#### Generate a manifest.txt for QIIME2 artifact (modification required to fit the QIIME2 format)
 
 ```ls -d "$PWD"/* > manifest.txt```
 
-The prescribed format entails the inclusion of "sample-id, absolute file-path, direction". The following script can be utilised to generate the necessary format, you could copy the script below and paste it into a `.sh` file.
+The prescribed format entails the inclusion of “sample-id, absolute file-path, direction”. The following script can be utilised to generate the necessary format. You could copy the script below and paste it into a .sh file.
 
 ```
 #!/bin/bash
@@ -168,7 +166,7 @@ conda activate qiime2-2023.5
 ```
 
 #### Import FASTQs as QIIME 2 artifact
-To standardise QIIME 2 analyses and to keep track of provenance (i.e. a list of what commands were previously run to produce a file) a special format is used for all QIIME2 input and output files called an "artefact" (with the extension QZA). The first step is to import the paired-end raw reads as a QZA file. Noted that you need to prepare the manifast.csv file following the QIIME2 requirement.
+To standardise QIIME 2 analyses and to keep track of provenance (i.e. a list of what commands were previously run to produce a file) a special format is used for all QIIME2 input and output files called an “artifact” (with the extension QZA). The first step is to import the paired-end raw reads as a QZA file. Note that you need to prepare the manifest.csv file following the QIIME2 requirement.
 
 ```
 qiime tools import
@@ -188,7 +186,7 @@ qiime demux summarize \
 ```
 
 #### Trim primers using Cutadapt QIIME2 plugin
-Screen out reads that do not begin with primer sequence and remove primer sequence from reads using the cutadapt QIIME2 plugin. The below primers correspond to the 16s V3-V4 region. DADA2's chimaera removal step requires primers to have been removed, as otherwise, the ambiguous nucleotides in most primer sets cause large numbers of false-positive chimaeras to be identified.
+Screen out reads that do not begin with primer sequence and remove primer sequence from reads using the cutadapt QIIME2 plugin. The below primers correspond to the 16s V3-V4 region. DADA2’s chimera removal step requires primers to have been removed, as otherwise, the ambiguous nucleotides in most primer sets cause large numbers of false-positive chimeras to be identified.
 
 The primes used in this dataset for 16s V3-V4 region
 ##### V3-V4 Primer-F	
@@ -250,12 +248,14 @@ qiime dada2 denoise-paired \
   --o-denoising-stats 428_228_220_stats.qza
 ```
 
-Please note that taxonomic classifiers exhibit optimal performance when they are tailored to your sample and sequencing processes. This encompasses factors such as the primers employed for amplification and the precise length of sequence reads utilised[^4]. It should be highlighted that employing full-length taxonomic classifiers remains a feasible approach. 
+Please note that taxonomic classifiers exhibit optimal performance when they are tailored to your sample and sequencing processes. This encompasses factors such as the primers employed for amplification and the precise length of sequence reads utilised[^4]. It should be highlighted that employing full-length taxonomic classifiers remains a feasible approach.
+
 [^4]: https://docs.qiime2.org/2023.5/tutorials/feature-classifier/
 
 #### Assign taxonomy to ASVs by running taxonomic classification
 
 The command for running the taxonomic classification is one of the most time-consuming and memory-intensive commands in the SOP. If you encounter an error due to insufficient memory and cannot increase your memory usage, consider adjusting the `--p-reads-per-batch` option to a value lower than the default (which is dynamic, depending on sample depth and the number of threads), and try running the command with fewer jobs (for example, set `--p-n-jobs` to `1`). Additionally, you can assign taxonomy to your ASVs using a Naive-Bayes approach implemented in the scikit-learn Python library, along with the SILVA 138 or Greengene2 database. The pre-trained classifiers can be obtained from Qiime2 data-resources [^5]. 
+
 [^5]: https://docs.qiime2.org/2023.7/data-resources/
 ```
 qiime feature-classifier classify-sklearn \
@@ -264,18 +264,18 @@ qiime feature-classifier classify-sklearn \
   --p-n-jobs 8 \
   --o-classification 428_228_220_taxonomy_silva138.qza
 ```
-#### visualise the taxonomy outcomes
+#### visualising the taxonomy outcomes
 ```
 qiime metadata tabulate \
   --m-input-file 428_228_220_taxonomy_silva138.qza \
   --o-visualization 428_228_220_taxonomy_silva138.qzv
 ```
 
-#### Filter out contaminant and unclassified ASVs
+#### Filtering out contaminant and unclassified ASVs
 
 With taxonomy assigned to our ASVs, we can leverage this information to eliminate ASVs that are likely contaminants or noise, based on their taxonomic labels. Mitochondrial and chloroplast 16S sequences are common contaminants in 16S sequencing data and can be removed by excluding any ASV containing these terms in its taxonomic label. It may also be beneficial to exclude any ASV unclassified at the phylum level, as these sequences are more likely to be noise (e.g., potential chimeric sequences).
 
-Please note that if your data has not been classified against SILVA, you will need to modify 'P__' to a string that allows phylum-level assignments to be identified, or simply omit that line. If you are studying a poorly characterized environment where there is a good chance of identifying novel phyla, you might also want to omit that line.
+Please note that if your data has not been classified against SILVA, you will need to modify ‘P__’ to a string that allows phylum-level assignments to be identified, or simply omit that line. If you are studying a poorly characterized environment where there is a good chance of identifying novel phyla, you might also want to omit that line.
 ```
 qiime taxa filter-table \
   --i-table 428_228_220_table.qza \
@@ -294,24 +294,15 @@ qiime taxa filter-seqs \
   --o-filtered-sequences 428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza
   ```
 
-#### Visualise the rep seq
+#### Visualise the Representative Sequence
 ```
 qiime metadata tabulate \
   --m-input-file 428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza \
   --o-visualization 428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qzv
 ```
-### Unrooted phylogenetic tree construction
-In evolutionary biology, an unrooted phylogenetic tree is employed to illustrate the relationships and evolutionary distances between entities such as species or sequences. Unlike their rooted counterparts, unrooted trees do not designate a common ancestor, but rather concentrate on depicting branching patterns and relative relationships. These trees aid in deducing genetic diversity and shared ancestry by scrutinising molecular data and creating diagrams that underscore evolutionary links. Unrooted trees play a crucial role in elucidating the evolutionary landscape and the interconnections among biological entities.
-```
-qiime phylogeny align-to-tree-mafft-fasttree \  
-  --i-sequences 428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza \  
-  --output-dir phylogeny-align-to-tree-mafft-fasttree
-```
-
-The framework structure established with QIIME2 can be utilised for various QIIME2 plugins dedicated to a range of downstream analyses. In this scenario, we plan to use the Phyloseq package within the R programming environment for our subsequent analysis.
 
 ### Functional Prediction - `PICRUSt2`
-`PICRUSt2` is a software tool for predicting functional abundances based solely on marker gene sequences. Please refer to the `PICRUSt2` wiki for comprehensive documentation and tutorials. Remember, “function” typically refers to gene families such as KEGG orthologs and Enzyme Classification numbers, but predictions can be made for a variety of other entities. There is also a tutorial from YouTube ([PICRUSt2 Command Line Pipeline - YouTube](https://www.youtube.com/watch?v=xZ7yc-GKcSk)) that could be use and follow.
+`PICRUSt2` is a software tool for predicting functional abundances based solely on marker gene sequences. Please refer to the `PICRUSt2` wiki for comprehensive documentation and tutorials. Remember, “function” typically refers to gene families such as KEGG orthologs and Enzyme Classification numbers, but predictions can be made for a variety of other entities. There is also a tutorial from YouTube (PICRUSt2 Command Line Pipeline - YouTube) that could be useful to follow.
 
 **A.** Output `BIOMV210DirFmt` (BIOM) file
 
@@ -322,8 +313,8 @@ The framework structure established with QIIME2 can be utilised for various QIIM
 
 `qiime tools export --input-path 428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza --output-path sequences`
 
-Establish a fresh environment with PICRUSt2 implemented and initiate this environment. Should you encounter an error indicating the absence of default reference files when attempting to execute the software, you may need to consider installing from the source as an alternative[^6].
-[^6]:https://github.com/picrust/picrust2/wiki/Installation
+Establish a fresh environment with PICRUSt2 implemented and initiate this environment. Should you encounter an error indicating the absence of default reference files when attempting to execute the software, you may need to consider installing from the source as an alternative.
+:https://github.com/picrust/picrust2/wiki/Installation
 
 
 **C.** Create and activate the environment for `PICRUSt2`
