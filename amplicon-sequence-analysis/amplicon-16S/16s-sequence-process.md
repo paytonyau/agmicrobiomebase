@@ -42,6 +42,18 @@ FIGARO is a software that assists in estimating the truncation parameters for th
 
 
 1.  `wget http://john-quensen.com/wp-content/uploads/2020/03/figaro.yml`
+
+Here, you may also create a `figaro.yml` file and contain the information below:
+name: figaro
+channels:
+  - bioconda
+  - defaults
+  - conda-forge
+dependencies:
+  - python >=3.6,<3.7.0
+  - numpy
+  - scipy==1.2.1
+  - matplotlib==3.0.2
     
 2.  `conda env create -n figaro -f figaro.yml`
     
