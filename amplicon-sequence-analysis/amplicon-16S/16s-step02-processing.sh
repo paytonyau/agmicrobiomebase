@@ -24,7 +24,7 @@ MINLEN:248 CROP: 248
 
 # We use 428 nt as the longest biologically meaningful read and the setting would be  
 
-python figaro.py -i (path) -o (path) -f 17 -r 21 -a 428 -m 20
+python figaro.py -i (path) -o (path) -f 17 -r 21 -a 428 -m 18
 
 
 # Generate a manifest.txt for QIIME2 artifact (modification required to fit the QIIME2 format)

@@ -10,7 +10,7 @@ To perform a sequencing analysis on the 16S amplicon data from the UK Crop Micro
 - [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
 - [PICRUSt2](https://github.com/picrust/picrust2)
 
-### 1. Install packages/programs for 16s amplicon sequencing data processing
+### 1. Install packages/programs for amplicon sequencing data processing
 
 #### Install Anaconda / Miniconda
 
@@ -43,7 +43,7 @@ FIGARO is a software that assists in estimating the truncation parameters for th
 
 1.  `wget http://john-quensen.com/wp-content/uploads/2020/03/figaro.yml`
 
-If the provided URL is not available, you may also create a `figaro.yml` file on your own and include the information provided below.
+If the provided URL is not available, you may also create a `figaro.yml` file on your own and include the information provided below, or use the `16s-step01-figaro.yml` file in our Github folder. 
 
 ```
 name: figaro
@@ -152,7 +152,7 @@ The settings from the first outcome will be used for the `denoise` process.
 
 Please note that the trimmed sequences from FIGARO will not be used for any other analysis. The original fastq files should be used to create the QIIME2 artifact.
 
-#### Generate a manifest.txt for QIIME2 artifact (modification required to fit the QIIME2 format)
+#### Generate a manifest.txt for QIIME2 artifact 
 
 To create a QIIME2 artifact for the analysis, a `manifest` file for the corresponding fastq files are required. This requried a format entails the inclusion of “sample-id, absolute file-path, direction” and below is an example,
 
@@ -343,9 +343,9 @@ Output files:
 - 428_228_220_table.qza
 - 428_228_220_stats.qza
 
->   428: Represents the longest combined biologically meaningful read, denoted as 428nt.
+>  428: Represents the longest combined biologically meaningful read, denoted as 428nt.
 >  228: The trimming position for the forward reads, denoted as 228nt.
->   220: The trimming position for the reverse reads, denoted as 220nt.
+>  220: The trimming position for the reverse reads, denoted as 220nt.
 
 Here is the elements and the explainations that we used for the `denose-paired` step:
 -   `qiime dada2 denoise-paired`: This is the command to run the  `denoise-paired`  method from the  `dada2`  plugin in QIIME 2. This method denoises paired-end sequence data.  
@@ -362,7 +362,7 @@ Please note that taxonomic classifiers exhibit optimal performance when they are
 
 #### Assign taxonomy to ASVs by running taxonomic classification
 
-The command for running the taxonomic classification is one of the most time-consuming and memory-intensive commands in the SOP. If you encounter an error due to insufficient memory and cannot increase your memory usage, consider adjusting the `--p-reads-per-batch` option to a value lower than the default (which is dynamic, depending on sample depth and the number of threads), and try running the command with fewer jobs (for example, set `--p-n-jobs` to `1`). Additionally, you can assign taxonomy to your ASVs using a Naive-Bayes approach implemented in the scikit-learn Python library, along with the SILVA 138 or Greengene2 database. The pre-trained classifiers can be obtained from Qiime2 data-resources [^5].  Here, we used Silva v. 138 as the reference database for the process.
+The command for running the taxonomic classification is the most time-consuming and memory-intensive commands in the SOP. If you encounter an error due to insufficient memory and cannot increase your memory usage, consider adjusting the `--p-reads-per-batch` option to a value lower than the default (which is dynamic, depending on sample depth and the number of threads), and try running the command with fewer jobs (for example, set `--p-n-jobs` to `1`). Additionally, you can assign taxonomy to your ASVs using a Naive-Bayes approach implemented in the scikit-learn Python library, along with the SILVA 138 or Greengene2 database. The pre-trained classifiers can be obtained from Qiime2 data-resources [^5].  Here, we used Silva v. 138 as the reference database for the process.
 
 [^5]: https://docs.qiime2.org/2023.7/data-resources/
 ```
@@ -373,7 +373,7 @@ qiime feature-classifier classify-sklearn \
   --o-classification 428_228_220_taxonomy_silva138.qza
 ```
 
-Input file:
+Input files:
 - silva-138-99-nb-classifier.qza
 - 428_228_220_rep-seqs.qza
 
