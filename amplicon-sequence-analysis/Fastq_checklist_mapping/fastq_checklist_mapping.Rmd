@@ -1,7 +1,7 @@
 ---
 title: "The UK Crop Microbiome Cryobank - mapping the files for the fastq checklist"
 author: "Payton Yau"
-date: "2024-01-23"
+date: "2024-03-11"
 output:
   pdf_document: default
   html_document: default
@@ -17,7 +17,7 @@ Files required:
 
 1. The receipt after the plant checklist uploaded to the server
 
-2. Plant checklist ERC000020 
+2. Plant checklist ERC000020 (The plant checklist was preiously prepared)
 
 3. MD5Checksum information
 
@@ -51,7 +51,10 @@ Check.list <- read.delim('Checklist_GSC-MIxS_16Samplicons_OR_TESTv1.tsv', header
 # Print the data (first 6 columns) to check if it has been read correctly
 head(Check.list)
 ```
-##### format the crop checklist to fit for the fastq checklist requirement and for the mapping/merging
+
+
+Format the crop checklist to fit the fastq checklist requirement and the mapping/merging process.
+
 ```{r Crop_Check_list_mod, warning=FALSE, message=FALSE}
 # Set the column names of 'data' to be the second row of 'data'
 colnames(Check.list) <- Check.list[2,]
@@ -66,7 +69,9 @@ Check.list_2 <- Check.list[,c(3:4)]
 head(Check.list_2)
 ```
 
-#### Merge 'Webin' and 'Check.list_2' on the columns "ALIAS" and "sample_alias", respectively, to create 'merged_df'
+
+Merge 'Webin' and 'Check.list_2' on the columns “ALIAS” and “sample_alias”, respectively, to create ‘merged_df’
+
 ```{r merge_Webin_Check.list_2, warning=FALSE, message=FALSE}
 merged_df <- merge(Webin, Check.list_2, by.x = "ALIAS", by.y = "sample_alias")
 
@@ -79,7 +84,7 @@ print(merged_df$sample_title)
 
 ### Step 3 
 
-Load the data from the "md5.txt"
+Load the data from the “md5.txt” file, which contains the MD5 checksums for each file in the directory. The MD5 checksum is a 32-digit hexadecimal number that represents the unique fingerprint of a file. It can be used to verify the integrity and authenticity of a file, especially after a file transfer.
 
 ```{r md5, warning=FALSE, message=FALSE}
 md5 <- read.table("md5.txt", sep = "")
@@ -88,36 +93,45 @@ md5 <- read.table("md5.txt", sep = "")
 head(md5)
 ```
 
-#### change the original md5 format to fit for fastq checklist
+Change the original md5 format to fit for fastq checklist
+
 ```{r md5_mod, warning=FALSE, message=FALSE}
 # Keep only the first and second columns of 'md5'
 md5 <- md5[, c("V2", "V1")]
 
-# Create a new dataframe 'md5.R1' that only includes the rows of 'md5' where the second column contains "_R1_001.fastq.gz"
+# Create a new dataframe 'md5.R1' that only includes the rows of 'md5' 
+# where the second column contains "_R1_001.fastq.gz"
 md5.R1 <- md5[grep("_R1_001.fastq.gz", md5$V2), ]
 
-# Add a new column to 'md5.R1', which is created by splitting the second column on underscores and taking the first element
+# Add a new column to 'md5.R1', which is created by splitting 
+# the second column on underscores and taking the first element
 md5.R1$v3 <- sapply(strsplit(as.character(md5.R1$V2), "_"), `[`, 1)
 
-# Replace single digits at the end of the strings in the new column with the same digit preceded by a zero
+# Replace single digits at the end of the strings in the new 
+# column with the same digit preceded by a zero
 md5.R1$v3 <- sub("(\\d)$", "0\\1", md5.R1$v3)
 
-# Replace single digits between dashes in the new column with the same digit preceded by a zero
+# Replace single digits between dashes in the new column 
+# with the same digit preceded by a zero
 md5.R1$v3 <- sub("-([1-9])-", "-0\\1-", md5.R1$v3)
 
 # Set the column names of 'md5.R1'
 colnames(md5.R1) <- c("forward_file_name","forward_file_md5", "sample_title")
 
-# Create a new dataframe 'md5.R2' that only includes the rows of 'md5' where the second column contains "_R2_001.fastq.gz"
+# Create a new dataframe 'md5.R2' that only includes the rows of 
+# 'md5' where the second column contains "_R2_001.fastq.gz"
 md5.R2 <- md5[grep("_R2_001.fastq.gz", md5$V2), ]
 
-# Add a new column to 'md5.R2', which is created by splitting the second column on underscores and taking the first element
+# Add a new column to 'md5.R2', which is created by splitting 
+# the second column on underscores and taking the first element
 md5.R2$v3 <- sapply(strsplit(as.character(md5.R2$V2), "_"), `[`, 1)
 
-# Replace single digits at the end of the strings in the new column with the same digit preceded by a zero
+# Replace single digits at the end of the strings in 
+# the new column with the same digit preceded by a zero
 md5.R2$v3 <- sub("(\\d)$", "0\\1", md5.R2$v3)
 
-# Replace single digits between dashes in the new column with the same digit preceded by a zero
+# Replace single digits between dashes in 
+# the new column with the same digit preceded by a zero
 md5.R2$v3 <- sub("-([1-9])-", "-0\\1-", md5.R2$v3)
 
 # Set the column names of 'md5.R2'
@@ -171,7 +185,9 @@ Final modification for the fastq checklist
 new_row <- setNames(data.frame(matrix(ncol = ncol(merged_all), nrow = 1)), colnames(merged_all))
 
 # Assign the values to the new row
-new_row[1, c("sample", "study", "instrument_model")] <- c("FileType", "fastq", "Read submission file type")
+new_row[1, c("sample", "study", 
+             "instrument_model")] <- c("FileType", 
+                                       "fastq", "Read submission file type")
 
 # Save the column names
 col_names <- colnames(new_row) 

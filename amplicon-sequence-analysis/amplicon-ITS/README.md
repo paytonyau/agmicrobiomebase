@@ -4,6 +4,7 @@ Below is the scripting documents for each of the process, we included both markd
 
 
 ITS-sequencing-process.md: This markdown file explains the entire process for the 16s amplicon sequencing.
+
 ITS-step01-startup.sh: A .sh file that includes the necessary packages to be installed for the environment before analysis.
 ITS-step02-processing.sh: These scripts handle data preparation during the initial stage.
 ITS-step03-qiime2.sh: This script is used for sequencing data analysis
