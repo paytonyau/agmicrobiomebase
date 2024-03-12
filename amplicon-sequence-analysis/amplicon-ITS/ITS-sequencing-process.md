@@ -11,55 +11,43 @@ To perform a sequencing analysis on the ITS amplicon data from the UK Crop Micro
 - [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
 
 
-### 1. Install packages/programs for amplicon sequencing data processing
+## 1. Install packages/programs for amplicon sequencing data processing
 
-#### Install Anaconda / Miniconda
+### Install Anaconda / Miniconda
 
 To install QIIME2, you can use Anaconda or Miniconda, which provide a self-contained environment and package manager. Download and install Miniconda and create a new environment for QIIME2. This allows you to manage your QIIME2 installation and dependencies easily.
 
-#### Install sequence quality check packages
+### Install sequence quality check packages
 
 For the installation of QIIME2, Anaconda or Miniconda can be utilised as they offer a self-contained environment and package manager. Begin by downloading and installing Miniconda, then create a new environment specifically for QIIME2. This approach simplifies the management of your QIIME2 installation and its dependencies.
 
 Create a new environment:
+
 ```conda create --name qc```
 
 Activate the conda environment
+
 ``` conda activate qc ```
 
-#### Install fastqc & multiqc
+### Install fastqc & multiqc
 
 ```conda install -c bioconda fastqc multiqc```
 
-#### Install Trimmomatic
+### Install Trimmomatic
 
 ```conda install -c conda-forge trimmomatic```
+
 Noted that Java may need to be installed before running Trimmomatic.
 
-#### Install FIGARO
+### Install FIGARO
 FIGARO is a software that assists in estimating the truncation parameters for the QIIME2 DADA2 plugin. A pre-print detailing its usage is readily available[^1]. The detailed process for installing the software can be found on the author’s GitHub page (https://github.com/Zymo-Research/figaro). Further guidance is provided in John Quensen’s tutorial (https://john-quensen.com/tutorials/figaro/).
 
 [^1]:Weinstein, M. et al. (2019) FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters. bioRxiv DOI: 10.1101/610394; Sasada, R. et al. (2020) FIGARO: An efficient and objective tool for optimizing microbiome rRNA gene trimming parameters. J. Biomol. Tech. 31, S2
 
 
-1.  `wget http://john-quensen.com/wp-content/uploads/2020/03/figaro.yml`
+1.  `wget http://john-quensen.com/wp-content/uploads/2020/03/figaro.yml` or `wget https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-step01-figaro.yml`
 
-If the provided URL is not available, you may also create a `figaro.yml` file on your own and include the information provided below, or use the `16s-step01-figaro.yml` file in our Github folder. 
-
-```
-name: figaro
-channels:
-  - bioconda
-  - defaults
-  - conda-forge
-dependencies:
-  - python >=3.6,<3.7.0
-  - numpy
-  - scipy==1.2.1
-  - matplotlib==3.0.2
-``` 
-
-2.  `conda env create -n figaro -f figaro.yml`
+2.  `conda env create -n figaro -f figaro.yml` or `conda env create -n figaro -f 16s-step01-figaro.yml`
     
 3.  `git clone https://github.com/Zymo-Research/figaro.git`
     
@@ -71,20 +59,21 @@ dependencies:
     
 7.  `chmod 755 *.py`
 
-#### Install QIIME2
+### Install QIIME2
 
 Run the workflow from the URL below provided in a specific conda environment, which ensures that the correct version of the Python required packages are being used for QIIME2.
 <https://docs.qiime2.org/2023.5/install/native/#install-qiime-2-within-a-conda-environment>
 
-### STEP 1
-#### Examine all the fastq files using FastQC and consolidate the results into a single report with the help of MultiQC
+## STEP 1
+### Examine all the fastq files using FastQC and consolidate the results into a single report with the help of MultiQC
 This procedure is designed to visualise the quality of sequences and any remaining adaptors in each individual fastq file.
 
 ``` fastqc *.fastq.gz ```
+
 ``` multiqc . ```
 
-### STEP 2
-#### Sequencing reads trimming for FIGARO
+## STEP 2
+### Sequencing reads trimming for FIGARO
 
 To maintain consistency as required by the program, sequence reads should be trimmed to a length of 248 nt, and any reads shorter than 248 nt should be discarded[^2]. This process can be accomplished using tools such as Cutadapt or Trimmomatic. In this case, Trimmomatic was used. Please note that the trimmed sequences are then ready for further analysis with FIGARO.
 [^2]: https://github.com/Zymo-Research/figaro/issues/37
@@ -95,23 +84,23 @@ output_forward_paired.fq.gz output_forward_unpaired.fq.gz \
 output_reverse_paired.fq.gz output_reverse_unpaired.fq.gz \
 MINLEN:248 CROP: 248
 ```
-We use 300 nt long as for the average merged length as ITS1 region has a roughly ranging from 220-520nt[^3].
+We use 300 nt long as for the average merged length as ITS1 region has a roughly ranging from 220-520nt[^3]. 
 [^3]:https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5309391
 
 `python figaro.py -i (path) -o (path) -f 20 -r 20 -a 300 -m 12`
 
 Please replace `(path)` with actual paths, and ensure that you have the required software and resources available for each step of the pipeline.
 
-Due to the high variability in length of ITS, the trimming process used in 16s will not be adapted, but an estimation of error rates still needs to be used for the denoising process.
+Due to the high variability in the length of ITS, the trimming process used in 16S will not be adapted. However, an estimation of error rates still needs to be used for the denoising process. It is also recommended to try other length conditions to estimate the error rates in other lengths.
 
-The outcome from the FIGARO run will generate four different files as listed below:
+> The outcome from the FIGARO run will generate four different files as listed below:
+> 
+> -   trimParameters.json
+> -   reverseExpectedError.png
+> -   forwardExpectedError.png
+> -   figaro.1672786258486002.log
 
--   trimParameters.json
--   reverseExpectedError.png
--   forwardExpectedError.png
--   figaro.1672786258486002.log
-
-#### Generate a manifest.txt for QIIME2 artifact (modification required to fit the QIIME2 format)
+### Generate a manifest.txt for QIIME2 artifact (modification required to fit the QIIME2 format)
 
 To create a QIIME2 artifact for the analysis, a `manifest` file for the corresponding fastq files are required. This requried a format entails the inclusion of “sample-id, absolute file-path, direction” and below is an example,
 
@@ -169,14 +158,14 @@ This script reads the `manifest.txt` file line by line, extracts the sample name
 
 Once we have identified that we have good quality ITS amplicon sequencing data, and defined the error rates, we can then move to the next step:
 
-#### Activate the environment 
+### Activate the environment 
 You can now activate this conda environment with this command:
 
 ```
 conda activate qiime2-2023.5
 ```
 
-#### Import FASTQs as QIIME 2 artifact
+### Import FASTQs as QIIME 2 artifact
 To standardise QIIME 2 analyses and to keep track of provenance (i.e. a list of what commands were previously run to produce a file) a special format is used for all QIIME2 input and output files called an “artifact” (with the extension QZA). The first step is to import the paired-end raw reads as a QZA file. Note that you need the manifest.csv file we mentioned previously and please following the QIIME2 requirement.
 
 ```
@@ -187,11 +176,11 @@ qiime tools import \
 --input-format PairedEndFastqManifestPhred33
 ```
 > Input file:
-manifest.csv
-the list of fastq (.fastq.gz) sequencing files
-
+> manifest.csv
+> The list of fastq (.fastq.gz) sequencing files
+>
 > Output file:
-demux.qza
+> demux.qza
 
 #### Summarise FASTQs
 Obtain sequencing data quality information:
@@ -201,10 +190,10 @@ qiime demux summarize \
 --o-visualization demux.qzv
 ```
 > Input file:
-demux.qza
-
+> demux.qza
+> 
 > Output file:
-demux.qzv
+> demux.qzv
 
 #### Trim primers using `Cutadapt` from the QIIME2 plugin
 Screen out reads that do not begin with primer sequence and remove primer sequence from reads using the cutadapt QIIME2 plugin. The below primers correspond to the ITS1 region. DADA2's chimaera removal step requires primers to have been removed, as otherwise, the ambiguous nucleotides in most primer sets cause large numbers of false-positive chimaeras to be identified. Please note that if you have identified a relatively higher adapter sequence contamination (which can be identified from the multiQC report), those adapter sequences should also be removed.
@@ -213,15 +202,19 @@ The primers used in this dataset for ITS1 region
 ##### TS1-Fl2 Primer-F	
 5’ 
 TCGTCGGCAGCGTC
-==AGATGTGTATAAGAGACAG== (Adaptor sequence)
-*GAACCWGCGGARGGATCA*  (Primer sequence)
+
+*AGATGTGTATAAGAGACAG* (Adaptor sequence)
+
+**GAACCWGCGGARGGATCA**  (Primer sequence)
 3’
 
 ##### ITS2 Primer-R	
 5’ 
 GTCTCGTGGGCTCGG
-==AGATGTGTATAAGAGACAG== (Adaptor sequence)
-*GCTGCGTTCTTCATCGATGC* (Primer sequence)
+
+*AGATGTGTATAAGAGACAG* (Adaptor sequence)
+
+**GCTGCGTTCTTCATCGATGC** (Primer sequence)
   3’ 
 
 ```
@@ -239,10 +232,10 @@ qiime cutadapt trim-paired \
 ```
 
 > Input file:
-demux.qza
-
+> - demux.qza
+> 
 > Output file:
-primer-trimmed-demux.qza
+> - primer-trimmed-demux.qza
 
 Please note that for the step here, we also trimmed adapter sequences, and we used the command `--p-discard-untrimmed` to discard the untrimmed reads that are highly variable in length in the ITS region. This was done to improve the accuracy. 
 
@@ -251,7 +244,7 @@ Please note that for the step here, we also trimmed adapter sequences, and we us
 Denoise and perform taxonomic classification using DADA2 and the UNITE reference classifier. The pre-trained classifier was obtained from the QIIME forum [^4].
 [^4]:[pre-trained UNITE 9.0 classifiers for QIIME 2023.7 (and older!) - Community Contributions / Data resources - QIIME 2 Forum](https://forum.qiime2.org/t/pre-trained-unite-9-0-classifiers-for-qiime-2023-7-and-older/24140)
 
-Based on the projected outcomes of the FIGARO programme, the expected parameters - error rates (`--p-max-ee-f` & `--p-max-ee-r`) are 2. However, again, due to the highly  variable nature of ITS, we set 0 (no trimming position applied) for the `denoise-paired` process. 
+Based on the projected outcomes of the FIGARO programme, the expected parameters - error rates (`--p-max-ee-f` & `--p-max-ee-r`) are `2`. However, again, due to the highly  variable nature of ITS, we set 0 (no trimming position applied) for the `denoise-paired` process. 
 
 ```
 qiime dada2 denoise-paired \
@@ -267,13 +260,14 @@ qiime dada2 denoise-paired \
 --o-table table-its.qza \
 --o-denoising-stats stats-its.qza
 ```
-> Input file:
-primer-trimmed-demux.qza
 
+> Input file:
+> - primer-trimmed-demux.qza
+> 
 > Output files:
-rep-seqs-its.qza
-table-its.qza
-stats-its.qza
+> - rep-seqs-its.qza
+> - table-its.qza
+> - stats-its.qza
 
 #### Assign taxonomy to ASVs by running taxonomic classification
 
@@ -286,19 +280,19 @@ qiime feature-classifier classify-sklearn \
   --p-n-jobs 1 \
 --o-classification taxonomy-its.qza
 ```
+
 > Input files:
-unite-9-dynamic-s-all-29.11.2022-Q2-2023.5.qza
-rep-seqs-its.qza
-
+> - unite-9-dynamic-s-all-29.11.2022-Q2-2023.5.qza
+> - rep-seqs-its.qza
+> 
 > Output file:
-taxonomy-its.qza
+> - taxonomy-its.qza
 
+### Filtering out contaminant and unclassified ASVs
 
-#### Filtering out contaminant and unclassified ASVs
+With taxonomy assigned to our ASVs, we can leverage this information to eliminate ASVs that are likely contaminants or noise, based on their taxonomic labels. Sequences from other nuclear regions are common contaminants in ITS sequencing data and can be removed by excluding any ASV containing these terms in its taxonomic label. It may also be beneficial to exclude any ASV unclassified at the phylum level, as these sequences are more likely to be noise (e.g., potential chimeric sequences).
 
-With taxonomy assigned to our ASVs, we can leverage this information to eliminate ASVs that are likely contaminants or noise, based on their taxonomic labels. Mitochondrial and chloroplast 16S sequences are common contaminants in 16S sequencing data and can be removed by excluding any ASV containing these terms in its taxonomic label. It may also be beneficial to exclude any ASV unclassified at the phylum level, as these sequences are more likely to be noise (e.g., potential chimeric sequences).
-
-#### Filter Table:
+### Filter Table:
 ```
 qiime taxa filter-table \
 --i-table table-its.qza \
@@ -308,11 +302,11 @@ qiime taxa filter-table \
 --o-filtered-table table-its-with-phyla-no-mitochondria-no-chloroplast.qza
 ```
 > Input files:
-table-its.qza
-taxonomy-its.qza
-
+> - table-its.qza
+> - taxonomy-its.qza
+>
 > Output files:
-table-its-with-phyla-no-mitochondria-no-chloroplast.qza
+> - table-its-with-phyla-no-mitochondria-no-chloroplast.qza
 
 
 #### Filter Sequences:
@@ -324,12 +318,13 @@ qiime taxa filter-seqs \
 --p-exclude mitochondria,chloroplast \
 --o-filtered-sequences rep-seqs-its-with-phyla-no-mitochondria-no-chloroplast.qza
 ```
-> Input files:
-rep-seqs-its.qza
-taxonomy-its.qza
 
+> Input files:
+> - rep-seqs-its.qza
+> - taxonomy-its.qza
+>
 > Output files:
-rep-seqs-its-with-phyla-no-mitochondria-no-chloroplast.qza
+> - rep-seqs-its-with-phyla-no-mitochondria-no-chloroplast.qza
 
 #### Unrooted Phylogenetic Tree Construction
 In evolutionary biology, an unrooted phylogenetic tree is used to illustrate the relationships and evolutionary distances between entities such as species or sequences. Unlike their rooted counterparts, unrooted trees do not designate a common ancestor, but rather focus on depicting branching patterns and relative relationships. These trees aid in deducing genetic diversity and shared ancestry by scrutinising molecular data and creating diagrams that underscore evolutionary links. Unrooted trees play a crucial role in elucidating the evolutionary landscape and the interconnections among biological entities.
@@ -341,12 +336,12 @@ qiime phylogeny align-to-tree-mafft-fasttree \
 ```
 
 > Input file:
-rep-seqs-its-with-phyla-no-mitochondria-no-chloroplast.qza
-
+> - rep-seqs-its-with-phyla-no-mitochondria-no-chloroplast.qza
+> 
 > Output files (under the subfolder phylogeny-align-to-tree-mafft-fasttree):
-alignment.qza
-masked_alignment.qza
-rooted_tree.qza
-tree.qza
+> - alignment.qza
+> - masked_alignment.qza
+> - rooted_tree.qza
+> - tree.qza
 
 The framework structure established with QIIME2 can be utilised for various QIIME2 plugins dedicated to a range of downstream analyses. In this scenario, we plan to use the Phyloseq package within the R programming environment for our subsequent analysis.

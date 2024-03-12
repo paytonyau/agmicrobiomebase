@@ -16,11 +16,10 @@ We have organised the key outcomes generated from Qiime2, which is it from the 1
    - 428_228_220_stats.qza
    - 428_228_220_table.qza
       
-2. [Qiime2]Silva_138: These outcomes pertain to Silva version 138
+2. [Qiime2]Silva_138: These outcomes pertain to Silva version 138, after the DADA2 process
    - 428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza
    - 428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza
    - 428_228_220_taxonomy_silva138.qza
-   - level_counts_by_group_silva138.csv
 
 P.S. The numbers 428, 228, and 220 indicate the longest biologically meaningful read for V3-V4, the nucleotide length of forward reads, and the nucleotide length of reverse reads.
 

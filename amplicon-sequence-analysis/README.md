@@ -1,6 +1,9 @@
 # Amplicon Sequencing Analysis
 
-This subfolder contains the information and preparation for the amplicon sequencing analysis, which is a method to study the diversity and taxonomy of microorganisms by targeting specific regions of their DNA. The subfolder consists of the following folders:
+This subfolder contains the information and preparation for the amplicon sequencing analysis, which is a method to study the diversity and taxonomy of microorganisms by targeting specific regions of their DNA. 
+
+
+The subfolder consists of the following folders:
 
 [**amplicon-16S**](https://github.com/paytonyau/agmicrobiomebase/tree/main/amplicon-sequence-analysis/amplicon-16S): The markdown and .sh files for 16s sequencing process, which targets the 16S rRNA gene of bacteria and archaea.
 
