@@ -32,27 +32,27 @@ This repository contains procedural information and scripts for the analysis of 
 
 1. Analysis of **16S Amplicon** sequence fastq files to derive amplicon sequence variant taxonomies using qiime2
 
-[16S-sequence-analysis.md]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-sequence-analysis.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-sequence-analysis.md)): A markdown file describing all processing steps from fastq to asv taxa output file
+[16S-sequence-analysis.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-sequence-analysis.md): A markdown file describing all processing steps from fastq to asv taxa output file
 
-**i**. [16S-script-startup](amplicon-sequence-analysis/amplicon-16S/16s-step01-startup.sh): script to install software, set-up environments and downloaded databases
+**i**. [16S-script-startup](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-step01-startup.sh): script to install software, set-up environments and downloaded databases
 
-**ii**. [16S-script-preprocessing]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-step02-preprocessing.sh](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-step02-preprocessing.sh)): script to trim reads
+**ii**. [16S-script-preprocessing](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-step02-preprocessing.sh): script to trim reads
 
-**iii**. [16S-script-qiime2]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-step03-qiime2.sh](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-step03-qiime2.sh)): This script performs the core analysis of 16S Amplicon sequences using qiime2, transforming raw sequence data into meaningful taxonomic information.
+**iii**. [16S-script-qiime2](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-step03-qiime2.sh): This script performs the core analysis of 16S Amplicon sequences using qiime2, transforming raw sequence data into meaningful taxonomic information.
 
-[README.md]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/README.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/README.md)):
+[README.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/README.md):
 
 2. Analysis of **ITS amplicon** fastq sequence files to derive amplicon sequence variant taxonomies using qiime2
 
-[ITS-sequence-analysis.md]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-sequencing-analysis.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-sequencing-analysis.md)): markdown file describing all processing steps from fastq to asv taxa output file
+[ITS-sequence-analysis.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-sequencing-analysis.md): markdown file describing all processing steps from fastq to asv taxa output file
 
-**i**. [ITS-script-startup]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step01-setup.sh](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step01-setup.sh)) : script to install software and set-up environments and downloaded databases
+**i**. [ITS-script-startup](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step01-setup.sh) : script to install software and set-up environments and downloaded databases
 
-**ii**. [ITS-script-preprocessing]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step02-preprocessing.sh](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step02-preprocessing.sh)): script to trim reads
+**ii**. [ITS-script-preprocessing](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step02-preprocessing.sh): script to trim reads
 
-**iii**. [ITS-script-qiime2]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step03-qiime2.sh](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step03-qiime2.sh)): This script performs the core analysis of ITS1 Amplicon sequences using qiime2, transforming raw sequence data into meaningful taxonomic information.
+**iii**. [ITS-script-qiime2](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step03-qiime2.sh): This script performs the core analysis of ITS1 Amplicon sequences using qiime2, transforming raw sequence data into meaningful taxonomic information.
 
-[README.md]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/README.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/README.md)):
+[README.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/README.md):
 
 3. Preparation and mapping of **amplicon sequence data for submission to ENA using standard templates** for intercative submission via the WebinPortal ([https://www.ebi.ac.uk/ena/submit/webin/login](https://www.ebi.ac.uk/ena/submit/webin/login))
 
@@ -64,7 +64,7 @@ This repository contains procedural information and scripts for the analysis of 
 
 - ENA ERS output exmaple file for one crop
 
-- [R markdown]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/Fastq_checklist_mapping/fastq_checklist_mapping.Rmd](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/Fastq_checklist_mapping/fastq_checklist_mapping.Rmd)): describing all processing steps to map ERS numbers from sample uplaods to fastq template
+- [R markdown](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/Fastq_checklist_mapping/fastq_checklist_mapping.Rmd): describing all processing steps to map ERS numbers from sample uplaods to fastq template
 
 - [R-code](): to map ERS numbers from sample uplaods to fastq template
 
