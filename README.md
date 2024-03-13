@@ -96,7 +96,7 @@ This repository contains procedural information and scripts for the analysis of 
 
 -- procedure.md
 
--- scripts
+-- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_00-preparation/Case_00-prep.R)
 
 -- README.md
 
@@ -104,7 +104,8 @@ This repository contains procedural information and scripts for the analysis of 
 
 -- procedure.md
 
--- scripts
+-- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_01-influence_of_soil_type/Case_01-16s.R)
+
 
 -- README.md
 
@@ -112,7 +113,8 @@ This repository contains procedural information and scripts for the analysis of 
 
 -- procedure.md
 
--- scripts
+-- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_02-core_microbiome/Case_02-16s.R)
+
 
 -- README.md
 
@@ -120,6 +122,6 @@ This repository contains procedural information and scripts for the analysis of 
 
 -- procedure.md
 
--- scripts
+-- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_03-ITS_wheat/Case_03-ITS.R)
 
 -- README.md
