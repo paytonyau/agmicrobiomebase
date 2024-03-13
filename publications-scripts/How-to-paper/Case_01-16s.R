@@ -14,6 +14,8 @@
 library("tidyverse")
 library("reshape2")
 
+load("norm.RData")
+
 # Subset the phyloseq object to include only samples of type "Sugarbeet" and "Bulksoil"
 physeq.SU <- physeq.norm %>% subset_samples(Type %in% c("Sugarbeet", "Bulksoil"))
 
@@ -321,3 +323,6 @@ results_df$p.adjusted <- p.adjust(results_df$p.value, method = "BH")
 # Print the resulting data frame
 # This step prints the final results
 print(results_df)
+
+# Save the "physeq.Sugarbeet.group" object for the other case study analysis
+save(physeq.Sugarbeet.group, "physeq.Sugarbeet.group.RData")

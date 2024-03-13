@@ -1,20 +1,29 @@
-##### Trimming and optimal sequence length selection. #####
+##### The scripts in this .R document contain 3 different analysis:
+##### Trimming and optimal sequence length selection                  ######
+##### Comparative analysis of taxonomic Levels of reference databases ######
+##### Batch effect correction and normalisation                       ###### 
 ## Author : Payton Yau
 ## Date : 12-03-2024
 
+##### Trimming and optimal sequence length selection. ######
 # We used the longest possible length to find the highest accumulated percentage of the merged sequence length frequency. 
 # It assists in trimming out sequences of lower quality and minimises the error rate for the sequence analysis steps in DADA2. 
 # This process is part of the events in preprocessing and to prevent “over-merging”.
 
 # The data extracted from "rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qzv"
-# The denoise setting is 
-# --p-trunc-len-f 233 \
-# --p-trunc-len-r 226 \
-# --p-trim-left-f 0 \
-# --p-trim-left-r 0 \
-# --p-max-ee-f 3 \
-# --p-max-ee-r 2 \
-# --p-n-threads 8 \
+
+# The denoise setting is
+# qiime dada2 denoise-paired \
+#   -i-demultiplexed-seqs demux.qza \
+#   --p-trunc-len-f 233 \
+#   --p-trunc-len-r 226 \
+#   --p-trim-left-f 0 \
+#   --p-trim-left-r 0 \
+#   --p-max-ee-f 3 \
+#   --p-max-ee-r 2 \
+#   --p-n-threads 8 \
+#   --o-representative-sequences rep-seqs.qza \
+#   --o-table table.qza
 
 # Load the necessary libraries
 library("ggplot2")     
@@ -394,3 +403,6 @@ plot_ordination(
   scale_color_brewer(palette = "Dark2") +
   scale_fill_brewer(palette = "Dark2") +
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
+
+# Save the "physeq.norm" object for the other case study analysis
+save(physeq.norm, file = "norm.RData")

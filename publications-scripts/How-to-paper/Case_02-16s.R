@@ -6,9 +6,10 @@
 # sugar beet, in natural conditions across various soils. 
 # This approach helps understand real-world microbial interactions in the rhizosphere.
 
+load("physeq.Sugarbeet.group.RData")
 ##### Plotting the top 10 taxa at family level #####
 # The script required from the use of "physeq.Sugarbeet.group" which is from`case_01-16s.R`
-
+ 
 # Transform normalised ASVs to proportions
 # This step converts the counts in the ASV table to proportions
 proportions = transform_sample_counts(physeq.Sugarbeet.group, function(x) 100 * x/sum(x))

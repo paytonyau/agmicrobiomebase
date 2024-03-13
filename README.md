@@ -1,84 +1,125 @@
+  
+
 # UK Crop Microbiome Cryobank
+
 ## Agmicrobiomebase
 
-The UK Crop Microbiome Cryobank integrates genomic (DNA) data with a cryobank collection of samples for the soil microbiomes of the UK major crop plant systems. For this project, the microbiomes are from the rhizosphere (the soil surrounding the crop plant roots) and from bulk soil (soil outside the rhizosphere). The Cryobank provides a facility for researchers to source data and samples, including cryo-preserved microbial material and genomic and metagenomic sequences from different soil microbiome environments.
+  
 
-The data catalogue for this project can be accessed at https://agmicrobiomebase.org/.
-This repository contains the scripts used to process the fastq files from the 16S and ITS amplicon Illumina sequencing and for the metagenomic Illumina sequencing. 
+This repository contains the scripts to process the fastq sequence files from the 16S and ITS amplicon Illumina sequencing and for the metagenomic Illumina sequencing for the UK Crop Microbiome Cryobank Project.
 
-### **Table of contents**
---------------------------------
-### *A. Amplicon Sequencing*
-#### A1. 16s Amplicon Gene (V3-V4) Sequencing Data Analysis
+  
 
-[01. 16s Sequencing Analysis (markdown)](https://github.com/paytonyau/agmicrobiomebase/tree/main/Amplicon/16s/16s_sequence_process.md)
+The UK Crop Microbiome Cryobank integrates genomic (DNA) data with a cryobank collection of samples for the soil microbiomes of the UK major crop plant systems.
 
-[02. 16s - Down Stream Analysis (R markdown)](https://github.com/paytonyau/agmicrobiomebase/tree/main/Amplicon/16s/16s_Rmarkdown.Rmd)
-[*16s - Down Stream Analysis (pdf format)](https://github.com/paytonyau/agmicrobiomebase/tree/main/Amplicon/16s/16s_Rmarkdown.pdf)
+For this project, the microbiomes are from the rhizosphere (the soil surrounding the crop plant roots) and from bulk soil (soil outside the rhizosphere).
 
-[03. Merged Sequence Length Distribution for Figure 4B (R script)](https://github.com/paytonyau/agmicrobiomebase/tree/main/Amplicon/R-scripts-figures/Fig_4B_merged_length_distribution.R) 
+The Cryobank provides a facility for researchers to source data and samples, including cryo-preserved microbial material and genomic and metagenomic sequences from different soil microbiome environments.
 
-[04. Reference Databases Comparison for Figure 5 (R script)](https://github.com/paytonyau/agmicrobiomebase/tree/main/Amplicon/R-scripts-figures/Fig_5_ref_databases_comparison.R) 
+  
 
-------------------------------------
-##### 16S Documents/Data/Results
-[05. DADA2 analysis outcomes (Qiime2 data structure)](https://github.com/paytonyau/agmicrobiomebase/tree/main/Amplicon/16s/%5BQiime2%5DDADA2_outcomes)
+The project has sequenced soil microbiomes from 6 different UK crops grown in 9 different soil types (within a pot experiment) from across the United Kingdom.
 
-[06. Silva [v138] (Qiime2 data structure)](https://github.com/paytonyau/agmicrobiomebase/tree/main/Amplicon/16s/%5BQiime2%5DSilva_138)
+  
 
-[07. GreenGene1 [v13.8] (Qiime2 data structure)](https://github.com/paytonyau/agmicrobiomebase/tree/main/Amplicon/16s/%5BQiime2%5DGreenGenes_13_8)
+The data catalogue for this project can be accessed at [https://agmicrobiomebase.org/](https://agmicrobiomebase.org/).
 
-[08. GreenGenes2 [v2022.10] (Qiime2 data structure)](https://github.com/paytonyau/agmicrobiomebase/tree/main/Amplicon/16s/%5BQiime2%5DGreenGenes2_2022_10)
+The catalogue links the raw sequence data files which have been submitted to the European Nucleotide Archive (ENA) with soil metadata.
 
-[09.  Silva [v138] for Figure 4B (Qiime2 data structure)](https://github.com/paytonyau/agmicrobiomebase/tree/main/Amplicon/16s/%5BQiime2%5DSilva_138_233_226_3_2_Fig_4B) *for the merged sequence length distribution analysis
+  
 
-[10. Figure 4B* sequence length distribution data (tsv file in zip format)](https://github.com/paytonyau/agmicrobiomebase/blob/main/Amplicon/R-scripts-figures/16s_length_distribution.zip) 
+This repository contains procedural information and scripts for the analysis of Amplicon sequence fastq files to derive amplicon sequence variant taxonomies using qiime2 and the corresponding packages.
 
-[11. FIGARO (Result)](https://github.com/paytonyau/agmicrobiomebase/tree/main/Amplicon/16s/%5BResult%5DFIGARO)
+1. Analysis of **16S Amplicon** sequence fastq files to derive amplicon sequence variant taxonomies using qiime2
 
-[12. Meta-table](https://github.com/paytonyau/agmicrobiomebase/blob/main/Amplicon/16s/meta-table.txt)
+[16S-sequence-analysis.md]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-sequence-analysis.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-sequence-analysis.md)): A markdown file describing all processing steps from fastq to asv taxa output file
 
------------------------------------------------------------
-#### A2. ITS Amplicon Gene (ITS1) Sequencing Data Analysis
+**i**. [16S-script-startup](amplicon-sequence-analysis/amplicon-16S/16s-step01-startup.sh): script to install software, set-up environments and downloaded databases
 
-[13. ITS Sequencing Analysis (markdown)](https://github.com/paytonyau/agmicrobiomebase/blob/main/Amplicon/ITS/ITS_sequencing_process.md)
+**ii**. [16S-script-preprocessing]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-step02-preprocessing.sh](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-step02-preprocessing.sh)): script to trim reads
 
-[14. ITS Down Stream Analysis (R markdown)](https://github.com/paytonyau/agmicrobiomebase/blob/main/Amplicon/ITS/ITS_Rmarkdown.Rmd)
-[*ITS Down Stream Analysis (pdf format)](https://github.com/paytonyau/agmicrobiomebase/blob/main/Amplicon/ITS/ITS_Rmarkdown.pdf)
+**iii**. [16S-script-qiime2]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-step03-qiime2.sh](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-step03-qiime2.sh)): This script performs the core analysis of 16S Amplicon sequences using qiime2, transforming raw sequence data into meaningful taxonomic information.
 
-------------------------------------
-##### ITS Documents/Data
+[README.md]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/README.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/README.md)):
 
-[15. DADA2 analysis outcomes (Qiime2 data structure)](https://github.com/paytonyau/agmicrobiomebase/tree/main/Amplicon/ITS/%5BQiime2%5DDADA2_outcomes)
+2. Analysis of **ITS amplicon** fastq sequence files to derive amplicon sequence variant taxonomies using qiime2
 
-[16. UNITE [v9.0] (Qiime2 data structure)](https://github.com/paytonyau/agmicrobiomebase/tree/main/Amplicon/ITS/%5BQiime2%5DUNITE_9)
+[ITS-sequence-analysis.md]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-sequencing-analysis.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-sequencing-analysis.md)): markdown file describing all processing steps from fastq to asv taxa output file
 
-[17. Meta-table (txt)](https://github.com/paytonyau/agmicrobiomebase/blob/main/Amplicon/ITS/ITS-meta-table.txt)
+**i**. [ITS-script-startup]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step01-setup.sh](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step01-setup.sh)) : script to install software and set-up environments and downloaded databases
 
-[19. Other R programming scripts for the supplementary figures](https://github.com/paytonyau/agmicrobiomebase/blob/main/Amplicon/R-scripts-figures/)
+**ii**. [ITS-script-preprocessing]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step02-preprocessing.sh](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step02-preprocessing.sh)): script to trim reads
 
-------------------------------------
-#### A3. Amplicon Sequencing Fastq files upload
+**iii**. [ITS-script-qiime2]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step03-qiime2.sh](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step03-qiime2.sh)): This script performs the core analysis of ITS1 Amplicon sequences using qiime2, transforming raw sequence data into meaningful taxonomic information.
 
-We used Oilseed rape as an example to demonstrate the mapping process for the European Nucleotide Archive (ENA) upload
+[README.md]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/README.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/README.md)):
 
-[20. Fastq checklist mapping (R mark down)](https://github.com/paytonyau/agmicrobiomebase/blob/main/Amplicon/Fastq_checklist_mapping/fastq_checklist_mapping.Rmd)
-[*Fastq checklist mapping (pdf format)](https://github.com/paytonyau/agmicrobiomebase/blob/main/Amplicon/Fastq_checklist_mapping/fastq_checklist_mapping.pdf)
+3. Preparation and mapping of **amplicon sequence data for submission to ENA using standard templates** for intercative submission via the WebinPortal ([https://www.ebi.ac.uk/ena/submit/webin/login](https://www.ebi.ac.uk/ena/submit/webin/login))
 
-------------------------------------
-##### Documents/Data for the fastq files upload
-[21. MD5 CheckSum (txt)](https://github.com/paytonyau/agmicrobiomebase/blob/main/Amplicon/Fastq_checklist_mapping/md5.txt)
+- ENA-upload-procedure.md
 
-[22. Plant Checklist (tsv)](https://github.com/paytonyau/agmicrobiomebase/blob/main/Amplicon/Fastq_checklist_mapping/Checklist_GSC-MIxS_16Samplicons_OR_TESTv1.tsv)
+- ENA sample template example for one crop
 
-[23. Receipt from the Plant Checklist uploaded (txt)](https://github.com/paytonyau/agmicrobiomebase/blob/main/Amplicon/Fastq_checklist_mapping/Webin-accessions-2023-12-07T15_42_52.222Z_OR.txt)
+- ENA fastq template example for one crop
 
-------------------------------------
-### *B. Shotgun Metagenomics Sequencing*
-####  B1. Shotgun Metagenomics Sequencing Data Analysis
+- ENA ERS output exmaple file for one crop
 
-------------------------------------
-##### Documents/Data for the fastq files upload
-[51. MD5 CheckSum (txt)](https://github.com/paytonyau/agmicrobiomebase/blob/main/Shotgun/Fastq_checklist_mapping/md5.txt)
+- [R markdown]([https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/Fastq_checklist_mapping/fastq_checklist_mapping.Rmd](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/Fastq_checklist_mapping/fastq_checklist_mapping.Rmd)): describing all processing steps to map ERS numbers from sample uplaods to fastq template
 
-[52. Meta-table (txt)](https://github.com/paytonyau/agmicrobiomebase/blob/main/Shotgun/Fastq_checklist_mapping/meta-table.txt)
+- [R-code](): to map ERS numbers from sample uplaods to fastq template
+
+- README.md
+
+4. **Pre-processing of metagenomic sequence data**
+
+  
+
+- procedure.md
+
+- scripts
+
+- README.md
+
+5. Preparation and mapping of **metagenomic sequence data for submission to ENA using standard templates** for intercative submission via the WebinPortal ([https://www.ebi.ac.uk/ena/submit/webin/login](https://www.ebi.ac.uk/ena/submit/webin/login))
+
+- procedure.md
+
+- scripts
+
+- README.md
+
+  
+
+6. Processing and data visualisation of **amplicon sequence data for 3 case studies** in the Crop Microbiome Cryobank Publication 1
+
+**i**. Optimisation/Batch effects corrections
+
+-- procedure.md
+
+-- scripts
+
+-- README.md
+
+**ii**. Case Study A-Influence of soil type
+
+-- procedure.md
+
+-- scripts
+
+-- README.md
+
+**iii**. Case Study B The core Microbiome
+
+-- procedure.md
+
+-- scripts
+
+-- README.md
+
+**iv**. Case Study C ITS taxonomy and Fusarium in wheat
+
+-- procedure.md
+
+-- scripts
+
+-- README.md
