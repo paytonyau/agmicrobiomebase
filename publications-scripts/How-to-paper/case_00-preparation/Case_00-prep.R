@@ -404,5 +404,12 @@ plot_ordination(
   scale_fill_brewer(palette = "Dark2") +
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
 
+##### Extract abundance matrix from the phyloseq object #####
+OTU1 = as(otu_table(physeq.norm), "matrix")
+# Transpose the matrix
+OTU1 <- t(OTU1)
+# Coerce to data.frame
+OTUdf = as.data.frame(physeq.norm)
+
 # Save the "physeq.norm" object for the other case study analysis
 save(physeq.norm, file = "norm.RData")
