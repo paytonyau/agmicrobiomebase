@@ -94,7 +94,7 @@ This repository contains procedural information and scripts for the analysis of 
 
 **i**. Optimisation/Batch effects corrections
 
--- procedure.md
+-- [procedure.R markdown](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00-Batch_effect_corr.Rmd)
 
 -- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_00-preparation/Case_00-prep.R)
 
