@@ -1,0 +1,384 @@
+---
+title: "The UK Crop Microbiome Cryobank - Case Study 1: The Influence of Soil Type (Sugarbeet vs. Bulk Soil)"
+author: "Payton Yau"
+date: "14-03-2024"
+output: md_document
+---
+
+Sugar beet, a member of the Brassica family, is cultivated in the United Kingdom and other regions for its tuber, which is rich in sucrose. In our study, we specifically examined this single crop type to understand the impact of soil type and locale. Our investigation focused on the rhizosphere effect, which involves the selection of specific soil microbiota members. To do this, we compared the diversity of the sugar beet rhizosphere with that of a no-plant control of bulk soil.
+
+### Load the tidyverse and reshape2 libraries
+
+```{r tidyverse, warning=FALSE, message=FALSE}
+# install.packages("tidyverse")
+library("tidyverse") # tidyverse includes several packages for data manipulation and visualisation
+library("reshape2") # reshape2 is for data reshaping
+library("phyloseq")
+```
+
+### Load the previously saved data
+```{r load data, warning=FALSE, message=FALSE}
+load("norm.RData") # load physeq.norm
+```
+
+### Extract Sugarbeet and Bulk Soil groups
+
+```{r Subgroupping, warning=FALSE, message=FALSE}
+## (1) Sub-samples for Sugarbeet and Bulk Soil groups for the comparisons
+physeq.SU <- physeq.norm %>% subset_samples(Type %in% c("Sugarbeet", "Bulksoil"))
+
+## (2) Subset the samples in the phyloseq object that belong to "Sugarbeet" 
+## or other crops "Barley", "Beans", "Bulksoil", "Oats", "OilseedRape", "Sugarbeet"
+physeq.Sugarbeet <- subset_samples(physeq.norm, Type=="Sugarbeet")
+
+## (3A) Merge the replicate samples for each Group
+physeq.Sugarbeet.group = merge_samples(physeq.Sugarbeet, "Group") # Sum between replicate samples
+
+# (3B) repair factors in the sample metadata
+# sample_data(physeq.Sugarbeet.group)$Group <- levels(sample_data(physeq.norm)$Group)[get_variable(physeq.Sugarbeet.group, "Group")]
+ # or another option
+sample_data(physeq.Sugarbeet.group)$Group <- rownames(sample_data(physeq.Sugarbeet.group))
+sample_data(physeq.Sugarbeet.group)$Soil <- levels(sample_data(physeq.norm)$Soil)[get_variable(physeq.Sugarbeet.group, "Soil")]
+sample_data(physeq.Sugarbeet.group)$Soil.Location <- levels(sample_data(physeq.norm)$Soil.Location)[get_variable(physeq.Sugarbeet.group, "Soil.Location")]
+
+## (4) Further subgroup for SU.CL.BO vs SU.CL.YO
+physeq.Sugarbeet.vs <- physeq.Sugarbeet %>% subset_samples(Group %in% c("SU.CL.BO", "SU.CL.YO"))
+```
+
+## Bata diversity - before and after the normalisation
+
+Beta diversity quantifies variation in microbial composition among samples, aiding in identifying patterns in microbial distribution. Non-Metric Multidimensional Scaling (NMDS) and Principal Coordinates Analysis (PCoA) are ordination techniques used for beta diversity analysis.
+
+**NMDS** preserves the rank order of pairwise dissimilarities between samples in a lower-dimensional space, making it suitable for cases where distances between samples are not well-preserved. The distances on the NMDS plot reflect the similarities or dissimilarities between samples but are not directly interpretable.
+
+PCoA, a metric multidimensional scaling technique, attempts to preserve the actual distances between samples in a lower-dimensional space. The distances on the PCoA plot reflect the actual dissimilarities between samples. Unlike NMDS, PCoA may not perform as well with non-linear or rank-based dissimilarity measures.
+
+Here, we employ NMDS to analyze Beta diversity, allowing us to draw comparisons between the states before and after normalisation.
+
+```{r ggplot2, warning=FALSE, message=FALSE}
+# install.packages("ggplot2")
+library("ggplot2")
+# install.packages("dplyr")
+library("dplyr")
+# install.packages("ggpubr")
+library("ggpubr")
+```
+
+we examine sugarbeet and bulk soil
+
+```{r Bata_2, warning=FALSE, message=FALSE}
+# method options: c("DCA", "CCA", "RDA", "CAP", "DPCoA", "NMDS", "MDS", "PCoA")
+NMDS <- ordinate(physeq = physeq.SU, 
+                 method = "NMDS", 
+                 distance = "bray"
+                 )
+
+groups_to_ellipse <- c("SC.HE", "CY.BU") # Replace with your actual group names
+
+physeq.SU.subset <- subset_samples(physeq.SU, Soil.Location %in% groups_to_ellipse)
+
+# Convert physeq.SU.subset to a data frame
+df <- sample_data(physeq.SU.subset)
+
+my_palette <- c("darkgoldenrod", "limegreen")
+
+# Create the ordination plot
+plot_ordination <- plot_ordination(physeq = physeq.SU, 
+                                   ordination = NMDS, 
+                                   color = "Type", 
+                                   shape = "Soil.Location")
+
+# Extract ordination scores from the plot
+df <- plot_ordination$data
+
+# Subset the data for the groups to ellipse
+df_subset <- df[df$Soil.Location %in% groups_to_ellipse, ]
+
+# Add the ellipse for the subsetted data
+
+plot_ordination <- plot_ordination + 
+  stat_ellipse(data = df_subset, 
+               type="norm", 
+               alpha=0.25, 
+               aes(group = Soil.Location), 
+               linetype = 1, 
+               size = 0.8, 
+               colour = "purple4"
+               ) +
+  theme_classic() + 
+  geom_point(aes(color = Type), alpha = 1, size = 3.5) +
+  theme(
+    text = element_text(size = 18, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
+    axis.title.x = element_text(color = "black", size = 20, face = "bold")) +
+  scale_color_manual(values = my_palette) +
+  scale_fill_manual(values = my_palette) +
+  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
+
+# Plot ordination
+# pdf(file = "bata_SU.pdf", width = 9,height = 6)
+plot_ordination
+# Close the PDF device and save the plot to a file
+# dev.off()
+  
+# Clean up by removing objects that are no longer needed
+# rm(NMDS, physeq.SU)
+
+```
+
+#### Alpha diversity
+
+Alpha diversity refers to the diversity of species within a single ecosystem or habitat. It is measured by analysing the number and distribution of species within a specific area or sample. Alpha diversity indices take into account the richness (number of species) and evenness (relative abundance of species) of a community. It provides insights into the complexity and stability of ecosystems. A high level of alpha diversity indicates a more complex ecosystem with a greater number of species, which is often associated with greater ecological resilience and stability. In contrast, a low level of alpha diversity can be an indicator of ecosystem disturbance, degradation, or vulnerability.
+
+Please noted that different types of alpha diversity metrics capture various aspects of biodiversity within a specific community. Here's a brief explanation of each:
+
+-   **Observed**: This metric simply counts the number of unique species (or operational taxonomic units) present in a sample. It provides a basic measure of species richness.
+
+-   **Chao1**: Chao1 estimates the total number of species by considering the number of rare or singleton species. It takes into account the number of singletons (species observed only once) and doubletons (species observed only twice).
+
+-   **ACE (Abundance-based Coverage Estimator)**: Similar to Chao1, ACE also estimates species richness by accounting for rare species, but it also considers their abundance in the community.
+
+-   **Shannon Diversity Index**: This index takes into account both species richness and evenness in the community. It considers the number of species present as well as their relative abundances.
+
+-   **Simpson Diversity Index**: Simpson's index gives more weight to dominant species in the community. It reflects the probability that two randomly selected individuals belong to different species.
+
+-   **Inverse Simpson Diversity Index (InvSimpson)**: This index is the reciprocal of the Simpson index and is useful for emphasizing the dominance of a few species.
+
+-   **Fisher's Alpha**: Fisher's alpha is a measure of species richness that takes into account the distribution of individuals among species. It's particularly useful for comparing species diversity between different communities.
+
+(<https://docs.cosmosid.com/docs/alpha-diversity>)
+
+Here, we use Shannon as an example for the work
+
+```{r Alpha, warning=FALSE, message=FALSE}
+# available measurements: "Observed" "Chao1" "ACE" "Shannon" "Simpson" "InvSimpson" "Fisher"
+# Calculate alpha diversity (Shannon) and store it in physeq.SU object
+alpha.object <- cbind(
+  x = sample_data(physeq.SU),
+  y = estimate_richness(physeq.SU, measures = 'Shannon')
+)
+
+# Data preparation (formatting)
+selected_columns <- alpha.object[, c("x.Soil.Location", "x.Group", "x.Type", "Shannon")]
+selected_columns2 <- melt(selected_columns)
+names(selected_columns2) <- c("Soil_Location","Group" , "Type", "variable", "Shannon")
+
+# Define the comparisons
+my_comparisons <- list(
+  c("SU.CL.BO", "CO.CL.BO"),
+  c("SU.CL.YO", "CO.CL.YO"),
+  c("SU.CY.BU", "CO.CY.BU"),
+  c("SU.CY.YO", "CO.CY.YO"),
+  c("SU.SC.HE", "CO.SC.HE"),
+  c("SU.SC.SH", "CO.SC.SH"),
+  c("SU.SL.AN", "CO.SL.AN"),
+  c("SU.SL.BE", "CO.SL.BE"),
+  c("SU.SL.SH", "CO.SL.SH")
+)
+
+# Initialise an empty data frame to store the results
+results <- data.frame()
+
+# Perform t-tests for each pair of groups
+for (i in seq_along(my_comparisons)) {
+  group1_data <- selected_columns2$Shannon[selected_columns2$Group == my_comparisons[[i]][1]]
+  group2_data <- selected_columns2$Shannon[selected_columns2$Group == my_comparisons[[i]][2]]
+  
+  wilcox_test_result <- wilcox.test(group1_data, group2_data)
+  
+  results <- rbind(results, data.frame(
+    group1 = my_comparisons[[i]][1],
+    group2 = my_comparisons[[i]][2],
+    p.value = wilcox_test_result$p.value
+  ))
+}
+
+# Adjust the p-values for multiple comparisons using the Benjamini-Hochberg procedure
+results$p.adjusted <- p.adjust(results$p.value, method = "BH")
+
+# Add significance levels based on the adjusted p-values
+results$p.signif <- symnum(results$p.adjusted, corr = FALSE, na = FALSE,
+                           cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1),
+                           symbols = c("***", "**", "*", ".", " "))
+
+# print result
+print(results)
+
+# Defind colour
+my_palette <- c("darkgoldenrod", "limegreen")
+
+# Create the boxplot
+p <- ggplot(data=selected_columns2, aes(x=Soil_Location, y= Shannon, fill = Type)) + 
+  geom_boxplot(size = 1.1, 
+               width = 0.825, 
+               color = "grey20", 
+               position = position_dodge(0.9)
+  ) +
+  scale_fill_manual(values = my_palette) +
+  labs(x = element_blank(),                     
+       y = "Alpha Diversity (Shannon)"          
+  ) + 
+  theme_classic() + 
+  theme(
+    text = element_text(size = 18, colour = "black"), 
+    axis.ticks = element_line(colour = "black", size = 1.1),
+    axis.line = element_line(colour = 'black', size = 1.1),
+    axis.text.x = element_text(colour = "black", angle = 45, hjust = 1, 
+                               size = 13, face = "bold"),
+    axis.text.y = element_text(angle = 0, hjust = 0, colour = "black", 
+                               size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 15, face = "bold"),
+    legend.position = "right") +
+  scale_y_continuous(breaks = seq(6, 8, by = 0.5), limits = c(6, 8.2))  
+
+# Add the results of the comparisons to the plot
+for (i in seq_len(nrow(results))) {
+  
+  # Set the y position for the label
+  y_position <- 8.15
+  
+  # Add the label to the plot
+p <- p + annotate("text", x = i, 
+                  y=y_position , 
+                  label=round(results$p.adjusted[i], 4), 
+                  size= 3.75, face = "bold")
+}
+
+# Create a plot for alpha diversity
+# pdf(file = "Fig7B_alpha.pdf", width = 8,height = 5)
+
+# Print the plot
+print(p)
+
+# Close the PDF device and save the plot to a file
+# dev.off()
+
+# Clean up by removing the alpha.object
+# rm(alpha.object, selected_columns, selected_columns2, my_comparisons, results, my_palette, group1_data, group2_data, t_test_result)
+```
+
+#### Determine the count of taxa within each level and group
+
+The purpose of this process is to visualise the distribution of the number of matched abundance across different groups and to identify any patterns in the distribution of the processed abundance within individual group.
+
+```{r ASV_group, warning=FALSE, message=FALSE}
+# Create an empty list to store genus-level abundance data for each taxonomic level
+gentab_levels <- list()
+
+# Set observation threshold
+observationThreshold <- 1
+
+# Define the taxonomic levels
+genus_levels <- c("Kingdom", "Phylum", "Class", "Order", 
+                  "Family", "Genus", "Species")
+
+# loop through all the taxonomic levels
+for (level in genus_levels) {
+  
+  # create a factor variable for each level
+  genfac <- factor(tax_table(physeq.Sugarbeet.group)[, level])
+  
+  # calculate the abundance of each genus within each sample
+  gentab <- apply(otu_table(physeq.Sugarbeet.group), MARGIN = 1, function(x) {
+    tapply(x, INDEX = genfac, FUN = sum, na.rm = TRUE, simplify = TRUE)
+  })
+  
+  # calculate the number of samples in which each genus is observed above the threshold
+  level_counts <- apply(gentab > observationThreshold, 2, sum)
+  
+  # create a data frame of level counts with genus names as row names
+  BB <- as.data.frame(level_counts)
+  BB$name <- row.names(BB)
+  
+  # add the data frame to the gentab_levels list
+  gentab_levels[[level]] <- BB
+}
+
+# Combine all level counts data frames into one data frame
+B2 <- gentab_levels %>% reduce(full_join, by = "name")
+
+# Set row names and column names
+rownames(B2) <- B2$name
+B2$name <- NULL
+colnames(B2)[1:7] <- genus_levels
+
+# Print the resulting data frame
+print(B2)
+
+# Clean up by removing unnecessary objects
+rm(gentab_levels, BB)
+```
+
+#### Pairwise comparison using PERMANOVA
+
+Pairwise PERMANOVA is a statistical method used to compare multiple groups or treatments in ecological and microbial community studies. It assesses dissimilarity between samples and provides a p-value to determine the significance of observed differences. This approach is valuable for targeted group comparisons, allowing researchers to investigate the effects of specific factors on microbial communities and uncover significant variations in community composition. By considering within- and between-group variation, pairwise PERMANOVA provides robust statistical analysis and insights into microbial community dynamics and functioning.
+
+```{r PERMANOVA Install, warning=FALSE, message=FALSE}
+# devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")
+library("pairwiseAdonis")
+library("GGally")
+```
+
+```{r PERMANOVA, warning=FALSE, message=FALSE}
+
+metdat = as.data.frame(as.matrix(physeq.SU@sam_data))
+dat = as.data.frame(t(as.data.frame(physeq.SU@otu_table)))
+
+# Define the pairs for comparison
+pairs <- list(
+  c("SU.CL.BO", "CO.CL.BO"),
+  c("SU.CL.YO", "CO.CL.YO"),
+  c("SU.CY.BU", "CO.CY.BU"),
+  c("SU.CY.YO", "CO.CY.YO"),
+  c("SU.SC.HE", "CO.SC.HE"),
+  c("SU.SC.SH", "CO.SC.SH"),
+  c("SU.SL.AN", "CO.SL.AN"),
+  c("SU.SL.BE", "CO.SL.BE"),
+  c("SU.SL.SH", "CO.SL.SH")
+)
+
+# Initialize an empty list to store the results
+results <- list()
+
+# Loop over each pair
+for(i in seq_along(pairs)) {
+  pair <- pairs[[i]]
+  
+  dat$Group = metdat$Group
+  dat_subset <- dat[dat$Group %in% pair, ]
+  dat_subset$Group <- NULL
+  
+  metdat_subset <- metdat[metdat$Group %in% pair, ]
+  
+  # Perform the pairwise comparison
+  results[[i]] <- pairwise.adonis(dat_subset, 
+                                  metdat_subset$Group, 
+                                  sim.function = "vegdist",
+                                  sim.method = "bray",
+                                  reduce = NULL, perm = 100000)
+}
+
+# Convert the list of results to a data frame
+results_df <- do.call(rbind, lapply(results, function(x) data.frame(t(unlist(x)))))
+
+# Add the adjusted p-value
+# "bonferroni", "holm", "hochberg", "hommel", "BH" or "BY" 
+results_df$p.adjusted <- p.adjust(results_df$p.value, method = "BH")
+
+# Print the dataframe to check the new column
+print(results_df)
+
+# Clean up by removing unnecessary objects
+# rm(metdat, dat, pairs, i, dat_subset, metdat_subset, results, results_df)
+
+```
+
+```{r sessionInfo, warning=FALSE, message=FALSE}
+sessionInfo()
+```
