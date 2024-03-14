@@ -294,6 +294,15 @@ comparisons between the states before and after normalisation.
 
 #### Convert `physeq.norm` object to ASV matrix and Save the “physeq.norm” object for the other case study analysis
 
+    # Extract abundance matrix from the phyloseq object 
+    # OTU1 = as(otu_table(physeq.norm), "matrix")
+    # Transpose the matrix
+    # OTU1 <- t(OTU1)
+    # Coerce to data.frame
+    # OTUdf = as.data.frame(physeq.norm)
+    # save(physeq.norm, file = "norm.RData")
+
+
 ### Session Info
 
     sessionInfo()
