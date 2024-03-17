@@ -1,21 +1,18 @@
 ---
-title: "The Silent Scourge: Investigating Soil-Borne Fungal Diseases in Wheat Crops"
-output:
-  pdf_document: default
-  html_document:
-    df_print: paged
-date: "2024-02-23"
+title: "The UK Crop Microbiome Cryobank - How-to Guide: Case Study 3 - Investigating Soil-Borne Fungal Diseases in Wheat"
+author: "Payton Yau"
+date: "2024-03-17"
+output: md_document
 ---
 
-## The Silent Scourge: Investigating Soil-Borne Fungal Diseases in Wheat Crops
+# How-to Guide: Case Study 3 - Investigating Soil-Borne Fungal Diseases in Wheat
 
 The fungi-wheat relationship significantly affects agricultural ecosystems and productivity. Wheat root rot disease, caused by soil-borne fungi, leads to major crop losses. This study explores the link between soil fungal diversity and wheat roots across nine farms to assess the prevalence of these pathogens.
 
+## Install and load the required packages for the conversion
 ### Qiime2 to Phyloseq
 
 Converting outcomes from Qiime2 data structure to the phyloseq object structure in R using Qiim2R package. Also, the phyloseq package provides functions for organising and manipulating data within the phyloseq object, allowing for diverse analyses such as diversity assessments, differential abundance testing, and taxonomic profile visualisation.
-
-#### Install and load the required packages for the conversion
 
 ```{r install, warning=FALSE, message=FALSE}
 # Download qiime2R from Github
@@ -35,15 +32,15 @@ library("tidyverse")
 library("ggpubr")
 ```
 
-#### The conversion of Qiime2 to Phyloseq datastructure
+### The conversion of Qiime2 to Phyloseq datastructure
 
 ```{r qiime2R, warning=FALSE, message=FALSE}
 # Convert qiime2 to phyloseq format
 physeq.a <- qza_to_phyloseq(
-  features = "~/GitHub/agmicrobiomebase/amplicon-sequence-analysis/amplicon-ITS/[Qiime2]UNITE_9/table-its-fungi-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
-  tree = "~/GitHub/agmicrobiomebase/amplicon-sequence-analysis/amplicon-ITS/[Qiime2]UNITE_9/phylogeny-align-to-tree-mafft-fasttree/rooted_tree.qza",
-  taxonomy = "~/GitHub/agmicrobiomebase/amplicon-sequence-analysis/amplicon-ITS/[Qiime2]UNITE_9/taxonomy-fungi.qza",
-  metadata = "ITS-meta-table.txt"
+  features = "C:/ITS/table-its-fungi-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
+  tree = "C:/ITS/rooted_tree.qza",
+  taxonomy = "C:/ITS/taxonomy-fungi.qza",
+  metadata = "C:/ITS/ITS-meta-table.txt"
 )
 physeq.a ## confirm the object
 
@@ -57,7 +54,7 @@ sample_data(physeq.a.group)$Soil.Type <- levels(sample_data(physeq.a)$Soil.Type)
 sample_data(physeq.a.group)$Soil <- levels(sample_data(physeq.a)$Soil)[get_variable(physeq.a.group, "Soil")]
 ```
 
-#### Assessing ASV distribution (merged and filtered)
+### Assessing ASV distribution (merged and filtered)
 
 We evaluated the number of Amplicon Sequence Variants (ASVs) and visualised the raw read counts per sample within each group. This provided insights into the distribution of ASVs and the sequencing depth of each sample, allowing for a comprehensive assessment of data quality and quantity.
 
@@ -69,18 +66,31 @@ library("RColorBrewer")
 ```
 
 ```{r ASV, warning=FALSE, message=FALSE}
-
+# This line is calculating the sum of samples in the physeq.a object and storing it in ASV.
 ASV <- sample_sums(physeq.a)
+
+# This line is converting ASV into a data frame.
 ASV <- as.data.frame(ASV)
+
+# This line is adding a new column to the ASV data frame called 'Group', 
+# which is taken from the 'Group' column of the sam_data slot of the physeq.a object.
 ASV$Group <- physeq.a@sam_data$Group
 
-#### pdf
-# pdf(file = "Suppl_ASV_ITS.pdf", width = 8,height = 5)
+# The following lines are creating a ggplot. The data used is the ASV data frame. 
+# The x-axis represents the 'Group', and the y-axis represents the 'ASV'. 
+# The colour of the points is determined by the 'Group'.
 ggplot(ASV, aes(x = Group, y = ASV,  colour = Group))+
+  # This line is setting the colour palette of the plot to 'Paired'.
   scale_color_brewer(palette = "Paired") +
+  # This line is adding jittered points to the plot. 
+  # The size of the points is 4, and the transparency level (alpha) is 1 (completely opaque).
   geom_point(alpha = 1, position = "jitter", size = 4) + 
+  # This line is adding boxplots to the plot. The boxplots are black and have a size of 0.8. 
+  # The boxplots are completely transparent (alpha = 0).
   geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
+  # This line is setting the theme of the plot to 'classic'.
   theme_classic() + 
+  # The following lines are customising various elements of the theme.
   theme(text = element_text(size=15, colour = "black"), 
         axis.ticks = element_line(colour = "black", size = 1.25),
         axis.line = element_line(colour = 'black', size = 1.25),
@@ -91,13 +101,11 @@ ggplot(ASV, aes(x = Group, y = ASV,  colour = Group))+
         axis.title.y = element_text(color="black", size=15,face="bold"),
         legend.position = "none")
 
-# Close the PDF device and save the plot to a file
-# dev.off()
-
+# This line is removing the ASV object from the workspace to free up memory.
 rm(ASV)
 ```
 
-#### Beta diversity
+### Beta diversity
 
 Beta diversity is a metric used in microbial community studies to assess species composition dissimilarity between samples, providing insights into microbial community dynamics and their ecological significance. By quantifying variation in community structure and employing visualisation techniques, beta diversity analysis allows comparisons across habitats or treatments, revealing key drivers of community variation and functional implications. It aids our understanding of microbial assemblages and their responses to environmental changes in ecology, environmental science, and human health research.
 
@@ -105,8 +113,6 @@ Beta diversity is a metric used in microbial community studies to assess species
 # method options: NMDS / PCoA
 NMDS <- ordinate(physeq = physeq.a, method = "NMDS", distance = "bray")
 
-# pdf
-# pdf(file = "Fig9A_bata_ITS.pdf", width = 8,height = 5)
 # Plot ordination
 plot_ordination(physeq = physeq.a,
                       ordination = NMDS,
@@ -129,14 +135,12 @@ plot_ordination(physeq = physeq.a,
     axis.title.x = element_text(color = "black", size = 20, face = "bold")
   ) + stat_ellipse(geom = "polygon", type="norm", alpha=0.25, aes(fill = Group)) +
   scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
-# Close the PDF device and save the plot to a file
-# dev.off()
 
 # Clean up by removing objects that are no longer needed
 rm(NMDS)
 ```
 
-#### Alpha diversity
+### Alpha diversity
 
 Alpha diversity, a key ecological concept, denotes species richness within a specific habitat or community. In microbial ecology, it signifies the variety and distribution of microorganisms in a sample or microbiome. It's measured by species richness and evenness, reflecting the number and distribution of species respectively. Alpha diversity is vital for assessing the stability and functional potential of microbial communities and can be influenced by environmental conditions, host factors, and disturbances. Comparing alpha diversity across samples or groups allows researchers to understand the effects of factors like disease or habitat changes on microbial community structure.
 
@@ -150,8 +154,6 @@ alpha.object <- cbind(
   y = estimate_richness(physeq.a, measures = 'Shannon')
 )
 
-#### pdf
-# pdf(file = "Fig9B_Alpha_ITS.pdf", width = 8,height = 5)
 # Create a plot for alpha diversity
 ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group)) + 
   scale_color_brewer(palette = "Paired") +
@@ -173,133 +175,9 @@ ggplot(data = alpha.object, aes(x = x.Group, y = Shannon, color = x.Group)) +
     axis.title.y = element_text(color = "black", size = 15, face = "bold"),
     legend.position = "none"                 # Hide legend
   ) 
-# Close the PDF device and save the plot to a file
-# dev.off()
-
 
 # Clean up by removing the alpha.object
 rm(alpha.object)
-```
-
-```{R Alpha diversity Suppl A, warning=FALSE, message=FALSE}
-##########  alpha diversity (Simpson)
-# Calculate alpha diversity (Simpson) and store it in physeq.a object
-alpha.object <- cbind(
-  x = sample_data(physeq.a),
-  y = estimate_richness(physeq.a, measures = 'Simpson')
-)
-
-#### pdf
-# Open a PDF device to save the plot
-# pdf(file = "Alpha_ITS_Simpson.pdf", width = 8,height = 5)
-
-# Create a plot for alpha diversity
-# This step creates a scatter plot of the Simpson alpha diversity for each group in the physeq.a object.
-ggplot(data = alpha.object, aes(x = x.Group, y = Simpson, color = x.Group)) + 
-  scale_color_brewer(palette = "Paired") +
-  theme_classic() + 
-  labs(
-    x = element_blank(),                     # No x-axis label
-    y = "Alpha Diversity (Simpson)"          # y-axis label
-  ) + 
-  geom_point(alpha = 1, position = "jitter", size = 4) + 
-  geom_boxplot(alpha = 0, colour = "black", size = 0.8)+ 
-  theme(
-    text = element_text(size = 18, colour = "black"), 
-    axis.ticks = element_line(colour = "black", size = 1.1),
-    axis.line = element_line(colour = 'black', size = 1.1),
-    axis.text.x = element_text(colour = "black", angle = 45, 
-                               hjust = 1, size = 13, face = "bold"),
-    axis.text.y = element_text(angle = 0, hjust = 0, 
-                               colour = "black", size = 13, face = "bold"),
-    axis.title.y = element_text(color = "black", size = 15, face = "bold"),
-    legend.position = "none"                 # Hide legend
-  ) +  
-  scale_y_continuous(breaks = seq(0.95, 0.99, by = 0.01), limits = c(0.95, 0.99))  
-
-# Close the PDF device and save the plot to a file
-# dev.off()
-```
-
-```{R Alpha diversity Suppl B, warning=FALSE, message=FALSE}
-########## alpha diversity (InvSimpson)
-# Calculate alpha diversity (InvSimpson) and store it in physeq.a object
-alpha.object <- cbind(
-  x = sample_data(physeq.a),
-  y = estimate_richness(physeq.a, measures = 'InvSimpson')
-)
-
-#### pdf
-# Open a PDF device to save the plot
-# pdf(file = "Alpha_ITS_InvSimpson.pdf", width = 8,height = 5)
-
-# Create a plot for alpha diversity
-# This step creates a scatter plot of the Inverse Simpson alpha diversity for each group in the physeq.a object.
-ggplot(data=alpha.object, aes(x=x.Group, y=InvSimpson, color=x.Group)) + 
-  scale_color_brewer(palette="Paired") +
-  theme_classic() + 
-  labs(
-    x=element_blank(),                     # No x-axis label
-    y="Alpha Diversity (InvSimpson)"       # y-axis label
-  ) + 
-  geom_point(alpha=1, position="jitter", size=4) + 
-  geom_boxplot(alpha=0, colour="black", size=0.8)+ 
-  theme(
-    text=element_text(size=18, colour="black"), 
-    axis.ticks=element_line(colour="black", size=1.1),
-    axis.line=element_line(colour='black', size=1.1),
-    axis.text.x=element_text(colour="black", angle=45,
-                             hjust=1, size=13, face="bold"),
-    axis.text.y=element_text(angle=0, hjust=0,
-                             colour="black", size=13, face="bold"),
-    axis.title.y=element_text(color="black", size=15, face="bold"),
-    legend.position="none"                 # Hide legend
-  ) +
-  scale_y_continuous(breaks=seq(20,90,by=10), limits=c(20,90))  
-
-# Close the PDF device and save the plot to a file
-# dev.off()
-```
-
-```{R Alpha diversity Suppl C, warning=FALSE, message=FALSE}
-##########  alpha diversity (Fisher)
-# Calculate alpha diversity (Fisher) and store it in physeq.a object
-# This step calculates the Fisher alpha diversity for each sample in the physeq.a object.
-alpha.object <- cbind(
-  x = sample_data(physeq.a),
-  y = estimate_richness(physeq.a, measures = 'Fisher')
-)
-
-#### pdf
-# Open a PDF device to save the plot
-# pdf(file = "Alpha_ITS_Fisher.pdf", width = 8,height = 5)
-
-# Create a plot for alpha diversity
-# This step creates a scatter plot of the Fisher alpha diversity for each group in the physeq.a object.
-ggplot(data=alpha.object, aes(x=x.Group, y=Fisher, color=x.Group)) + 
-  scale_color_brewer(palette="Paired") +
-  theme_classic() + 
-  labs(
-    x=element_blank(),                     # No x-axis label
-    y="Alpha Diversity (Fisher)"           # y-axis label
-  ) + 
-  geom_point(alpha=1, position="jitter", size=4) + 
-  geom_boxplot(alpha=0, colour="black", size=0.8)+ 
-  theme(
-    text=element_text(size=18, colour="black"), 
-    axis.ticks=element_line(colour="black", size=1.1),
-    axis.line=element_line(colour='black', size=1.1),
-    axis.text.x=element_text(colour="black", angle=45,
-                             hjust=1, size=13, face="bold"),
-    axis.text.y=element_text(angle=0, hjust=0,
-                             colour="black", size=13, face="bold"),
-    axis.title.y=element_text(color="black", size=15, face="bold"),
-    legend.position="none"                 # Hide legend
-  ) +
-  scale_y_continuous(breaks=seq(20,70,by=10), limits=c(20,70))  
-
-# Close the PDF device and save the plot to a file
-# dev.off()
 ```
 
 #### Number of taxa in groups
@@ -360,8 +238,6 @@ data_long <- melt(B2, id.vars = "Group",
 
 
 # Plot the data as a line graph using ggplot
-# Open a new PDF graphics device
-# pdf(file = "Fig7C_line_graph_ITS.pdf", width=8,height=5)
 ggplot(data_long, aes(x = Level, y = Taxa, 
                       color = Group, group = Group)) +
   geom_line() +
@@ -384,10 +260,6 @@ ggplot(data_long, aes(x = Level, y = Taxa,
   ) +
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
   scale_y_continuous(breaks=seq(0,400,by=100))
-
-
-# Close the PDF device and save the plot to a file
-# dev.off()  
 
 # Clean up by removing the alpha.object
 rm(physeq, gentab_levels, observationThreshold, B2, data_long, genfac, genus_levels, level, level_counts)
@@ -470,15 +342,8 @@ upset_plot <- upset(temp_df,
                     text.scale = 1.5
 )
 
-
-# Open a new PDF graphics device
-# pdf(file = "Fig7D_UpSet_ITS.pdf", width=8,height=5)
-
 # Print the UpSet plot
 print(upset_plot)
-
-# Close the PDF device and save the plot to a file
-# dev.off()  
 ```
 
 ### Phylogenetic tree
@@ -519,13 +384,9 @@ p <- ggtree(GP.chl, ladderize = TRUE) +
         legend.position = "bottom"
   ) 
 
-# Open a new PDF graphics device
-# pdf(file = "Fig10_Tree_ITS.pdf", width=11,height=5)
 # Print the ggtree plot
 print(p)
 
-# Close the PDF device and save the plot to a file
-# dev.off() 
 ```
 
 From the phylogenetic tree, it was obsered *Fusarium culmorum* and *Fusarium tonkinense* were identified in only one of the samples. However, there was an enrichment of *Fusarium equiseti* , *Fusarium nurragi and Fusarium waltergamsii.*
@@ -643,13 +504,8 @@ fig <- ggarrange(p1, p2, p3, p4, labels = c("A", "B", "C", "D"), size = 8,
 # Add labels
 fig <- annotate_figure(fig)
 
-# Open a new PDF graphics device
-# pdf(file = "Fig11_ITS.pdf", width=11,height=7.5)
 # Print the figure
 print(fig)
-
-# Close the PDF device and save the plot to a file
-# dev.off() 
 
 ```
 
