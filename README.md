@@ -94,9 +94,13 @@ This repository contains procedural information and scripts for the analysis of 
 
 **i**. Optimisation/Batch effects corrections
 
--- [procedure.R markdown](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00-Batch_effect_corr.Rmd)
+-- [procedure.R markdown - merged length distribution & reference databases](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00A-length_dist_ref_databases.Rmd)
 
--- [procedure.markdown](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00B-Batch_effects.md)
+-- [procedure.markdown - merged length distribution & reference databases](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00A-length_dist_ref_databases.md)
+
+-- [procedure.R markdown - batch effects correction](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00B-Batch_effects.Rmd)
+
+-- [procedure.markdown - batch effects correction](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00B-Batch_effects.md)
 
 -- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_00-preparation/Case_00-prep.R)
 
