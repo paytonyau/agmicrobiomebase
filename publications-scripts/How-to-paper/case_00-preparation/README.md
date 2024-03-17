@@ -1,0 +1,21 @@
+# Preparation and Analysis Scripts for Microbiome Data
+
+This directory contains the R scripts and documentation for three distinct analyses on microbiome sequencing data. These analyses are crucial for ensuring data quality and integrity before downstream analysis.
+
+## Contents
+
+-   **Case_00-prep.R**: This script encompasses all preprocessing steps, including trimming, sequence length selection, comparative analysis of taxonomic levels, and batch effect correction.
+-   **case00A-length_dist_ref_databases.Rmd**: The R Markdown file for the analysis of sequence length distributions across reference databases.
+-   **case00A-length_dist_ref_databases.md**: The markdown documentation detailing the methodology and results of the sequence length distribution analysis.
+-   **case00B-Batch_effects.Rmd**: The R Markdown file for the analysis and correction of batch effects in sequencing data.
+-   **case00B-Batch_effects.md**: The markdown documentation explaining the batch effect correction process and its results.
+-   **16s_length_distribution.RData**: An R data file containing the distribution of 16S rRNA gene sequence lengths.
+-   **16s_meta-table.txt**: A metadata table associated with the 16S rRNA gene sequencing data.
+-   **case00A-length_dist_ref_databases_files/figure-markdown_strict**: A folder containing figures generated from the sequence length distribution analysis.
+-   **case00B-Batch_effects_files/figure-markdown_strict**: A folder containing figures generated from the batch effect analysis.
+
+## Analyses Overview
+
+1.  **Trimming and Optimal Sequence Length Selection**: Determining the longest sequence length that maximizes quality and minimizes error rates.
+2.  **Comparative Analysis of Taxonomic Levels of Reference Databases**: Aggregating matched hits by names to consolidate ASVs and analyze taxonomic levels from Kingdom to Species.
+3.  **Batch Effect Correction and Normalisation**: Correcting for batch effects to ensure consistent and accurate data across different sequencing runs.
