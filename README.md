@@ -126,7 +126,7 @@ This repository contains procedural information and scripts for the analysis of 
 
 -- [procedure.R markdown](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_03-ITS_wheat/Case_03-ITS.Rmd)
 
--- procedure.md
+-- [procedure.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_03-ITS_wheat/Case_03-ITS.md)
 
 -- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_03-ITS_wheat/Case_03-ITS.R)
 
