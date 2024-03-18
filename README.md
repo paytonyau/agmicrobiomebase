@@ -8,7 +8,6 @@
 
 This repository contains the scripts to process the fastq sequence files from the 16S and ITS amplicon Illumina sequencing and for the metagenomic Illumina sequencing for the UK Crop Microbiome Cryobank Project.
 
-  
 
 The UK Crop Microbiome Cryobank integrates genomic (DNA) data with a cryobank collection of samples for the soil microbiomes of the UK major crop plant systems.
 
@@ -30,7 +29,7 @@ The catalogue links the raw sequence data files which have been submitted to the
 
 This repository contains procedural information and scripts for the analysis of Amplicon sequence fastq files to derive amplicon sequence variant taxonomies using qiime2 and the corresponding packages.
 
-1. Analysis of **16S Amplicon** sequence fastq files to derive amplicon sequence variant taxonomies using qiime2
+#### 1. Analysis of **16S Amplicon** sequence fastq files to derive amplicon sequence variant taxonomies using qiime2
 
 [16S-sequence-analysis.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-sequence-analysis.md): A markdown file describing all processing steps from fastq to asv taxa output file
 
@@ -42,9 +41,9 @@ This repository contains procedural information and scripts for the analysis of 
 
 [README.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/README.md):
 
-2. Analysis of **ITS amplicon** fastq sequence files to derive amplicon sequence variant taxonomies using qiime2
+#### 2. Analysis of **ITS amplicon** fastq sequence files to derive amplicon sequence variant taxonomies using qiime2
 
-[ITS-sequence-analysis.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-sequencing-analysis.md): markdown file describing all processing steps from fastq to asv taxa output file
+[ITS-sequence-analysis.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-sequencing-analysis.md): A markdown file describing all processing steps from fastq to asv taxa output file
 
 **i**. [ITS-script-startup](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/ITS-step01-setup.sh) : script to install software and set-up environments and downloaded databases
 
@@ -54,7 +53,7 @@ This repository contains procedural information and scripts for the analysis of 
 
 [README.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-ITS/README.md):
 
-3. Preparation and mapping of **amplicon sequence data for submission to ENA using standard templates** for intercative submission via the WebinPortal ([https://www.ebi.ac.uk/ena/submit/webin/login](https://www.ebi.ac.uk/ena/submit/webin/login))
+#### 3. Preparation and mapping of **amplicon sequence data for submission to ENA using standard templates** for intercative submission via the WebinPortal ([https://www.ebi.ac.uk/ena/submit/webin/login](https://www.ebi.ac.uk/ena/submit/webin/login))
 
 - ENA-upload-procedure.md
 
@@ -70,9 +69,7 @@ This repository contains procedural information and scripts for the analysis of 
 
 - README.md
 
-4. **Pre-processing of metagenomic sequence data**
-
-  
+#### 4. **Pre-processing of metagenomic sequence data**
 
 - procedure.md
 
@@ -80,7 +77,7 @@ This repository contains procedural information and scripts for the analysis of 
 
 - README.md
 
-5. Preparation and mapping of **metagenomic sequence data for submission to ENA using standard templates** for intercative submission via the WebinPortal ([https://www.ebi.ac.uk/ena/submit/webin/login](https://www.ebi.ac.uk/ena/submit/webin/login))
+#### 5. Preparation and mapping of **metagenomic sequence data for submission to ENA using standard templates** for intercative submission via the WebinPortal ([https://www.ebi.ac.uk/ena/submit/webin/login](https://www.ebi.ac.uk/ena/submit/webin/login))
 
 - procedure.md
 
@@ -88,50 +85,30 @@ This repository contains procedural information and scripts for the analysis of 
 
 - README.md
 
-  
-
-6. Processing and data visualisation of **amplicon sequence data for 3 case studies** in the Crop Microbiome Cryobank Publication 1
+#### 6. Processing and data visualisation of **amplicon sequence data for 3 case studies** in the Crop Microbiome Cryobank Publication 1
 
 **i**. Optimisation/Batch effects corrections
+- [procedure.R markdown - merged length distribution & reference databases](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00A-length_dist_ref_databases.Rmd)
+- [procedure.markdown - merged length distribution & reference databases](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00A-length_dist_ref_databases.md)
+- [procedure.R markdown - batch effects correction](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00B-Batch_effects.Rmd)
+- [procedure.markdown - batch effects correction](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00B-Batch_effects.md)
+- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_00-preparation/Case_00-prep.R)
+- [README.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/README.md)
 
--- [procedure.R markdown - merged length distribution & reference databases](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00A-length_dist_ref_databases.Rmd)
+**ii**. Case Study A -Influence of soil type
+- [procedure.R markdown](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_02-core_microbiome/case02-core_microbiome.Rmd)
+- [procedure.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_02-core_microbiome/case02-core_microbiome.md)
+- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_01-influence_of_soil_type/Case_01-16s.R)
+- [README.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_01-influence_of_soil_type/README.md)
 
--- [procedure.markdown - merged length distribution & reference databases](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00A-length_dist_ref_databases.md)
+**iii**. Case Study B - The core Microbiome
+- [procedure.R markdown](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_02-core_microbiome/case02-core_microbiome.Rmd)
+- [procedure.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_02-core_microbiome/case02-core_microbiome.md)
+- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_02-core_microbiome/Case_02-16s.R)
+- [README.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_02-core_microbiome/README.md)
 
--- [procedure.R markdown - batch effects correction](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00B-Batch_effects.Rmd)
-
--- [procedure.markdown - batch effects correction](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_00-preparation/case00B-Batch_effects.md)
-
--- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_00-preparation/Case_00-prep.R)
-
--- README.md
-
-**ii**. Case Study A-Influence of soil type
-
--- [procedure.R markdown](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_02-core_microbiome/case02-core_microbiome.Rmd)
-
--- [procedure.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_02-core_microbiome/case02-core_microbiome.md)
-
--- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_01-influence_of_soil_type/Case_01-16s.R)
-
--- README.md
-
-**iii**. Case Study B The core Microbiome
-
--- [procedure.R markdown](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_02-core_microbiome/case02-core_microbiome.Rmd)
-
--- [procedure.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_02-core_microbiome/case02-core_microbiome.md)
-
--- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_02-core_microbiome/Case_02-16s.R)
-
--- README.md
-
-**iv**. Case Study C ITS taxonomy and Fusarium in wheat
-
--- [procedure.R markdown](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_03-ITS_wheat/Case_03-ITS.Rmd)
-
--- [procedure.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_03-ITS_wheat/Case_03-ITS.md)
-
--- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_03-ITS_wheat/Case_03-ITS.R)
-
--- README.md
+**iv**. Case Study C - ITS taxonomy and Fusarium in wheat
+- [procedure.R markdown](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_03-ITS_wheat/Case_03-ITS.Rmd)
+- [procedure.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_03-ITS_wheat/Case_03-ITS.md)
+- [scripts](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_03-ITS_wheat/Case_03-ITS.R)
+- [README.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/publications-scripts/How-to-paper/case_03-ITS_wheat/README.md)
