@@ -1,25 +1,33 @@
-# UK CROP MICROBIOME CRYOBANK (16S amplicon sequencing analysis)
 
-Below are the scripting documents for each of the process; we included both markdown (`.md`) and `.sh` documents. An .md file is a text file that uses Markdown syntax to format text elements, such as headings, lists, links, and images; it is a lightweight and easy-to-read markup language that can be converted to HTML or other formats. A .sh file is a text file that contains commands to be executed by a Unix shell or a specific interpreter, and it is used to automate tasks in Unix-like operating systems.
+# 16S Amplicon Sequencing Analysis
 
+In the  **16S Amplicon Sequencing Analysis**  sub-folder, contains information associated with crop plants using 16S rRNA gene sequencing data. 
 
-16s-sequence-process.md: This markdown file explains the entire process for the 16s amplicon sequencing.
-16s-step01-startup.sh: A .sh file that includes the necessary packages to be installed for the environment before analysis.
-16s-step02-processing.sh: These scripts handle data preparation during the initial stage.
-16s-step03-qiime2.sh: This script is used for sequencing data analysis.
+## Overview
 
+-   **16S Sequencing Process**: The  `16s-sequence-process.md`  file provides a comprehensive guide to the entire workflow for 16S amplicon sequencing. It covers data preparation, quality control, and downstream analysis steps.
+    
+-   **Scripts and Shell Files**:
+    
+    -   `16s-step01-startup.sh`: A shell script that sets up the necessary environment by installing required packages.
+    -   `16s-step02-processing.sh`: These scripts handle data preparation during the initial stage of analysis.
+    -   `16s-step03-qiime2.sh`: This script performs the actual sequencing data analysis using Qiime2.
 
-We have organised the key outcomes generated from Qiime2, which is it from the 16s sequencing process, into separate sub-folders to help with using our sequencing analysis process.
+## Key Outcomes
 
-1. [Qiime2]DADA2_outcomes: These outcomes were processed by DADA2 and are now ready for mapping to reference databases (such as GreenGenes and Silva)
-   - 428_228_220_rep-seqs.qza
-   - 428_228_220_stats.qza
-   - 428_228_220_table.qza
-      
-2. [Qiime2]Silva_138: These outcomes pertain to Silva version 138, after the DADA2 process
-   - 428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza
-   - 428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza
-   - 428_228_220_taxonomy_silva138.qza
+We have  organised the key outcomes generated from Qiime2 during the 16S sequencing process into separate sub-folders:
 
-P.S. The numbers 428, 228, and 220 indicate the longest biologically meaningful read for V3-V4, the nucleotide length of forward reads, and the nucleotide length of reverse reads.
-
+1.  **[Qiime2]DADA2_outcomes**:
+    
+    -   These outcomes were processed by DADA2 and are now ready for mapping to reference databases (such as GreenGenes and Silva).
+    -   Files:
+        -   `428_228_220_rep-seqs.qza`: Processed representative sequences.
+        -   `428_228_220_stats.qza`: Statistical summary of the data.
+        -   `428_228_220_table.qza`: Processed feature table.
+2.  **[Qiime2]Silva_138**:
+    
+    -   These outcomes correspond to Silva version 138, post-DADA2 processing.
+    -   Files:
+        -   `428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza`: Fungal representative sequences.
+        -   `428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza`: Fungal feature table.
+        -   `428_228_220_taxonomy_silva138.qza`: Taxonomic assignments for fungal sequences.
