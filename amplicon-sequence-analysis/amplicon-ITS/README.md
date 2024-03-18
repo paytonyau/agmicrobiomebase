@@ -1,22 +1,32 @@
-# UK CROP MICROBIOME CRYOBANK (ITS amplicon sequencing analysis)
+# ITS Amplicon Sequencing Analysis
 
-Below is the scripting documents for each of the process, we included both markdown and `.sh` documents for giving an example for the ITS sequencing analysis. An .md file is a text file that uses Markdown syntax to format text elements, such as headings, lists, links, and images; it is a lightweight and easy-to-read markup language that can be converted to HTML or other formats. A .sh file is a text file that contains commands to be executed by a Unix shell or a specific interpreter, and it is used to automate tasks in Unix-like operating systems.
+In this repository, it contains Internal Transcribed Spacer (ITS) amplicon sequencing data for wheat, which provides insights into the fungal communities inhabiting agricultural ecosystems.
 
+## Overview
 
-ITS-sequencing-process.md: This markdown file explains the entire process for the 16s amplicon sequencing.
+-   **ITS Sequencing Process**: The  `ITS-sequencing-process.md`  file explains the entire workflow for 16S amplicon sequencing. It covers data preparation, quality control, and downstream analysis steps.
+    
+-   **Scripts and Shell Files**:
+    
+    -   `ITS-step01-startup.sh`: A shell script that sets up the necessary environment by installing required packages.
+    -   `ITS-step02-processing.sh`: These scripts handle data preparation during the initial stage of analysis.
+    -   `ITS-step03-qiime2.sh`: This script performs the actual sequencing data analysis using Qiime2.
 
-ITS-step01-startup.sh: A .sh file that includes the necessary packages to be installed for the environment before analysis.
-ITS-step02-processing.sh: These scripts handle data preparation during the initial stage.
-ITS-step03-qiime2.sh: This script is used for sequencing data analysis
+## Key Outcomes
 
+We have organised the key outcomes generated from Qiime2 during the ITS1 sequencing process into separate sub-folders:
 
-We have organised the key outcomes generated from Qiime2, where is it from the ITS1 sequencing process, into separate sub-folders.
-1. [Qiime2]DADA2_outcomes - These outcomes were processed by DADA2 and are now ready for mapping to reference database, here for UNITE Version 9
-- rep-seqs-its.qza
-- stats-its.qza
-- table-its.qza
-
-2. [Qiime2]UNITE_9 - These outcomes correspond to UNITE Version 9
- - rep-seqs-its-fungi-with-phyla-no-mitochondria-no-chloroplast.qza
- - table-its-fungi-with-phyla-no-mitochondria-no-chloroplast.qza
- - taxonomy-fungi.qza
+1.  **[Qiime2]DADA2_outcomes**:
+    
+    -   These outcomes were processed by DADA2 and are now ready for mapping to reference databases (specifically UNITE Version 9).
+    -   Files:
+        -   `rep-seqs-its.qza`: Processed representative sequences.
+        -   `stats-its.qza`: Statistical summary of the data.
+        -   `table-its.qza`: Processed feature table.
+2.  **[Qiime2]UNITE_9**:
+    
+    -   These outcomes correspond to UNITE Version 9.
+    -   Files:
+        -   `rep-seqs-its-fungi-with-phyla-no-mitochondria-no-chloroplast.qza`: Fungal representative sequences.
+        -   `table-its-fungi-with-phyla-no-mitochondria-no-chloroplast.qza`: Fungal feature table.
+        -   `taxonomy-fungi.qza`: Taxonomic assignments for fungal sequences.
