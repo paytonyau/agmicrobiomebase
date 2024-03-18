@@ -55,19 +55,19 @@ This repository contains procedural information and scripts for the analysis of 
 
 #### 3. Preparation and mapping of **amplicon sequence data for submission to ENA using standard templates** for intercative submission via the WebinPortal ([https://www.ebi.ac.uk/ena/submit/webin/login](https://www.ebi.ac.uk/ena/submit/webin/login))
 
-- ENA-upload-procedure.md
+- [ENA-upload-procedure.md](amplicon-sequence-analysis/Fastq_checklist_mapping/fastq_checklist_mapping.md)
 
-- ENA sample template example for one crop
+- [ENA sample template example for one crop](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/Fastq_checklist_mapping/Checklist_GSC-MIxS_16Samplicons_OR_TESTv1.tsv)
 
 - ENA fastq template example for one crop
 
-- ENA ERS output exmaple file for one crop
+- [ENA ERS output exmaple file for one crop](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/Fastq_checklist_mapping/Webin-accessions-2023-12-07T15_42_52.222Z.txt)
 
 - [R markdown](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/Fastq_checklist_mapping/fastq_checklist_mapping.Rmd): describing all processing steps to map ERS numbers from sample uplaods to fastq template
 
-- [R-code](): to map ERS numbers from sample uplaods to fastq template
+- [R-code](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/Fastq_checklist_mapping/fastq_checklist_mapping.R): to map ERS numbers from sample uplaods to fastq template
 
-- README.md
+- [README.md](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/Fastq_checklist_mapping/README.md)
 
 #### 4. **Pre-processing of metagenomic sequence data**
 
