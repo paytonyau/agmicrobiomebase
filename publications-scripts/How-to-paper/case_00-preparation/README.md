@@ -1,6 +1,6 @@
 # Preparation and Analysis Scripts for Microbiome Data
 
-This directory is dedicated to the analysis of microbiome sequencing data. It contains R scripts and corresponding documentation for three distinct analyses. Each analysis serves a unique purpose and is crucial for ensuring the quality and integrity of the data before any downstream analysis. Here’s a brief overview of the three analyses:
+This directory contains R scripts for three analyses for the purpose of the data optimisation and standardisation. Each analysis serves a unique purpose and is crucial for ensuring the quality and integrity of the data. Here’s a brief overview of the three analyses:
 1.  **Trimming and Optimal Sequence Length Selection**: Determining the longest sequence length that maximizes quality and minimizes error rates.
 2.  **Comparative Analysis of Taxonomic Levels of Reference Databases**: Aggregating matched hits by names to consolidate ASVs and analyze taxonomic levels from Kingdom to Species.
 3.  **Batch Effect Correction and Normalisation**: Correcting for batch effects to ensure consistent and accurate data across different sequencing runs.
