@@ -6,11 +6,12 @@ In this repository, it contains Internal Transcribed Spacer (ITS) amplicon seque
 
 -   **ITS Sequencing Process**: The  `ITS-sequencing-process.md`  file explains the entire workflow for 16S amplicon sequencing. It covers data preparation, quality control, and downstream analysis steps.
     
--   **Scripts and Shell Files**:
+-   **Shell Script and the meta-table**:
     
     -   `ITS-step01-startup.sh`: A shell script that sets up the necessary environment by installing required packages.
     -   `ITS-step02-processing.sh`: These scripts handle data preparation during the initial stage of analysis.
     -   `ITS-step03-qiime2.sh`: This script performs the actual sequencing data analysis using Qiime2.
+    -   `ITS-meta-table.txt`: A metadata table that contains information about the samples used in the analysis. It includes details such as sample IDs, sample types, and other relevant characteristics.
 
 ## Key Outcomes
 

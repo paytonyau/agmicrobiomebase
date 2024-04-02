@@ -1,6 +1,27 @@
 #!/bin/bash
 
-# STEP 3
+# 02/04/2024 - Payton Yau
+
+# List of required files:
+# 1. manifest.csv: CSV file that follows a specific format required by QIIME2
+# 2. silva-138-99-nb-classifier.qza: Classifier for feature-classifier
+
+# List of output files:
+# 1. demux.qza: Output from the qiime tools import command
+# 2. demux.qzv: Visualization of the demultiplexed data
+# 3. primer-trimmed-demux.qza: Output from the qiime cutadapt trim-paired command
+# 4. primer-trimmed-demux.qzv: Visualization of the primer-trimmed data
+# 5. 428_228_220_rep-seqs.qza, 428_228_220_table.qza, 428_228_220_stats.qza: Outputs from the qiime dada2 denoise-paired command
+# 6. 428_228_220_taxonomy_silva138.qza: Output from the qiime feature-classifier classify-sklearn command
+# 7. 428_228_220_taxonomy_silva138.qzv: Visualization of the taxonomy
+# 8. 428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza: Filtered table from the qiime taxa filter-table command
+# 9. 428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza: Filtered sequences from the qiime taxa filter-seqs command
+# 10. 428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qzv: Visualization of the representative sequence
+# 11. table-exported: Directory containing the exported BIOM file
+# 12. sequences: Directory containing the exported FASTA file
+# 13. picrust2_out_pipeline: Output directory from the picrust2_pipeline.py command
+
+# Start of the script
 # Activate the environment 
 # You can activate this conda environment with this command (you may need to swap in source for conda if you get an error):
 

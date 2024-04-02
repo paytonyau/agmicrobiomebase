@@ -1,3 +1,7 @@
+# The influence of soil type (Sugarbeet vs Bulksoil)
+## Author : Payton Yau
+## Date : 02-04-2024
+
 Sugar beet, a member of the Brassica family, is cultivated in the United
 Kingdom and other regions for its tuber, which is rich in sucrose. In
 our study, we specifically examined this single crop type to understand
@@ -6,6 +10,16 @@ rhizosphere effect, which involves the selection of specific soil
 microbiota members. To do this, we compared the diversity of the sugar
 beet rhizosphere with that of a no-plant control of bulk soil.
 
+
+
+### Load the previously saved data
+
+    load("norm.RData") # load physeq.norm
+
+
+The "norm.RData" object contains the normalised data for the analyses which is from the case study 00 - preparation and the file can be found from https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_00_02_RData
+
+
 ### Load the tidyverse and reshape2 libraries
 
     # install.packages("tidyverse")
@@ -13,9 +27,6 @@ beet rhizosphere with that of a no-plant control of bulk soil.
     library("reshape2") # reshape2 is for data reshaping
     library("phyloseq")
 
-### Load the previously saved data
-
-    load("norm.RData") # load physeq.norm
 
 ### Extract Sugarbeet and Bulk Soil groups
 

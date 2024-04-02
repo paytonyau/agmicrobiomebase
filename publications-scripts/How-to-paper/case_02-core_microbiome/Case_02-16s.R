@@ -6,8 +6,28 @@
 # sugar beet, in natural conditions across various soils. 
 # This approach helps understand real-world microbial interactions in the rhizosphere.
 
-library("RColorBrewer")
+# The output from the script:
+# (1) Bar Plot of Top 10 Taxa at Family Level:
+# A bar plot displaying the proportion of the top 10 taxa at the family level in each sample, 
+# colored by soil location.
 
+# (2) UpSet Plot: 
+# An UpSet plot showing the intersection of taxa presence/absence across different soil locations. 
+# This plot provides insights into shared and unique taxa among soil locations.
+
+# (3) Venn Diagram:
+# A Venn diagram illustrating the overlap of taxa between different soil locations.
+
+
+# load the required package
+library("RColorBrewer")
+library("phyloseq")
+library("ggplot2")
+
+# The `physeq.Sugarbeet.group.RData` originally saved from the case study 1. The RData can also be found from 
+# https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_00_02_RData
+
+# The "physeq.Sugarbeet.group.RData" object contains the normalised data for the analyses.
 load("physeq.Sugarbeet.group.RData")
 
 ##### Plotting the top 10 taxa at family level #####

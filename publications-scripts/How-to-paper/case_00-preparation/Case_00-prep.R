@@ -10,7 +10,7 @@
 # It assists in trimming out sequences of lower quality and minimises the error rate for the sequence analysis steps in DADA2. 
 # This process is part of the events in preprocessing and to prevent “over-merging”.
 
-# The data extracted from "rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qzv"
+# To obtain the data for the merged sequence length, we used the parameter below 
 
 # The denoise setting is
 # qiime dada2 denoise-paired \
@@ -22,19 +22,26 @@
 #   --p-max-ee-f 3 \
 #   --p-max-ee-r 2 \
 #   --p-n-threads 8 \
-#   --o-representative-sequences rep-seqs.qza \
-#   --o-table table.qza
+#   --o-representative-sequences rep-seqs_233_226_3_2.qza \
+#   --o-table table_233_226_3_2.qza
+
+# Then, after some filtering steps in removing mitochondria and chloroplast
+# We have "rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qza" and obtain 
+# "rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qzv"
+
+# qiime feature-table tabulate-seqs \
+# --i-data rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qza \
+# --o-visualization rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qzv
+
+# You can use https://view.qiime2.org/ to view and extract the merged sequence data.
+# Here, we load the data from the .RData object, 
+# and you can use the command below to load the merged sequence data.
+
+load("16s_length_distribution.RData")
 
 # Load the necessary libraries
 library("ggplot2")     
 library("scales")     
-
-# Unzip your file
-unzip("16s_length_distribution.zip") # This zipped file contains the full list of the merged sequences for ASVs.
-
-# Read the data
-# This step reads the data from the .tsv file into a data frame
-df = read.csv("16s_length_distribution.tsv", header = T, sep = ",")
 
 # Calculate the length of each sequence
 # This step adds a new column to the data frame that contains the length of each sequence
@@ -124,6 +131,9 @@ genus_levels <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Spe
 
 # Define the datasets and paths
 # We compared GreenGene v.1 (13.8), GreenGene v.2 (2022.10), and Silva v.138 reference databases.
+# Briefly, we first used DADA2 to obtain the merged information 
+# This can be followed by the 16s amplicon-sequence-analysis guide 
+# https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-sequence-analysis.md
 
 dataset_info <- list(
   list(  # GreenGenes 1
@@ -201,9 +211,10 @@ for (dataset in dataset_info) {
   rm(gentab_levels, observationThreshold, BB, B2)
 }
 
+# The outputs of the corresponding reference databases are stored at 
+# https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_00-preparation/case00A-ref_databases_outputs
 
-
-## Data Visualization
+## Data Visualisation
 # Load the reshape2 and ggplot2 libraries
 library(reshape2)
 library(ggplot2)

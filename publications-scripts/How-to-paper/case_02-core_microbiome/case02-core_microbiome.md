@@ -11,6 +11,9 @@ microbial interactions in the rhizosphere.
 
     load("physeq.Sugarbeet.group.RData")
 
+The `physeq.Sugarbeet.group.RData` originally saved from the case study 1. The RData can also be found from 
+https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_00_02_RData
+
 ### Plotting the top 10 taxa at family level
 
 Plotting the top 10 taxa at the family level offers a clear and concise

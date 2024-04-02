@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# 02/04/2024 - Payton Yau
+
+# List of required files/software:
+# 1. FastQC: Quality control tool for high throughput sequence data
+# 2. MultiQC: Tool to aggregate results from bioinformatics analyses across many samples into a single report
+# 3. Trimmomatic: Flexible read trimming tool for Illumina sequence data
+# 4. FIGARO: Software for estimating the truncation parameters for the QIIME2 DADA2 plugin
+# 5. QIIME2: Microbiome bioinformatics platform for flexible and reproducible microbial analysis
+# 6. Input files: .fastq.gz files for analysis
+# 7. Manifest file: Text file listing all the files for analysis
+# 8. CSV file: CSV file generated from the manifest file for QIIME2
+
 # STEP 1
 # Examine all the fastq files using FastQC and consolidate the results into a single report with the help of MultiQC
 # This procedure is designed to visualise the quality of sequences and any remaining adaptors in each individual fastq file.

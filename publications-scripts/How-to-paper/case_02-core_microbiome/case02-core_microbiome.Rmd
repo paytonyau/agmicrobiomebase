@@ -15,6 +15,9 @@ library("phyloseq")
 library("ggplot2")
 ```
 
+The `physeq.Sugarbeet.group.RData` originally saved from the case study 1. The RData can also be found from 
+https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_00_02_RData
+
 ```{r load, warning=FALSE, message=FALSE}
 load("physeq.Sugarbeet.group.RData")
 ```

@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# 02/04/2024
+# List of required packages/software:
+# 1. Anaconda or Miniconda
+# 2. fastqc
+# 3. multiqc
+# 3. Trimmomatic
+# 4. 16s-step01-figaro.yml
+# 5. FIGARO
+# 6. QIIME2
+
 # To perform a sequencing analysis on the 16S amplicon data from the UK Crop Microbiome Cryobank, it is necessary to prepare a Linux environment with specific pre-installed packages. These packages, crucial for processing sequencing data, encompass a range of tools for quality control, sequence alignment, taxonomic classification, and diversity analysis. Prior to initiating the analysis, ensure that your system is equipped with all the necessary packages to facilitate a seamless and successful analysis.
 
 # Install Anaconda / Miniconda
@@ -22,9 +32,9 @@ conda install -c conda-forge trimmomatic
 # Note that Java may need to be installed before the run.
 
 # Install FIGARO
-# FIGARO is a software that assists in estimating the truncation parameters for the QIIME2 DADA2 plugin. A pre-print detailing its usage is readily available. The detailed process for installing the software can be found on the author’s GitHub page. Further guidance is provided in John Quensen’s tutorial.
+# FIGARO is a software that assists in estimating the truncation parameters for the QIIME2 DADA2 plugin. A pre-print detailing its usage is readily available. The detailed process for installing the software can be found on the author’s GitHub page. 
 
-wget http://john-quensen.com/wp-content/uploads/2020/03/figaro.yml
+wget https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-step01-figaro.yml
 conda env create -n figaro -f figaro.yml
 git clone https://github.com/Zymo-Research/figaro.git
 unzip master.zip

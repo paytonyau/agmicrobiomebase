@@ -1,7 +1,7 @@
 ---
 title: "The UK Crop Microbiome Cryobank - How-to Guide: sequence length selection & taxonomic Levels of reference databases"
 author: "Payton Yau"
-date: "2024-03-17"
+date: "2024-04-02"
 output: md_document
 ---
 
@@ -11,7 +11,7 @@ output: md_document
 ## Trimming and optimal sequence length selection.
 We used the longest possible length to find the highest accumulated percentage of the merged sequence length frequency. It assists in trimming out sequences of lower quality and minimises the error rate for the sequence analysis steps in DADA2. This process is part of the events in preprocessing and to prevent “over-merging”.
 
-The denoise setting is for DADA2: 
+The denoise setting is
 qiime dada2 denoise-paired \
   -i-demultiplexed-seqs demux.qza \
   --p-trunc-len-f 233 \
@@ -21,10 +21,19 @@ qiime dada2 denoise-paired \
   --p-max-ee-f 3 \
   --p-max-ee-r 2 \
   --p-n-threads 8 \
-  --o-representative-sequences rep-seqs.qza \
-  --o-table table.qza
+  --o-representative-sequences rep-seqs_233_226_3_2.qza \
+  --o-table table_233_226_3_2.qza
 
-The original "16s_length_distribution.RData" extracted from "rep-seqs-with-phyla-no-mitochondria-no-chloroplast.qzv"
+Then, after some filtering steps in removing mitochondria and chloroplast
+We have "rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qza" and obtain 
+"rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qzv"
+
+qiime feature-table tabulate-seqs \
+ --i-data rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qza \
+ --o-visualization rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qzv
+
+Then, you can use https://view.qiime2.org/ to view and extract the merged sequence data.
+Here, we load the data from the .RData object, and you can use the command below to load the merged sequence data.
 
 ```{r install_load.data, warning=FALSE, message=FALSE}
 # Load the necessary libraries
@@ -131,6 +140,10 @@ genus_levels <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Spe
 
 # Define the datasets and paths
 # We compared GreenGene v.1 (13.8), GreenGene v.2 (2022.10), and Silva v.138 reference databases.
+# Briefly, we first used DADA2 to obtain the merged information 
+# This can be followed by the 16s amplicon-sequence-analysis guide 
+# https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/16s-sequence-analysis.md
+# Then, we used 3 different reference databases to obtain the sequence information
 
 dataset_info <- list(
   list(  # GreenGenes 1
@@ -150,6 +163,17 @@ dataset_info <- list(
   )
 )
 ```
+
+The outputs of the corresponding reference databases:
+
+- level_counts_by_group_silva138.csv
+- level_counts_by_group_gg2.csv
+- level_counts_by_group_gg1.csv
+
+The information can be found at the URL below:
+
+https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_00-preparation/case00A-ref_databases_outputs
+
 
 ### Data Processing and Analysis
 

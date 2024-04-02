@@ -8,7 +8,6 @@
 
 
 # Install and load the required packages for the conversion
-# Uncomment the lines to install the packages if not already installed
 # install.packages("devtools")
 # devtools::install_github("jbisanz/qiime2R")
 library("qiime2R")
@@ -22,6 +21,16 @@ library("tidyverse")
 
 # install.packages("ggpubr")
 library("ggpubr")
+
+# The required input files are below 
+# table-its-fungi-with-phyla-no-mitochondria-no-chloroplast.qza
+# phylogeny-align-to-tree-mafft-fasttree/rooted_tree.qza
+# taxonomy-fungi.qza
+# ITS-meta-table.txt
+# and those data can be found from 
+# https://github.com/paytonyau/agmicrobiomebase/tree/main/amplicon-sequence-analysis/amplicon-ITS/%5BQiime2%5DDADA2_outcomes
+# https://github.com/paytonyau/agmicrobiomebase/tree/main/amplicon-sequence-analysis/amplicon-ITS/%5BQiime2%5DUNITE_9
+
 
 # The conversion of Qiime2 to Phyloseq datastructure
 # Convert qiime2 to phyloseq format
@@ -238,8 +247,8 @@ ggplot(data_long, aes(x = Level, y = Taxa,
   scale_y_continuous(breaks=seq(0,400,by=100))
 
 # Clean up by removing unnecessary objects
-rm(physeq, gentab_levels, observationThreshold, B2, data_long, genfac, genus_levels, level, level_counts)
-
+rm(physeq, gentab_levels, observationThreshold, 
+   B2, data_long, genfac, genus_levels, level, level_counts)
 
 ##### Upset plot using UpsetR #####
 

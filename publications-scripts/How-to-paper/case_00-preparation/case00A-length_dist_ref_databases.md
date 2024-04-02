@@ -8,27 +8,42 @@ trimming out sequences of lower quality and minimises the error rate for
 the sequence analysis steps in DADA2. This process is part of the events
 in preprocessing and to prevent “over-merging”.
 
-The denoise setting is for DADA2: qiime dada2 denoise-paired  
--i-demultiplexed-seqs demux.qza  
-–p-trunc-len-f 233  
-–p-trunc-len-r 226  
-–p-trim-left-f 0  
-–p-trim-left-r 0  
-–p-max-ee-f 3  
-–p-max-ee-r 2  
-–p-n-threads 8  
-–o-representative-sequences rep-seqs.qza  
-–o-table table.qza
+To obtain the data for the merged sequence length, we used the parameter below 
 
-The original “16s\_length\_distribution.RData” extracted from
-“rep-seqs-with-phyla-no-mitochondria-no-chloroplast.qzv”
+The denoise setting is for DADA2: 
+```qiime dada2 denoise-paired  
+   -i-demultiplexed-seqs demux.qza \
+   --p-trunc-len-f 233 \
+   --p-trunc-len-r 226 \
+   --p-trim-left-f 0 \
+   --p-trim-left-r 0 \
+   --p-max-ee-f 3 \
+   --p-max-ee-r 2 \
+   --p-n-threads 8 \
+   --o-representative-sequences rep-seqs_233_226_3_2.qza \
+   --o-table table_233_226_3_2.qza
+   ```
+
+Then, after some filtering steps in removing mitochondria and chloroplast
+We have ```rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qza``` and obtain 
+```rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qzv```
+
+```
+qiime feature-table tabulate-seqs \
+   --i-data rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qza \
+   --o-visualization rep-seqs_233_226_3_2-with-phyla-no-mitochondria-no-chloroplast.qzv
+```
+
+You can use https://view.qiime2.org/ to view and extract the merged sequence data.
+Here, we load the data from the .RData object,  and you can use the command below to load the merged sequence data. The [```16s_length_distribution.RData```](https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_00_02_RData/16s_length_distribution.RData) can be found from https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper .
+
+    # Load the merged sequence data
+    load("16s_length_distribution.RData")
 
     # Load the necessary libraries
     library("ggplot2")     
     library("scales")     
 
-    # Load the merged sequence data
-    load("16s_length_distribution.RData")
 
 ### Calculate the length and frequency of each sequence
 

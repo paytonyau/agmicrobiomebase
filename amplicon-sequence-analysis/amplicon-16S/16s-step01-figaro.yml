@@ -1,3 +1,5 @@
+# This is the figaro.yml file originally retrieved from http://john-quensen.com/wp-content/uploads/2020/03/figaro.yml
+
 name: figaro
 channels:
   - bioconda

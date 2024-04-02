@@ -1,6 +1,6 @@
 ## The influence of soil type (Sugarbeet vs Bulksoil)
 ## Author : Payton Yau
-## Date : 12-03-2024
+## Date : 02-04-2024
 
 # Sugar beet, a member of the brassica family, 
 # is cultivated in the UK and other regions for its tuber, which is rich in sucrose. 
@@ -8,13 +8,16 @@
 # To investigate the rhizosphere effect, which refers to the selection of specific members from the source soil microbiota, 
 # we compared the diversity of the sugar beet rhizosphere to that of a no-plant control of bulk soil.
 
+
+# The "norm.RData" object contains the normalised data for the analyses which is from the case study 00 - preparation and the file can be found from https://github.com/paytonyau/agmicrobiomebase/tree/main/publications-scripts/How-to-paper/case_00_02_RData
+
+load("norm.RData") # load physeq.norm
+
 # Load the tidyverse and reshape2 libraries for data manipulation
 # tidyverse includes several packages for data manipulation and visualisation
 # reshape2 is for data reshaping
 library("tidyverse")
 library("reshape2")
-
-load("norm.RData") # load physeq.norm
 
 # Subset the phyloseq object to include only samples of type "Sugarbeet" and "Bulksoil"
 physeq.SU <- physeq.norm %>% subset_samples(Type %in% c("Sugarbeet", "Bulksoil"))
@@ -326,4 +329,3 @@ print(results_df)
 
 # Save the "physeq.Sugarbeet.group" object for the other case study analysis
 save(physeq.Sugarbeet.group, file = "physeq.Sugarbeet.group.RData")
-

@@ -10,16 +10,17 @@ In the  **16S Amplicon Sequencing Analysis**  sub-folder, contains information a
 -   **Scripts and Shell Files**:
     
     -   `16s-step01-startup.sh`: A shell script that sets up the necessary environment by installing required packages.
+    -   `16s-step01-figaro.yml`: : A YAML file for setting up the `figaro` conda environment with necessary packages.
     -   `16s-step02-processing.sh`: These scripts handle data preparation during the initial stage of analysis.
     -   `16s-step03-qiime2.sh`: This script performs the actual sequencing data analysis using Qiime2.
 
 ## Key Outcomes
 
-We have  organised the key outcomes generated from Qiime2 during the 16S sequencing process into separate sub-folders:
+We have organised the key outcomes generated from Qiime2 during the 16S sequencing process into separate sub-folders:
 
 1.  **[Qiime2]DADA2_outcomes**:
     
-    -   These outcomes were processed by DADA2 and are now ready for mapping to reference databases (such as GreenGenes and Silva).
+    -   These outcomes were processed by DADA2 and for reference databases mapping (such as GreenGenes and Silva).
     -   Files:
         -   `428_228_220_rep-seqs.qza`: Processed representative sequences.
         -   `428_228_220_stats.qza`: Statistical summary of the data.
