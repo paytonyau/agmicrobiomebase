@@ -334,9 +334,9 @@ qiime dada2 denoise-paired \
 > - primer-trimmed-demux.qza
 > 
 > Output files:
-> - [428_228_220_rep-seqs.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DDADA2_outcomes/428_228_220_rep-seqs.qza)
-> - [428_228_220_table.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DDADA2_outcomes/428_228_220_table.qza)
-> - [428_228_220_stats.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DDADA2_outcomes/428_228_220_stats.qza)
+> - [428_228_220_rep-seqs.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DDADA2_outputfiles/428_228_220_rep-seqs.qza)
+> - [428_228_220_table.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DDADA2_outputfiles/428_228_220_table.qza)
+> - [428_228_220_stats.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DDADA2_outputfiles/428_228_220_stats.qza)
 
 > ###### - 428: Represents the longest combined biologically meaningful read, denoted as 428nt.
 > ###### - 228: The trimming position for the forward reads, denoted as 228nt.
@@ -370,10 +370,10 @@ qiime feature-classifier classify-sklearn \
 
 > Input files:
 > - [silva-138-99-nb-classifier.qza](https://data.qiime2.org/2024.2/common/silva-138-99-nb-classifier.qza)
-> - [428_228_220_rep-seqs.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DDADA2_outcomes/428_228_220_rep-seqs.qza)
+> - [428_228_220_rep-seqs.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DDADA2_outputfiles/428_228_220_rep-seqs.qza)
 > 
 > Output file:
-> - [428_228_220_taxonomy_silva138.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138/428_228_220_taxonomy_silva138.qza)
+> - [428_228_220_taxonomy_silva138.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138_outputfiles/428_228_220_taxonomy_silva138.qza)
 
 Here is the elements and the explainations that we used for the `qiime feature-classifier classify-sklearn` step:
 
@@ -395,7 +395,7 @@ qiime metadata tabulate \
 ```
 
 > Input file:
-> - [428_228_220_taxonomy_silva138.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138/428_228_220_taxonomy_silva138.qza)
+> - [428_228_220_taxonomy_silva138.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138_outputfiles/428_228_220_taxonomy_silva138.qza)
 
 > Output file:
 > - 428_228_220_taxonomy_silva138.qzv
@@ -417,11 +417,11 @@ qiime taxa filter-table \
   --o-filtered-table 428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza
 ```
 > Input files:
-> - [428_228_220_table.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DDADA2_outcomes/428_228_220_table.qza)
-> - [428_228_220_taxonomy_silva138.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138/428_228_220_taxonomy_silva138.qza)
+> - [428_228_220_table.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DDADA2_outputfiles/428_228_220_table.qza)
+> - [428_228_220_taxonomy_silva138.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138_outputfiles/428_228_220_taxonomy_silva138.qza)
 >
 > Output files:
-> - [428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138/428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza)
+> - [428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138_outputfiles/428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza)
 
 ```
 qiime taxa filter-seqs \
@@ -433,11 +433,11 @@ qiime taxa filter-seqs \
   ```
 
 > Input files:
-> - [428_228_220_rep-seqs.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DDADA2_outcomes/428_228_220_rep-seqs.qza)
-> - [428_228_220_taxonomy_silva138.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138/428_228_220_taxonomy_silva138.qza)
+> - [428_228_220_rep-seqs.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DDADA2_outputfiles/428_228_220_rep-seqs.qza)
+> - [428_228_220_taxonomy_silva138.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138_outputfiles/428_228_220_taxonomy_silva138.qza)
 > 
 > Output files:
-> - [428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138/428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza)
+> - [428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138_outputfiles/428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza)
 
 ### Visualise the Representative Sequence
 ```
@@ -446,7 +446,7 @@ qiime metadata tabulate \
   --o-visualization 428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qzv
 ```
 > Input files:
-> - [428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138/428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza)
+> - [428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza](https://github.com/paytonyau/agmicrobiomebase/blob/main/amplicon-sequence-analysis/amplicon-16S/%5BQiime2%5DSilva_138_outputfiles/428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qza)
 > 
 > Output files:
 > - 428_228_220_rep-seqs_silva138-with-phyla-no-mitochondria-no-chloroplast.qzv

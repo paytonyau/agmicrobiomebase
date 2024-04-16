@@ -13,18 +13,18 @@ In this repository, it contains Internal Transcribed Spacer (ITS) amplicon seque
     -   `ITS-step03-qiime2.sh`: This script performs the actual sequencing data analysis using Qiime2.
     -   `ITS-meta-table.txt`: A metadata table that contains information about the samples used in the analysis. It includes details such as sample IDs, sample types, and other relevant characteristics.
 
-## Key Outcomes
+## Key outputs
 
 We have organised the key outcomes generated from Qiime2 during the ITS1 sequencing process into separate sub-folders:
 
-1.  **[Qiime2]DADA2_outcomes**:
+1.  **[Qiime2]DADA2_outputfiles**:
     
     -   These outcomes were processed by DADA2 and are now ready for mapping to reference databases (specifically UNITE Version 9).
     -   Files:
         -   `rep-seqs-its.qza`: Processed representative sequences.
         -   `stats-its.qza`: Statistical summary of the data.
         -   `table-its.qza`: Processed feature table.
-2.  **[Qiime2]UNITE_9**:
+2.  **[Qiime2]UNITE_9_outputfiles**:
     
     -   These outcomes correspond to UNITE Version 9.
     -   Files:

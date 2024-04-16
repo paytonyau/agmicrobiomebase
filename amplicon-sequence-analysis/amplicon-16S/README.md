@@ -14,18 +14,18 @@ In the  **16S Amplicon Sequencing Analysis**  sub-folder, contains information a
     -   `16s-step02-processing.sh`: These scripts handle data preparation during the initial stage of analysis.
     -   `16s-step03-qiime2.sh`: This script performs the actual sequencing data analysis using Qiime2.
 
-## Key Outcomes
+## Key Outputfiles
 
 We have organised the key outcomes generated from Qiime2 during the 16S sequencing process into separate sub-folders:
 
-1.  **[Qiime2]DADA2_outcomes**:
+1.  **[Qiime2]DADA2_outputfiles**:
     
     -   These outcomes were processed by DADA2 and for reference databases mapping (such as GreenGenes and Silva).
     -   Files:
         -   `428_228_220_rep-seqs.qza`: Processed representative sequences.
         -   `428_228_220_stats.qza`: Statistical summary of the data.
         -   `428_228_220_table.qza`: Processed feature table.
-2.  **[Qiime2]Silva_138**:
+2.  **[Qiime2]Silva_138_outputfiles**:
     
     -   These outcomes correspond to Silva version 138, post-DADA2 processing.
     -   Files:
