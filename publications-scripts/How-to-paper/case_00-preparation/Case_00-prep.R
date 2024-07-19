@@ -371,18 +371,20 @@ plot_ordination(
 ) +
   theme_classic() +
   geom_point(aes(color = Plate), alpha = 1, size = 3.5) +
+  stat_ellipse(aes(color = Plate, group = Plate), geom = "path", alpha = 1.5) + # Add ellipses
   theme(
-    text = element_text(size = 18, colour = "black"),
+    text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
     axis.line = element_line(colour = 'black', size = 1.1),
-    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
-    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
-    axis.title.y = element_text(color = "black", size = 20, face = "bold"),
-    axis.title.x = element_text(color = "black", size = 20, face = "bold")
-  ) +
-  scale_color_brewer(palette = "Dark2") +
-  scale_fill_brewer(palette = "Dark2") +
-  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
+    axis.title.x = element_text(color = "black", size = 20, face = "bold")) + 
+  scale_color_brewer(palette = "Dark2") + 
+  scale_fill_brewer(palette = "Dark2") + 
+  scale_shape_manual(values = c(15, 17, 3, 4, 16, 21, 22, 23)) # Set custom shapes
 
 # Beta diversity analysis - based on Plate and Type - after the normalisation
 # ordinate function performs NMDS ordination on the normalized phylogenetic sequence data (physeq.norm) using Bray-Curtis dissimilarity.
@@ -402,18 +404,20 @@ plot_ordination(
 ) +
   theme_classic() +
   geom_point(aes(color = Plate), alpha = 1, size = 3.5) +
+  stat_ellipse(aes(color = Plate, group = Plate), geom = "path", alpha = 1.5) + # Add ellipses
   theme(
-    text = element_text(size = 18, colour = "black"),
+    text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
     axis.line = element_line(colour = 'black', size = 1.1),
-    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
-    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, size = 13, face = "bold"),
-    axis.title.y = element_text(color = "black", size = 20, face = "bold"),
-    axis.title.x = element_text(color = "black", size = 20, face = "bold")
-  ) +
-  scale_color_brewer(palette = "Dark2") +
-  scale_fill_brewer(palette = "Dark2") +
-  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
+    axis.text.x = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
+    axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, 
+                               size = 13, face = "bold"),
+    axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
+    axis.title.x = element_text(color = "black", size = 20, face = "bold")) + 
+  scale_color_brewer(palette = "Dark2") + 
+  scale_fill_brewer(palette = "Dark2") + 
+  scale_shape_manual(values = c(15, 17, 3, 4, 16, 21, 22, 23)) # Set custom shapes
 
 ##### Extract abundance matrix from the phyloseq object #####
 OTU1 = as(otu_table(physeq.norm), "matrix")

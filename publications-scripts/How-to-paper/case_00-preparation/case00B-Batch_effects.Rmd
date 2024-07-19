@@ -16,27 +16,30 @@ The UK Crop Microbiome Cryobank integrates genomic (DNA) data with a cryobank co
 `Qiime2` is a microbial community analysis tool used for sequencing analysis, while `Phyloseq` is an R package for analyzing high-throughput sequencing data. The `Qiime2R` package allows conversion of `Qiime2` data to `Phyloseq` within R. R enhances features through external packages from sources like CRAN, Bioconductor, and GitHub. After installation, packages must be loaded into the R session using the **library()** function.Once data is imported, Phyloseq enables data manipulation, analysis, and visualization. This conversion leverages R's analysis tools like ggplot2 for visualization, dplyr for data manipulation, and vegan for ecological community analysis.
 
 ```{r packages, warning=FALSE, message=FALSE}
-# Download qiime2R from Github
-# if (!requireNamespace("devtools", quietly = TRUE)){install.packages("devtools")}
-# devtools::install_github("jbisanz/qiime2R")
-library("qiime2R")
-
 # Download phyloseq from Bioconductor
 # if (!require("BiocManager", quietly = TRUE))
 #   install.packages("BiocManager")
 # BiocManager::install("phyloseq")
 library("phyloseq")
 
+# Download qiime2R from Github
+# if (!requireNamespace("devtools", quietly = TRUE)){install.packages("devtools")}
+# devtools::install_github("jbisanz/qiime2R")
+library("qiime2R")
+
 # install.packages("RColorBrewer")
 library("RColorBrewer")
+
+# install.packages("doParallel")
+library("doParallel")
 ```
 
 ```{r qiime2R, warning=FALSE, message=FALSE}
 # Convert qiime2 results to phyloseq format
 physeq <- qza_to_phyloseq(
-  features = "~/005A_SRUC_B/01_UK_CryoBank/GitHub/agmicrobiomebase-main/amplicon-sequence-analysis/amplicon-16S/[Qiime2]Silva_138/428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
-  taxonomy = "~/005A_SRUC_B/01_UK_CryoBank/GitHub/agmicrobiomebase-main/amplicon-sequence-analysis/amplicon-16S/[Qiime2]Silva_138/428_228_220_taxonomy_silva138.qza",
-  metadata = "16s_meta-table.txt"
+  features = "C:/Users/Admin/OneDrive/Desktop/temp/428_228_220_table_silva138-with-phyla-no-mitochondria-no-chloroplast.qza", # table.qza
+  taxonomy = "C:/Users/Admin/OneDrive/Desktop/temp/428_228_220_taxonomy_silva138.qza",
+  metadata = "C:/Users/Admin/OneDrive/Desktop/temp/16s_meta-table.txt"
   #, tree = "rooted-tree.qza"
 )
 
@@ -65,10 +68,6 @@ Constrained Quantile Normalisation (ConQUR, <https://www.nature.com/articles/s41
 ```{r ConQuR_install, warning=FALSE, message=FALSE}
 # devtools::install_github("wdl2459/ConQuR")
 library(ConQuR)
-
-# Download phyloseq from CRAN
-# install.packages("doParallel")
-library(doParallel)
 ```
 
 ```{r ConQuR_run, warning=FALSE, message=FALSE}
@@ -104,6 +103,10 @@ sampledata = sample_data(physeq.ori)
 # repack the objects into a level 4 phyloseq structural data
 physeq.norm = phyloseq(ASV, TAXA, sampledata)
 
+# Save the "physeq.norm" object for the other case study analysis
+# save(physeq.norm, file = "norm.RData")
+# load("C:/Users/Admin/OneDrive/Desktop/temp/norm.RData")
+
 # remove
 rm(B, D, batchid, taxa_correct1, taxa_correct2, ASV, TAXA, sampledata, to_skip)
 ```
@@ -131,7 +134,6 @@ library("ggpubr")
 
 ```{r Beta_1, warning=FALSE, message=FALSE}
 # method options: NMDS / PCoA
-
 NMDS1 <- ordinate(physeq = physeq.ori, 
                   method = "NMDS", 
                   distance = "bray"
@@ -145,6 +147,7 @@ plot_ordination(physeq = physeq.ori,
                       ) + 
   theme_classic() + 
   geom_point(aes(color = Plate), alpha = 1, size = 3.5) +
+  stat_ellipse(aes(color = Plate, group = Plate), geom = "path", alpha = 1.5) + # Add ellipses
   theme(
     text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
@@ -157,7 +160,7 @@ plot_ordination(physeq = physeq.ori,
     axis.title.x = element_text(color = "black", size = 20, face = "bold")) + 
   scale_color_brewer(palette = "Dark2") + 
   scale_fill_brewer(palette = "Dark2") + 
-  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
+  scale_shape_manual(values = c(15, 17, 3, 4, 16, 21, 22, 23)) # Set custom shapes
 
 ```
 
@@ -179,6 +182,7 @@ plot_ordination(physeq = physeq.norm,
                 ) +
   theme_classic() + 
   geom_point(aes(color = Plate), alpha = 1, size = 3.5) +
+  stat_ellipse(aes(color = Plate, group = Plate), geom = "path", alpha = 1.5) + # Add ellipses
   theme(
     text = element_text(size = 18, colour = "black"), 
     axis.ticks = element_line(colour = "black", size = 1.1),
@@ -188,11 +192,11 @@ plot_ordination(physeq = physeq.norm,
     axis.text.y = element_text(colour = "black", angle = 0, hjust = 0.5, 
                                size = 13, face = "bold"),
     axis.title.y = element_text(color = "black", size = 20, face = "bold"), 
-    axis.title.x = element_text(color = "black", size = 20, face = "bold")
-  ) + 
+    axis.title.x = element_text(color = "black", size = 20, face = "bold")) + 
   scale_color_brewer(palette = "Dark2") + 
   scale_fill_brewer(palette = "Dark2") + 
-  scale_shape_manual(values = c(15, 17, 3, 4, 16, 18, 21, 22, 23)) # Set custom shapes
+  scale_shape_manual(values = c(15, 17, 3, 4, 16, 21, 22, 23)) # Set custom shapes
+
 
 ```
 
